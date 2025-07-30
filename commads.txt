@@ -1,0 +1,12 @@
+pnpm create astro@latest
+pnpm astro add tailwind
+pnpm astro add vercel
+pnpm install prisma tsx --save-dev
+pnpm install @prisma/client
+pnpm install @libsql/client @prisma/adapter-libsql
+pnpm prisma init --datasource-provider sqlite --output prisma
+
+
+commands to update database
+npx prisma migrate dev --name NAME
+wsl turso db shell monerpyv2 < ./prisma/migrations/...

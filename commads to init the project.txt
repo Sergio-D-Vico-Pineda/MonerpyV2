@@ -1,6 +1,0 @@
-pnpm create astro@latest
-pnpm astro add tailwind
-pnpm astro add vercel
-npm install prisma tsx --save-dev
-npm install @prisma/client
-npm install @libsql/client @prisma/adapter-libsql
