@@ -23,8 +23,8 @@ Monerpy is a comprehensive personal finance management web application designed 
 ---
 
 ## Tech Stack
-- **Frontend:** Astro + TailwindCSS + JavaScript
-- **Backend:** TypeScript with Prisma ORM
+- **Frontend:** Astro v5.12.5 + TailwindCSS v4.1.11 + JavaScript
+- **Backend:** TypeScript with Prisma ORM v6.13.0
 - **Database:** Turso (LibSQL / SQLite-compatible)
 - **Hosting:** Vercel or Node.js for local development
 - **CLI:** pnpm
@@ -62,7 +62,7 @@ Monerpy is a comprehensive personal finance management web application designed 
 
 ### Tables Used
 - `families`: Grouping of users.
-- `users`: Belongs to a family. Has roles.
+- `users`: Can belong to a family. Has roles.
 - `accounts`: Linked to families. Tracks type and balance.
 - `account_balances`: Daily balance tracking.
 - `categories`: Hierarchical spending categories.
@@ -167,6 +167,6 @@ This project is licensed under the Creative Commons Attribution-NonCommercial-Sh
 
 <a href="https://github.com/Scarpy19/Monerpy">Monerpy</a> © 2025 by <a href="https://github.com/Scarpy19">Scarpy19</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
-Favicon.png Image from Dead Cells by Motion Twin, licensed under CC BY-NC-SA 4.0
+favicon.ico Image from Dead Cells by Motion Twin, licensed under CC BY-NC-SA 4.0
 
  
