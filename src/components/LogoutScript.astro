@@ -1,0 +1,29 @@
+<script>
+    import { actions } from "astro:actions";
+    import { navigate } from "astro:transitions/client";
+
+    // Handle logout form submission
+    document
+        .getElementById("logoutForm")
+        ?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            try {
+                const { data, error } = await actions.logout();
+
+                if (error) {
+                    console.error("Logout error:", error);
+                    alert("Logout failed: " + error.message);
+                    return;
+                }
+
+                if (data?.ok) {
+                    // Navigate to login page after successful logout
+                    navigate("/login");
+                }
+            } catch (error) {
+                console.error("Logout error:", error);
+                alert("Logout failed");
+            }
+        });
+</script>
