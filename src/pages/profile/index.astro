@@ -1,0 +1,244 @@
+---
+import LogoutScript from "@/components/LogoutScript.astro";
+import Layout from "@layouts/Layout.astro";
+
+const user = Astro.locals.user;
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+---
+
+<Layout title="Profile">
+    <main class="min-h-screen bg-gray-900 text-white p-8">
+        <div class="max-w-4xl mx-auto">
+            <nav class="flex items-baseline space-x-4">
+                <h2 class="text-lg font-semibold text-purple-300">
+                    <a href="/dashboard">Dashboard</a>
+                </h2>
+                <h1 class="text-4xl font-bold text-purple-500 cursor-default">
+                    Profile
+                </h1>
+            </nav>
+
+            <div class="mt-8 flex flex-wrap gap-6">
+                <div class="grow bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-semibold mb-6 text-purple-400">
+                        Account Information
+                    </h2>
+                    <form id="profileForm" class="space-y-6">
+                        <div>
+                            <label
+                                for="username"
+                                class="block text-sm font-medium text-purple-300"
+                            >
+                                Username
+                            </label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                value={user.username}
+                                required
+                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="email"
+                                class="block text-sm font-medium text-purple-300"
+                            >
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={user.email}
+                                required
+                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <p>
+                            <strong>Session Created:</strong>
+                            {new Date(parseInt(user.created)).toLocaleString()}
+                        </p>
+
+                        <button
+                            type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        >
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+
+                <div class="grow bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-6 text-purple-400">
+                        Change Password
+                    </h2>
+                    <form id="passwordForm" class="space-y-6">
+                        <div>
+                            <label
+                                for="currentPassword"
+                                class="block text-sm font-medium text-purple-300"
+                            >
+                                Current Password
+                            </label>
+                            <input
+                                type="password"
+                                id="currentPassword"
+                                name="currentPassword"
+                                required
+                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="newPassword"
+                                class="block text-sm font-medium text-purple-300"
+                            >
+                                New Password
+                            </label>
+                            <input
+                                type="password"
+                                id="newPassword"
+                                name="newPassword"
+                                required
+                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="confirmPassword"
+                                class="block text-sm font-medium text-purple-300"
+                            >
+                                Confirm New Password
+                            </label>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                required
+                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        >
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+
+                <div class="w-full mx-auto bg-gray-800 p-6 rounded-lg mb-6">
+                    <h2 class="text-xl font-semibold mb-4">
+                        How This Page is Protected
+                    </h2>
+
+                    <p class="text-gray-300">
+                        The user information is available in <code
+                            >Astro.locals.user</code
+                        > which is set by the middleware.
+                    </p>
+
+                    <form method="POST" id="logoutForm" class="float-right">
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                        >
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const profileForm = document.getElementById(
+            "profileForm",
+        ) as HTMLFormElement;
+        const passwordForm = document.getElementById(
+            "passwordForm",
+        ) as HTMLFormElement;
+
+        profileForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target as HTMLFormElement);
+            const data = {
+                username: formData.get("username"),
+                email: formData.get("email"),
+            };
+
+            try {
+                const response = await fetch("/api/user/profile", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    alert("Profile updated successfully");
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || "Failed to update profile");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to update profile");
+            }
+        });
+
+        passwordForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target as HTMLFormElement);
+            const newPassword = formData.get("newPassword");
+            const confirmPassword = formData.get("confirmPassword");
+
+            if (newPassword !== confirmPassword) {
+                alert("New passwords do not match");
+                return;
+            }
+
+            const data = {
+                currentPassword: formData.get("currentPassword"),
+                newPassword: newPassword,
+            };
+
+            try {
+                const response = await fetch("/api/user/password", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    alert("Password updated successfully");
+                    (e.target as HTMLFormElement).reset();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || "Failed to update password");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to update password");
+            }
+        });
+    </script>
+</Layout>
+
+<LogoutScript />
