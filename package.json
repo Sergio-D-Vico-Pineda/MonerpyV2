@@ -16,13 +16,15 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/vercel": "^8.2.3",
     "@libsql/client": "^0.15.10",
     "@prisma/adapter-libsql": "^6.13.0",
     "@prisma/client": "6.13.0",
     "@tailwindcss/vite": "^4.1.11",
     "astro": "^5.12.5",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
