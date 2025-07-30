@@ -1,7 +1,9 @@
 ---
+import LogoutScript from "@/components/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 
-import { isAuthenticated } from "@mid/auth.ts";
+// Check if user is authenticated via the new middleware system
+const user = Astro.locals.user;
 ---
 
 <Layout title="Welcome" description="Your personal finance management tool">
@@ -20,7 +22,7 @@ import { isAuthenticated } from "@mid/auth.ts";
 				Dashboard
 			</a>
 			{
-				!isAuthenticated(Astro.request) ? (
+				!user ? (
 					<a
 						href="/login"
 						class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold"
@@ -28,11 +30,7 @@ import { isAuthenticated } from "@mid/auth.ts";
 						Login
 					</a>
 				) : (
-					<form
-						action="/api/auth/logout"
-						method="POST"
-						class="inline"
-					>
+					<form id="logoutForm" class="inline">
 						<button
 							type="submit"
 							class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold"
@@ -45,3 +43,5 @@ import { isAuthenticated } from "@mid/auth.ts";
 		</div>
 	</div>
 </Layout>
+
+<LogoutScript />

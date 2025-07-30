@@ -1,17 +1,18 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Footer from "@comps/Footer.astro";
-import { isAuthenticated, getCurrentUserId } from "@mid/auth";
-import { prisma } from "@prisma/index.js";
+import LogoutScript from "@comps/LogoutScript.astro";
 
-const userId = getCurrentUserId(Astro.request);
+// The user information is now available in Astro.locals.user thanks to our middleware
+const user = Astro.locals.user;
 
-if (!isAuthenticated(Astro.request) || !userId) {
-  console.log(
-    "dashboard.astro: User is not authenticated, redirecting to login",
-  );
+if (!user) {
+  // This shouldn't happen if middleware is working correctly, but just in case
   return Astro.redirect("/login");
 }
+
+// Extract userId for compatibility with existing code
+const userId = user.id;
 
 /* const groups = await prisma.transactionGroup.findMany({
   where: {
@@ -56,9 +57,9 @@ if (!isAuthenticated(Astro.request) || !userId) {
           href="/profile"
           class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
         >
-          Profile
+          Profile {user.username}
         </a>
-        <form action="/api/auth/logout" method="POST" class="inline">
+        <form id="logoutForm" method="POST" class="inline">
           <button
             type="submit"
             class="bg-red-700 hover:bg-red-900 px-4 py-2 rounded text-white transition duration-200"
@@ -436,7 +437,10 @@ if (!isAuthenticated(Astro.request) || !userId) {
 
     // Update calendar UI
     function updateCalendar(events) {
-      console.log("[updateCalendar] Starting calendar update with events:", events);
+      console.log(
+        "[updateCalendar] Starting calendar update with events:",
+        events,
+      );
       if (!calendarGrid) {
         console.error("[updateCalendar] Calendar grid element not found");
         return;
@@ -444,7 +448,9 @@ if (!isAuthenticated(Astro.request) || !userId) {
 
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
-      console.log(`[updateCalendar] Rendering calendar for ${year}-${month + 1}`);
+      console.log(
+        `[updateCalendar] Rendering calendar for ${year}-${month + 1}`,
+      );
 
       // Get first day of month and total days
       const firstDay = new Date(year, month, 1).getDay();
@@ -476,8 +482,8 @@ if (!isAuthenticated(Astro.request) || !userId) {
       for (let day = 1; day <= lastDay; day++) {
         // BUG FIX: Use direct string formatting to avoid timezone issues
         // JavaScript Date constructor with timezone conversion can cause off-by-one errors
-        const currentDateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
+        const currentDateISO = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
         const realDate = currentDateISO; // Use the same date for links
 
         const dayEvents = events.filter((event) => {
@@ -600,3 +606,5 @@ if (!isAuthenticated(Astro.request) || !userId) {
     loadCurrentMonth();
   </script>
 </Layout>
+
+<LogoutScript />
