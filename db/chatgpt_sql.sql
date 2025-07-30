@@ -1,164 +1,149 @@
 CREATE TABLE families (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT,
+    family_id INTEGER NOT NULL REFERENCES families (id),
+    username TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE
+    role TEXT CHECK (role IN ('admin', 'member')) NOT NULL DEFAULT 'member',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
+    family_id INTEGER NOT NULL REFERENCES families (id),
     name TEXT NOT NULL,
-    type TEXT NOT NULL, -- Ej: "checking", "cash", "loan", "investment"
+    account_type TEXT CHECK (
+        account_type IN (
+            'cash',
+            'checking',
+            'savings',
+            'credit_card',
+            'investment',
+            'loan'
+        )
+    ) NOT NULL, -- Ej: "checking", "cash", "loan", "investment"
     balance REAL NOT NULL DEFAULT 0.0, -- Saldo actual
     color TEXT NOT NULL DEFAULT '#6172F3', -- Hex string
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE account_balances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    account_id INTEGER NOT NULL,
-    date TEXT NOT NULL, -- YYYY-MM-DD
+    account_id INTEGER NOT NULL REFERENCES accounts (id),
+    DATE DATE NOT NULL, -- YYYY-MM-DD
     balance REAL NOT NULL,
     cash_balance REAL NOT NULL DEFAULT 0.0,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
-    UNIQUE (account_id, date)
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME UNIQUE (account_id, DATE)
 );
 
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
+    family_id INTEGER NOT NULL REFERENCES families (id),
     name TEXT NOT NULL,
     color TEXT NOT NULL DEFAULT '#6172F3',
-    parent_id INTEGER, -- para subcategorías
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES categories (id) ON DELETE SET NULL
+    parent_id INTEGER REFERENCES categories (id) ON DELETE SET NULL, -- para subcategorías
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
+    family_id INTEGER NOT NULL REFERENCES families (id),
     name TEXT NOT NULL,
     color TEXT NOT NULL DEFAULT '#e99537',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE transaction_tags (
-    transaction_id INTEGER NOT NULL,
-    tag_id INTEGER NOT NULL,
-    PRIMARY KEY (transaction_id, tag_id),
-    FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
-);
-
-CREATE TABLE categories (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    color TEXT NOT NULL DEFAULT '#6172F3',
-    parent_id INTEGER, -- para subcategorías
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES categories (id) ON DELETE SET NULL
-);
-
-CREATE TABLE tags (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    family_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    color TEXT NOT NULL DEFAULT '#e99537',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (family_id) REFERENCES families (id) ON DELETE CASCADE
-);
-
-CREATE TABLE transaction_tags (
-    transaction_id INTEGER NOT NULL,
-    tag_id INTEGER NOT NULL,
-    PRIMARY KEY (transaction_id, tag_id),
-    FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
+    transaction_id INTEGER NOT NULL REFERENCES transactions (id),
+    tag_id INTEGER NOT NULL REFERENCES tags (id),
+    PRIMARY KEY (transaction_id, tag_id)
 );
 
 CREATE TABLE transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    account_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    category_id INTEGER,
-    transaction_date TEXT NOT NULL, -- YYYY-MM-DD
-    description TEXT NOT NULL,
+    account_id INTEGER NOT NULL REFERENCES accounts (id),
+    user_id INTEGER NOT NULL REFERENCES users (id),
+    category_id INTEGER REFERENCES categories (id) ON DELETE SET NULL,
+    DATE DATE NOT NULL, -- YYYY-MM-DD
+    name TEXT NOT NULL,
     amount REAL NOT NULL, -- positivo en todos los casos
-    type TEXT NOT NULL, -- "income", "expense", "investment_buy", etc.
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
+    type TEXT CHECK (
+        type IN (
+            'income',
+            'expense',
+            'transfer',
+            'investment_buy',
+            'investment_sell',
+            'loan_payment'
+        )
+    ) NOT NULL, -- "income", "expense", "investment_buy", etc.
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE recurring_transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    account_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    category_id INTEGER,
+    account_id INTEGER NOT NULL REFERENCES accounts (id),
+    user_id INTEGER NOT NULL REFERENCES users (id),
+    category_id INTEGER REFERENCES categories (id) ON DELETE SET NULL,
     description TEXT NOT NULL,
     amount REAL NOT NULL,
-    type TEXT NOT NULL,
-    frequency TEXT NOT NULL, -- "daily", "weekly", "monthly", "yearly"
+    type TEXT CHECK (
+        type IN (
+            'income',
+            'expense',
+            'investment_buy',
+            'investment_sell',
+            'loan_disbursement',
+            'loan_repayment'
+        )
+    ) NOT NULL, -- "income", "expense", "investment_buy", etc.
+    frequency TEXT CHECK (
+        frequency IN (
+            'daily',
+            'weekly',
+            'monthly',
+            'yearly'
+        )
+    ) NOT NULL, -- "daily", "weekly", "monthly", "yearly"
     day_of_month INTEGER, -- para frecuencia mensual/anual
     day_of_week INTEGER, -- 0 (domingo) a 6 (sábado) para semanal
-    time_of_day TEXT, -- "HH:MM" (24h)
-    start_date TEXT NOT NULL,
-    end_date TEXT,
+    time_of_day TIME, -- "HH:MM" (24h)
+    start_date DATE NOT NULL,
+    end_date DATE,
     max_occurrences INTEGER,
     occurrences_count INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TEXT,
-    FOREIGN KEY (account_id) REFERENCES accounts (id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
 );
 
 CREATE TABLE recurring_transaction_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    recurring_transaction_id INTEGER NOT NULL,
-    generated_transaction_id INTEGER, -- transacción real creada (opcional)
-    execution_time TEXT NOT NULL, -- timestamp ISO8601
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions (id) ON DELETE CASCADE,
-    FOREIGN KEY (generated_transaction_id) REFERENCES transactions (id) ON DELETE SET NULL
+    recurring_transaction_id INTEGER NOT NULL REFERENCES recurring_transactions (id),
+    generated_transaction_id INTEGER REFERENCES transactions (id) ON DELETE SET NULL, -- transacción real creada (opcional)
+    execution_time TIMESTAMP NOT NULL, -- unix timestamp 
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_users_family_id ON users (family_id);
@@ -170,7 +155,7 @@ CREATE INDEX idx_accounts_family_id ON accounts (family_id);
 
 CREATE INDEX idx_accounts_type ON accounts(type);
 
-CREATE INDEX idx_account_balances_account_id_date ON account_balances (account_id, date DESC);
+CREATE INDEX idx_account_balances_account_id_date ON account_balances (account_id, DATE DESC);
 
 CREATE INDEX idx_categories_family_id ON categories (family_id);
 

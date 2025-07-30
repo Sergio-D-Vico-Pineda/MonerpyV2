@@ -1,0 +1,223 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Family {
+  id        Int       @id @default(autoincrement())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  users      User[]
+  accounts   Account[]
+  categories Category[]
+  tags       Tag[]
+}
+
+enum UserRole {
+  Admin
+  Member
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  familyId     Int
+  username     String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(Member)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+  deletedAt    DateTime?
+
+  // Relations
+  family                Family                 @relation(fields: [familyId], references: [id])
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+
+  @@index([familyId])
+}
+
+enum AccountType {
+  Cash
+  Checking
+  Savings
+  CreditCard
+  Investment
+  Loan
+}
+
+model Account {
+  id          Int         @id @default(autoincrement())
+  familyId    Int
+  name        String
+  accountType AccountType
+  balance     Float       @default(0.0)
+  color       String      @default("#6172F3")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
+  deletedAt   DateTime?
+
+  // Relations
+  family                Family                 @relation(fields: [familyId], references: [id])
+  accountBalances       AccountBalance[]
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+
+  @@index([familyId])
+  @@index([accountType])
+}
+
+model AccountBalance {
+  id          Int       @id @default(autoincrement())
+  accountId   Int
+  date        DateTime // YYYY-MM-DD
+  balance     Float
+  cashBalance Float     @default(0.0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@unique([accountId, date])
+  @@index([accountId, date(sort: Desc)])
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  familyId  Int
+  name      String
+  color     String    @default("#6172F3")
+  parentId  Int?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  family                Family                 @relation(fields: [familyId], references: [id])
+  parent                Category?              @relation("CategoryToSubcategory", fields: [parentId], references: [id])
+  children              Category[]             @relation("CategoryToSubcategory")
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+
+  @@index([familyId])
+  @@index([parentId])
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  familyId  Int
+  name      String
+  color     String    @default("#e99537")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  family                Family                 @relation(fields: [familyId], references: [id])
+  transactions          Transaction[]          @relation("TransactionToTag")
+  recurringTransactions RecurringTransaction[] @relation("RecurringTransactionToTag")
+
+  @@index([familyId])
+}
+
+enum TransactionType {
+  Income
+  Expense
+  InvestmentBuy
+  InvestmentSell
+  LoanPayment
+  LoanRepayment
+}
+
+model Transaction {
+  id         Int             @id @default(autoincrement())
+  accountId  Int
+  userId     Int
+  categoryId Int?
+  date       DateTime // YYYY-MM-DD
+  name       String
+  amount     Float
+  type       TransactionType
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @default(now())
+  deletedAt  DateTime?
+
+  // Relations
+  account      Account                  @relation(fields: [accountId], references: [id])
+  user         User                     @relation(fields: [userId], references: [id])
+  category     Category?                @relation(fields: [categoryId], references: [id])
+  tags         Tag[]                    @relation("TransactionToTag")
+  recurringLog RecurringTransactionLog? @relation("GeneratedTransaction")
+
+  @@index([accountId, date(sort: Desc)])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([type])
+  @@index([deletedAt])
+}
+
+enum Frequency {
+  Daily
+  Weekly
+  Monthly
+  Yearly
+}
+
+model RecurringTransaction {
+  id               Int             @id @default(autoincrement())
+  accountId        Int
+  userId           Int
+  categoryId       Int?
+  description      String
+  amount           Float
+  type             TransactionType
+  frequency        Frequency
+  dayOfMonth       Int? // para la frecuencia mensual y anual
+  dayOfWeek        Int? // 0 (domingo) a 6 (sábado) para semanal
+  timeOfDay        String? // formato "HH:mm:ss"
+  startDate        DateTime
+  endDate          DateTime?
+  maxOccurrences   Int?
+  occurrencesCount Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now())
+  deletedAt        DateTime?
+
+  // Relations
+  account  Account                   @relation(fields: [accountId], references: [id])
+  user     User                      @relation(fields: [userId], references: [id])
+  category Category?                 @relation(fields: [categoryId], references: [id])
+  tags     Tag[]                     @relation("RecurringTransactionToTag")
+  logs     RecurringTransactionLog[]
+
+  @@index([accountId])
+  @@index([userId])
+  @@index([type])
+}
+
+model RecurringTransactionLog {
+  id                     Int      @id @default(autoincrement())
+  recurringTransactionId Int
+  generatedTransactionId Int?     @unique
+  executionTime          DateTime // unix timestamp
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @default(now())
+
+  // Relations
+  recurringTransaction RecurringTransaction @relation(fields: [recurringTransactionId], references: [id])
+  generatedTransaction Transaction?         @relation("GeneratedTransaction", fields: [generatedTransactionId], references: [id])
+
+  @@index([recurringTransactionId])
+  @@index([generatedTransactionId])
+}
