@@ -4,11 +4,10 @@
   "version": "0.0.1",
   "author": {
     "name": "Scarpy19",
-    "email": "servicpin2@alu.edu.gva.es",
     "url": "https://github.com/Scarpy19"
   },
   "scripts": {
-    "init": "npm install && prisma generate",
+    "init": "pnpm install && prisma generate",
     "dev": "astro dev",
     "deve": "astro dev --host",
     "build": "prisma generate && astro check && astro build",
