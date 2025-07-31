@@ -1,14 +1,14 @@
 import { prisma } from '@prisma/index.js';
+import { getCurrentDateTime, getCurrentDate } from '../../lib/date-utils.js';
 
 /**
  * Updates daily balance records for an account
  * This should be called whenever a transaction affects an account balance
  */
-export async function updateDailyBalance(accountId: number, date: Date = new Date()) {
+export async function updateDailyBalance(accountId: number, date?: string) {
     try {
-        // Set date to start of day
-        const balanceDate = new Date(date);
-        balanceDate.setHours(0, 0, 0, 0);
+        // Use provided date or current date (YYYY-MM-DD format)
+        const balanceDate = date || getCurrentDate();
 
         // Get current account balance
         const account = await prisma.account.findUnique({
@@ -31,13 +31,15 @@ export async function updateDailyBalance(accountId: number, date: Date = new Dat
             update: {
                 balance: account.balance,
                 cashBalance: account.balance, // For now, assume cash balance equals total balance
-                updatedAt: new Date()
+                updatedAt: getCurrentDateTime()
             },
             create: {
                 accountId,
                 date: balanceDate,
                 balance: account.balance,
-                cashBalance: account.balance
+                cashBalance: account.balance,
+                createdAt: getCurrentDateTime(),
+                updatedAt: getCurrentDateTime()
             }
         });
 
@@ -90,7 +92,7 @@ export async function recalculateAccountBalance(accountId: number) {
             where: { id: accountId },
             data: {
                 balance,
-                updatedAt: new Date()
+                updatedAt: getCurrentDateTime()
             }
         });
 

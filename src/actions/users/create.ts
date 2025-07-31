@@ -3,6 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { createSession } from '@lib/session-manager.ts';
 import { hashPassword } from '@lib/password.ts';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const create = defineAction({
     accept: 'form',
@@ -31,7 +32,9 @@ export const create = defineAction({
                     email,
                     passwordHash,
                     username,
-                    role: 'Admin' // First user in family becomes admin
+                    role: 'Admin', // First user in family becomes admin
+                    createdAt: getCurrentDateTime(),
+                    updatedAt: getCurrentDateTime()
                 }
             });
 

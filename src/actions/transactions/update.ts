@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import { formatDateTimeLocal, getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const updateTransaction = defineAction({
     accept: 'form',
@@ -12,8 +13,8 @@ export const updateTransaction = defineAction({
         name: z.string().trim().min(1, "Transaction name is required"),
         amount: z.string().transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0, "Amount must be a positive number"),
         type: z.enum(['Income', 'Expense', 'InvestmentBuy', 'InvestmentSell', 'LoanPayment', 'LoanRepayment']),
-        tags: z.string().optional().transform(val => val ? val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []),
-        newCategory: z.string().optional().transform(val => val?.trim() || undefined),
+        tags: z.string().nullable().optional().transform(val => val ? val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []),
+        newCategory: z.string().nullable().optional().transform(val => val?.trim() || undefined),
         newCategoryColor: z.string().optional().default("#6172F3")
     }),
     handler: async (input, context) => {
@@ -81,7 +82,9 @@ export const updateTransaction = defineAction({
                         data: {
                             name: input.newCategory,
                             color: input.newCategoryColor,
-                            familyId: userWithFamily.familyId
+                            familyId: userWithFamily.familyId,
+                            createdAt: getCurrentDateTime(),
+                            updatedAt: getCurrentDateTime()
                         }
                     });
                     categoryId = newCategory.id;
@@ -94,10 +97,11 @@ export const updateTransaction = defineAction({
                 data: {
                     accountId: input.accountId,
                     categoryId,
-                    date: new Date(input.date),
+                    date: formatDateTimeLocal(input.date),
                     name: input.name,
                     amount: input.amount,
                     type: input.type,
+                    updatedAt: getCurrentDateTime(),
                     tags: {
                         set: [] // Clear existing tags first
                     }
@@ -121,7 +125,9 @@ export const updateTransaction = defineAction({
                         tag = await prisma.tag.create({
                             data: {
                                 name: tagName,
-                                familyId: userWithFamily.familyId
+                                familyId: userWithFamily.familyId,
+                                createdAt: getCurrentDateTime(),
+                                updatedAt: getCurrentDateTime()
                             }
                         });
                     }

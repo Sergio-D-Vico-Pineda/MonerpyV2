@@ -2,6 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { updateDailyBalance } from './helpers.ts';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const createAccount = defineAction({
     accept: 'form',
@@ -48,7 +49,9 @@ export const createAccount = defineAction({
                     name: input.name,
                     accountType: input.accountType,
                     balance: input.initialBalance,
-                    color: input.color
+                    color: input.color,
+                    createdAt: getCurrentDateTime(),
+                    updatedAt: getCurrentDateTime()
                 }
             });
 
@@ -61,10 +64,12 @@ export const createAccount = defineAction({
                     data: {
                         accountId: account.id,
                         userId: user.id,
-                        date: new Date(),
+                        date: getCurrentDateTime(),
                         name: "Initial Balance",
                         amount: Math.abs(input.initialBalance),
-                        type: input.initialBalance >= 0 ? 'Income' : 'Expense'
+                        type: input.initialBalance >= 0 ? 'Income' : 'Expense',
+                        createdAt: getCurrentDateTime(),
+                        updatedAt: getCurrentDateTime()
                     }
                 });
             }

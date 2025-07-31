@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const createFamily = defineAction({
     accept: 'form',
@@ -27,7 +28,9 @@ export const createFamily = defineAction({
             // Create family
             const family = await prisma.family.create({
                 data: {
-                    name: input.name
+                    name: input.name,
+                    createdAt: getCurrentDateTime(),
+                    updatedAt: getCurrentDateTime()
                 }
             });
 
@@ -36,7 +39,8 @@ export const createFamily = defineAction({
                 where: { id: user.id },
                 data: {
                     familyId: family.id,
-                    role: 'Admin'
+                    role: 'Admin',
+                    updatedAt: getCurrentDateTime()
                 }
             });
 
