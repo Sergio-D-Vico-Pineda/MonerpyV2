@@ -1,0 +1,378 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Footer from "@comps/Footer.astro";
+import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Get account ID from URL
+const accountId = parseInt(Astro.params.id as string);
+if (isNaN(accountId)) {
+    return Astro.redirect("/accounts");
+}
+
+// Check if user is in a family first
+const userResult = await Astro.callAction(actions.getFamilyDetails, {});
+const userInFamily = userResult.data?.ok && userResult.data.family;
+
+if (!userInFamily) {
+    return Astro.redirect("/accounts");
+}
+
+// Get days parameter from URL, default to 30
+const url = new URL(Astro.request.url);
+const days = parseInt(url.searchParams.get("days") || "30");
+
+// Get balance history
+const balanceResult = await Astro.callAction(actions.getAccountBalanceHistory, {
+    accountId,
+    days: Math.min(Math.max(days, 1), 365), // Limit between 1 and 365 days
+});
+
+if (
+    !balanceResult.data?.ok ||
+    !balanceResult.data.balanceHistory ||
+    !balanceResult.data.account
+) {
+    return Astro.redirect("/accounts");
+}
+
+const { balanceHistory, account } = balanceResult.data;
+
+// Calculate balance change
+const oldestBalance =
+    balanceHistory && balanceHistory.length > 0
+        ? balanceHistory[balanceHistory.length - 1]
+        : null;
+const newestBalance =
+    balanceHistory && balanceHistory.length > 0 ? balanceHistory[0] : null;
+const balanceChange =
+    newestBalance && oldestBalance
+        ? newestBalance.balance - oldestBalance.balance
+        : 0;
+const balanceChangePercent =
+    oldestBalance && oldestBalance.balance !== 0
+        ? (balanceChange / Math.abs(oldestBalance.balance)) * 100
+        : 0;
+
+// Time period options
+const timePeriods = [
+    { days: 7, label: "7 days" },
+    { days: 30, label: "30 days" },
+    { days: 90, label: "90 days" },
+    { days: 180, label: "6 months" },
+    { days: 365, label: "1 year" },
+];
+---
+
+<Layout
+    title={`Balance History: ${account.name}`}
+    description={`Balance history for ${account.name}`}
+>
+    <main class="bg-gray-900 p-8 min-h-screen text-white">
+        <Header currentPage="accounts" user={user} />
+
+        <div class="mx-auto max-w-7xl">
+            <!-- Back Link -->
+            <div class="mb-6">
+                <a
+                    href={`/accounts/${accountId}`}
+                    class="text-purple-400 hover:text-purple-300 flex items-center space-x-2"
+                >
+                    <span>←</span>
+                    <span>Back to {account.name}</span>
+                </a>
+            </div>
+
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-white mb-2">
+                    Balance History: {account.name}
+                </h1>
+                <p class="text-gray-400">View balance changes over time</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Time Period Selector -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                        <h2 class="mb-4 font-semibold text-purple-400 text-xl">
+                            Time Period
+                        </h2>
+
+                        <div class="space-y-2">
+                            {
+                                timePeriods.map((period) => (
+                                    <a
+                                        href={`/accounts/${accountId}/balance?days=${period.days}`}
+                                        class={`block w-full text-left px-3 py-2 rounded transition-colors ${
+                                            days === period.days
+                                                ? "bg-purple-600 text-white"
+                                                : "text-gray-300 hover:bg-gray-700"
+                                        }`}
+                                    >
+                                        {period.label}
+                                    </a>
+                                ))
+                            }
+                        </div>
+
+                        <!-- Custom Period -->
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <form method="GET" class="space-y-2">
+                                <label
+                                    for="customDays"
+                                    class="block text-sm font-medium text-gray-300"
+                                >
+                                    Custom (days)
+                                </label>
+                                <div class="flex space-x-2">
+                                    <input
+                                        type="number"
+                                        id="customDays"
+                                        name="days"
+                                        min="1"
+                                        max="365"
+                                        value={days}
+                                        class="flex-1 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                                    />
+                                    <button
+                                        type="submit"
+                                        class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                    >
+                                        Go
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balance History Content -->
+                <div class="lg:col-span-3">
+                    <!-- Summary Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- Current Balance -->
+                        <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                            <h3 class="text-gray-400 text-sm mb-2">
+                                Current Balance
+                            </h3>
+                            <p
+                                class={`text-2xl font-bold ${
+                                    newestBalance && newestBalance.balance >= 0
+                                        ? "text-green-400"
+                                        : "text-red-400"
+                                }`}
+                            >
+                                {
+                                    newestBalance
+                                        ? new Intl.NumberFormat("en-US", {
+                                              style: "currency",
+                                              currency: "EUR",
+                                              minimumFractionDigits: 2,
+                                          }).format(newestBalance.balance)
+                                        : "N/A"
+                                }
+                            </p>
+                        </div>
+
+                        <!-- Balance Change -->
+                        <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                            <h3 class="text-gray-400 text-sm mb-2">
+                                Change ({days} days)
+                            </h3>
+                            <p
+                                class={`text-2xl font-bold ${balanceChange >= 0 ? "text-green-400" : "text-red-400"}`}
+                            >
+                                {balanceChange >= 0 ? "+" : ""}
+                                {
+                                    new Intl.NumberFormat("en-US", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                        minimumFractionDigits: 2,
+                                    }).format(balanceChange)
+                                }
+                            </p>
+                        </div>
+
+                        <!-- Percentage Change -->
+                        <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                            <h3 class="text-gray-400 text-sm mb-2">
+                                Percentage Change
+                            </h3>
+                            <p
+                                class={`text-2xl font-bold ${balanceChangePercent >= 0 ? "text-green-400" : "text-red-400"}`}
+                            >
+                                {balanceChangePercent >= 0 ? "+" : ""}
+                                {balanceChangePercent.toFixed(1)}%
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Balance History Table -->
+                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                        <h2 class="mb-6 font-semibold text-purple-400 text-xl">
+                            Daily Balance Records
+                        </h2>
+
+                        {
+                            balanceHistory && balanceHistory.length === 0 ? (
+                                <div class="text-center py-12 text-gray-400">
+                                    <div class="text-6xl mb-4">📊</div>
+                                    <p class="text-xl mb-2">
+                                        No balance history
+                                    </p>
+                                    <p>
+                                        Balance records will appear as
+                                        transactions are processed.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead>
+                                            <tr class="border-b border-gray-700">
+                                                <th class="text-left py-3 px-4 text-gray-400 font-medium">
+                                                    Date
+                                                </th>
+                                                <th class="text-right py-3 px-4 text-gray-400 font-medium">
+                                                    Balance
+                                                </th>
+                                                <th class="text-right py-3 px-4 text-gray-400 font-medium">
+                                                    Cash Balance
+                                                </th>
+                                                <th class="text-right py-3 px-4 text-gray-400 font-medium">
+                                                    Change
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {balanceHistory &&
+                                                balanceHistory.map(
+                                                    (
+                                                        record: any,
+                                                        index: number,
+                                                    ) => {
+                                                        const previousRecord =
+                                                            balanceHistory[
+                                                                index + 1
+                                                            ];
+                                                        const dailyChange =
+                                                            previousRecord
+                                                                ? record.balance -
+                                                                  previousRecord.balance
+                                                                : 0;
+
+                                                        return (
+                                                            <tr class="border-b border-gray-700 hover:bg-gray-700 transition-colors">
+                                                                <td class="py-3 px-4 text-white">
+                                                                    {new Date(
+                                                                        record.date,
+                                                                    ).toLocaleDateString(
+                                                                        "en-US",
+                                                                        {
+                                                                            year: "numeric",
+                                                                            month: "short",
+                                                                            day: "numeric",
+                                                                            weekday:
+                                                                                "short",
+                                                                        },
+                                                                    )}
+                                                                </td>
+                                                                <td
+                                                                    class={`py-3 px-4 text-right font-semibold ${
+                                                                        record.balance >=
+                                                                        0
+                                                                            ? "text-green-400"
+                                                                            : "text-red-400"
+                                                                    }`}
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "en-US",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "EUR",
+                                                                            minimumFractionDigits: 2,
+                                                                        },
+                                                                    ).format(
+                                                                        record.balance,
+                                                                    )}
+                                                                </td>
+                                                                <td
+                                                                    class={`py-3 px-4 text-right font-medium ${
+                                                                        record.cashBalance >=
+                                                                        0
+                                                                            ? "text-green-300"
+                                                                            : "text-red-300"
+                                                                    }`}
+                                                                >
+                                                                    {new Intl.NumberFormat(
+                                                                        "en-US",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "EUR",
+                                                                            minimumFractionDigits: 2,
+                                                                        },
+                                                                    ).format(
+                                                                        record.cashBalance,
+                                                                    )}
+                                                                </td>
+                                                                <td
+                                                                    class={`py-3 px-4 text-right text-sm ${
+                                                                        dailyChange ===
+                                                                        0
+                                                                            ? "text-gray-400"
+                                                                            : dailyChange >
+                                                                                0
+                                                                              ? "text-green-400"
+                                                                              : "text-red-400"
+                                                                    }`}
+                                                                >
+                                                                    {previousRecord ? (
+                                                                        <>
+                                                                            {dailyChange >=
+                                                                            0
+                                                                                ? "+"
+                                                                                : ""}
+                                                                            {new Intl.NumberFormat(
+                                                                                "en-US",
+                                                                                {
+                                                                                    style: "currency",
+                                                                                    currency:
+                                                                                        "EUR",
+                                                                                    minimumFractionDigits: 2,
+                                                                                },
+                                                                            ).format(
+                                                                                dailyChange,
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        "-"
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    },
+                                                )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <Footer />
+    <LogoutScript />
+</Layout>

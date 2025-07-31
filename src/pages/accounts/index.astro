@@ -1,0 +1,321 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Footer from "@comps/Footer.astro";
+import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Handle form submissions
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const action = formData.get("_action") as string;
+
+    if (action === "create") {
+        const result = await Astro.callAction(
+            actions.createAccount,
+            formData,
+        );
+        if (result.data?.ok) {
+            return Astro.redirect("/accounts?success=created");
+        }
+    } else if (action === "delete") {
+        const result = await Astro.callAction(
+            actions.deleteAccount,
+            formData,
+        );
+        if (result.data?.ok) {
+            return Astro.redirect("/accounts?success=deleted");
+        }
+    }
+}
+
+// Check if user is in a family first
+const userResult = await Astro.callAction(actions.getFamilyDetails, {});
+const userInFamily = userResult.data?.ok && userResult.data.family;
+
+// Get accounts data only if user is in a family
+const accountsResult = userInFamily 
+    ? await Astro.callAction(actions.getAccountsList, { includeDeleted: false })
+    : { data: { ok: false, accounts: [] } };
+const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
+
+// Get URL parameters for success messages
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get("success");
+
+// Account type options
+const accountTypes = [
+    { value: 'Cash', label: 'Cash', icon: '💵' },
+    { value: 'Checking', label: 'Checking Account', icon: '🏦' },
+    { value: 'Savings', label: 'Savings Account', icon: '💰' },
+    { value: 'CreditCard', label: 'Credit Card', icon: '💳' },
+    { value: 'Investment', label: 'Investment Account', icon: '📈' },
+    { value: 'Loan', label: 'Loan Account', icon: '🏠' }
+];
+
+// Predefined colors
+const colors = [
+    '#6172F3', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4',
+    '#84CC16', '#F97316', '#EC4899', '#6B7280', '#14B8A6', '#F43F5E'
+];
+---
+
+<Layout title="Accounts" description="Manage your accounts">
+    <main class="bg-gray-900 p-8 min-h-screen text-white">
+        <Header currentPage="accounts" user={user} />
+
+        <!-- Success Messages -->
+        {success && (
+            <div class="mx-auto max-w-7xl mb-6">
+                <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
+                    {success === "created" && "Account created successfully!"}
+                    {success === "deleted" && "Account deleted successfully!"}
+                    {success === "updated" && "Account updated successfully!"}
+                </div>
+            </div>
+        )}
+
+        <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {!userInFamily ? (
+                <!-- Not in Family Message -->
+                <div class="lg:col-span-3">
+                    <div class="bg-gray-800 shadow-lg px-8 py-12 rounded-lg text-center">
+                        <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
+                        <h2 class="text-2xl font-bold text-purple-400 mb-4">
+                            Join a Family First
+                        </h2>
+                        <p class="text-gray-300 mb-6 max-w-md mx-auto">
+                            You need to be part of a family to create and manage accounts. 
+                            Families help organize finances and allow multiple members to collaborate.
+                        </p>
+                        <div class="space-y-4">
+                            <a 
+                                href="/families"
+                                class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                            >
+                                Go to Families Page
+                            </a>
+                            <p class="text-sm text-gray-400">
+                                Create a new family or join an existing one to get started
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <!-- Account Form -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                            <h2 class="mb-6 font-semibold text-purple-400 text-xl">
+                                Create Account
+                            </h2>
+                            
+                            <form method="POST" class="space-y-4">
+                                <input type="hidden" name="_action" value="create" />
+                                
+                                <!-- Account Name -->
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Account Name *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="name" 
+                                        name="name" 
+                                        required
+                                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="Enter account name"
+                                    />
+                                </div>
+
+                                <!-- Account Type -->
+                                <div>
+                                    <label for="accountType" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Account Type *
+                                    </label>
+                                    <select 
+                                        id="accountType" 
+                                        name="accountType" 
+                                        required
+                                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select account type</option>
+                                        {accountTypes.map(type => (
+                                            <option value={type.value}>{type.icon} {type.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <!-- Initial Balance -->
+                                <div>
+                                    <label for="initialBalance" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Initial Balance
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="initialBalance" 
+                                        name="initialBalance" 
+                                        step="0.01"
+                                        value="0"
+                                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+
+                                <!-- Color Picker -->
+                                <div>
+                                    <label for="color" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Account Color
+                                    </label>
+                                    <div class="flex items-center space-x-3">
+                                        <input 
+                                            type="color" 
+                                            id="color" 
+                                            name="color" 
+                                            value="#6172F3"
+                                            class="w-12 h-10 border border-gray-600 rounded cursor-pointer"
+                                        />
+                                        <input 
+                                            type="text" 
+                                            id="colorHex" 
+                                            name="colorHex" 
+                                            value="#6172F3"
+                                            pattern="^#[0-9A-Fa-f]{6}$"
+                                            class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            placeholder="#6172F3"
+                                        />
+                                    </div>
+                                    <!-- Predefined Colors -->
+                                    <div class="mt-3 grid grid-cols-6 gap-2">
+                                        {colors.map(color => (
+                                            <button 
+                                                type="button" 
+                                                class="w-8 h-8 rounded border-2 border-gray-600 hover:border-white transition-colors"
+                                                style={`background-color: ${color}`}
+                                                onclick={`document.getElementById('color').value = '${color}'; document.getElementById('colorHex').value = '${color}';`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit"
+                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    Create Account
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Accounts List -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="font-semibold text-purple-400 text-xl">
+                                    Your Accounts
+                                </h2>
+                                <a 
+                                    href="/accounts/deleted" 
+                                    class="text-gray-400 hover:text-white text-sm underline"
+                                >
+                                    View Deleted Accounts
+                                </a>
+                            </div>
+
+                            {accounts && accounts.length === 0 ? (
+                                <div class="text-center py-12 text-gray-400">
+                                    <div class="text-6xl mb-4">🏦</div>
+                                    <p class="text-xl mb-2">No accounts yet</p>
+                                    <p>Create your first account to get started!</p>
+                                </div>
+                            ) : (
+                                <div class="space-y-4">
+                                    {accounts && accounts.map(account => (
+                                        <div class="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                                            <div class="flex items-center space-x-4">
+                                                <div 
+                                                    class="w-4 h-4 rounded-full"
+                                                    style={`background-color: ${account.color}`}
+                                                />
+                                                <div>
+                                                    <h3 class="font-semibold text-white">
+                                                        {account.name}
+                                                    </h3>
+                                                    <p class="text-sm text-gray-400">
+                                                        {accountTypes.find(t => t.value === account.accountType)?.label || account.accountType}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center space-x-4">
+                                                <div class="text-right">
+                                                    <p class={`font-semibold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                        {new Intl.NumberFormat('en-US', { 
+                                                            style: 'currency', 
+                                                            currency: 'EUR',
+                                                            minimumFractionDigits: 2
+                                                        }).format(account.balance)}
+                                                    </p>
+                                                </div>
+                                                
+                                                <div class="flex items-center space-x-2">
+                                                    <a 
+                                                        href={`/accounts/${account.id}`}
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                                    >
+                                                        View
+                                                    </a>
+                                                    <form method="POST" class="inline">
+                                                        <input type="hidden" name="_action" value="delete" />
+                                                        <input type="hidden" name="id" value={account.id} />
+                                                        <button 
+                                                            type="submit"
+                                                            onclick="return confirm('Are you sure you want to delete this account?')"
+                                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    </main>
+    
+    <Footer />
+    <LogoutScript />
+
+    <!-- Color picker synchronization script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorPicker = document.getElementById('color') as HTMLInputElement;
+            const colorHex = document.getElementById('colorHex') as HTMLInputElement;
+            
+            if (colorPicker && colorHex) {
+                colorPicker.addEventListener('change', function() {
+                    colorHex.value = this.value;
+                });
+                
+                colorHex.addEventListener('input', function() {
+                    if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                        colorPicker.value = this.value;
+                    }
+                });
+            }
+        });
+    </script>
+</Layout>
