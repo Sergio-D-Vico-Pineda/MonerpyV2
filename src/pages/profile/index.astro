@@ -1,6 +1,7 @@
 ---
 import LogoutScript from "@/components/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
+import Header from "@comps/Header.astro";
 
 const user = Astro.locals.user;
 
@@ -11,16 +12,9 @@ if (!user) {
 
 <Layout title="Profile">
     <main class="min-h-screen bg-gray-900 text-white p-8">
-        <div class="max-w-4xl mx-auto">
-            <nav class="flex items-baseline space-x-4">
-                <h2 class="text-lg font-semibold text-purple-300">
-                    <a href="/dashboard">Dashboard</a>
-                </h2>
-                <h1 class="text-4xl font-bold text-purple-500 cursor-default">
-                    Profile
-                </h1>
-            </nav>
+        <Header currentPage="profile" user={user} />
 
+        <div class="max-w-4xl mx-auto">
             <div class="mt-8 flex flex-wrap gap-6">
                 <div class="grow bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
                     <h2 class="text-2xl font-semibold mb-6 text-purple-400">
