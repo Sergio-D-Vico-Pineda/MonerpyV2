@@ -1,0 +1,36 @@
+---
+// Component to handle server-side toast messages
+interface Props {
+    message?: string;
+    type?: 'success' | 'error' | 'warning' | 'info' | string;
+    duration?: number;
+}
+
+const { message, type = 'success', duration = 10000 }: Props = Astro.props;
+---
+
+{message && (
+    <script is:inline define:vars={{ message, type, duration }}>
+        if (typeof window !== 'undefined' && message) {
+            // Add toast to session storage for immediate display
+            const existingToasts = JSON.parse(sessionStorage.getItem('toasts') || '[]');
+            const newToast = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                message: message,
+                type: type,
+                duration: duration
+            };
+            existingToasts.push(newToast);
+            sessionStorage.setItem('toasts', JSON.stringify(existingToasts));
+
+            // Trigger display if toast manager is already loaded
+            if (window.toastManager) {
+                window.toastManager.showToast({
+                    message: message,
+                    type: type,
+                    duration: duration
+                });
+            }
+        }
+    </script>
+)}

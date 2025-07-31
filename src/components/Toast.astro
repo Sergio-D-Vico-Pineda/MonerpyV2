@@ -1,0 +1,166 @@
+---
+// Toast component to display notifications
+---
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 space-y-3 max-w-md w-full px-4"></div>
+
+<script>
+interface Toast {
+    id: string;
+    message: string;
+    type: 'success' | 'error' | 'warning' | 'info' | string;
+    duration?: number;
+}
+
+class ToastManager {
+    private container: HTMLElement;
+    private toasts: Map<string, NodeJS.Timeout> = new Map();
+
+    constructor() {
+        this.container = document.getElementById('toast-container')!;
+        this.loadFromSessionStorage();
+        this.setupStorageListener();
+    }
+
+    private setupStorageListener() {
+        // Listen for storage changes from other tabs/windows
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'toasts') {
+                this.loadFromSessionStorage();
+            }
+        });
+
+        // Listen for custom toast events
+        window.addEventListener('toast:show', ((e: CustomEvent) => {
+            this.showToast(e.detail);
+        }) as EventListener);
+    }
+
+    private loadFromSessionStorage() {
+        const toastsData = sessionStorage.getItem('toasts');
+        if (toastsData) {
+            try {
+                const toasts: Toast[] = JSON.parse(toastsData);
+                toasts.forEach(toast => this.displayToast(toast));
+                // Clear from session storage after displaying
+                sessionStorage.removeItem('toasts');
+            } catch (error) {
+                console.error('Error parsing toasts from session storage:', error);
+            }
+        }
+    }
+
+    private getToastStyles(type: string): string {
+        const baseStyles = "flex items-center justify-between p-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300 transform translate-y-0 opacity-100";
+        
+        switch (type) {
+            case 'success':
+                return `${baseStyles} bg-green-600`;
+            case 'error':
+                return `${baseStyles} bg-red-600`;
+            case 'warning':
+                return `${baseStyles} bg-yellow-600`;
+            case 'info':
+                return `${baseStyles} bg-blue-600`;
+            default:
+                return `${baseStyles} bg-gray-600`;
+        }
+    }
+
+    private getToastIcon(type: string): string {
+        switch (type) {
+            case 'success':
+                return '✅';
+            case 'error':
+                return '❌';
+            case 'warning':
+                return '⚠️';
+            case 'info':
+                return 'ℹ️';
+            default:
+                return '📢';
+        }
+    }
+
+    private displayToast(toast: Toast) {
+        // Check if toast already exists
+        if (document.getElementById(`toast-${toast.id}`)) {
+            return;
+        }
+
+        const toastElement = document.createElement('div');
+        toastElement.id = `toast-${toast.id}`;
+        toastElement.className = this.getToastStyles(toast.type);
+        toastElement.style.transform = 'translateY(100px)';
+        toastElement.style.opacity = '0';
+
+        toastElement.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">${this.getToastIcon(toast.type)}</span>
+                <span>${toast.message}</span>
+            </div>
+            <button type="button" class="ml-4 text-white hover:text-gray-200 focus:outline-none" onclick="toastManager.removeToast('${toast.id}')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        `;
+
+        this.container.appendChild(toastElement);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toastElement.style.transform = 'translateY(0)';
+            toastElement.style.opacity = '1';
+        });
+
+        // Auto-remove after duration
+        const duration = toast.duration || 10000; // 10 seconds default
+        const timeoutId = setTimeout(() => {
+            this.removeToast(toast.id);
+        }, duration);
+
+        this.toasts.set(toast.id, timeoutId);
+    }
+
+    public removeToast(id: string) {
+        const toastElement = document.getElementById(`toast-${id}`);
+        if (toastElement) {
+            // Animate out
+            toastElement.style.transform = 'translateY(100px)';
+            toastElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                if (toastElement.parentNode) {
+                    toastElement.parentNode.removeChild(toastElement);
+                }
+            }, 300);
+        }
+
+        // Clear timeout
+        const timeoutId = this.toasts.get(id);
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            this.toasts.delete(id);
+        }
+    }
+
+    public showToast(toast: Omit<Toast, 'id'>) {
+        const fullToast: Toast = {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            ...toast
+        };
+        this.displayToast(fullToast);
+    }
+}
+
+// Global instance
+declare global {
+    var toastManager: ToastManager;
+}
+
+// Initialize toast manager
+if (typeof window !== 'undefined') {
+    window.toastManager = new ToastManager();
+}
+</script>

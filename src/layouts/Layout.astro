@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Toast from "@comps/Toast.astro";
 
 interface Props {
 	title?: string;
@@ -21,5 +22,6 @@ const { title, description }: Props = Astro.props;
 	</head>
 	<body>
 		<slot />
+		<Toast />
 	</body>
 </html>

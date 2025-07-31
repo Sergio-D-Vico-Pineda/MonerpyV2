@@ -4,6 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import TransactionModal from "@comps/TransactionModal.astro";
+import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 import {
     formatDateForDisplay,
@@ -18,6 +19,9 @@ if (!user) {
 }
 
 // Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
 if (Astro.request.method === "POST") {
     const formData = await Astro.request.formData();
     const action = formData.get("_action") as string;
@@ -29,13 +33,15 @@ if (Astro.request.method === "POST") {
         );
         console.log("Create transaction result:", result);
         if (result.data?.ok) {
-            return Astro.redirect("/transactions?success=created");
+            toastMessage = "Transaction created successfully!";
+            toastType = "success";
         } else {
             console.error(
                 "Transaction creation failed:",
                 result.error || result.data?.error,
             );
-            return Astro.redirect("/transactions?error=create-failed");
+            toastMessage = "Failed to create transaction. Please try again.";
+            toastType = "error";
         }
     } else if (action === "update") {
         const result = await Astro.callAction(
@@ -44,13 +50,15 @@ if (Astro.request.method === "POST") {
         );
         console.log("Update transaction result:", result);
         if (result.data?.ok) {
-            return Astro.redirect("/transactions?success=updated");
+            toastMessage = "Transaction updated successfully!";
+            toastType = "success";
         } else {
             console.error(
                 "Transaction update failed:",
                 result.error || result.data?.error,
             );
-            return Astro.redirect("/transactions?error=update-failed");
+            toastMessage = "Failed to update transaction. Please try again.";
+            toastType = "error";
         }
     } else if (action === "delete") {
         const result = await Astro.callAction(
@@ -59,13 +67,15 @@ if (Astro.request.method === "POST") {
         );
         console.log("Delete transaction result:", result);
         if (result.data?.ok) {
-            return Astro.redirect("/transactions?success=deleted");
+            toastMessage = "Transaction deleted successfully!";
+            toastType = "success";
         } else {
             console.error(
                 "Transaction deletion failed:",
                 result.error || result.data?.error,
             );
-            return Astro.redirect("/transactions?error=delete-failed");
+            toastMessage = "Failed to delete transaction. Please try again.";
+            toastType = "error";
         }
     }
 }
@@ -105,48 +115,11 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
             b.date.localeCompare(a.date),
         ), // Sort transactions by full datetime descending
     }));
-
-// Get URL parameters for success and error messages
-const url = new URL(Astro.request.url);
-const success = url.searchParams.get("success");
-const error = url.searchParams.get("error");
 ---
 
 <Layout title="Transactions" description="Manage your transactions">
     <main class="bg-gray-900 p-8 min-h-screen text-white">
         <Header currentPage="transactions" user={user} />
-
-        <!-- Success Messages -->
-        {
-            success && (
-                <div class="mx-auto max-w-7xl mb-6">
-                    <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
-                        {success === "created" &&
-                            "Transaction created successfully!"}
-                        {success === "updated" &&
-                            "Transaction updated successfully!"}
-                        {success === "deleted" &&
-                            "Transaction deleted successfully!"}
-                    </div>
-                </div>
-            )
-        }
-
-        <!-- Error Messages -->
-        {
-            error && (
-                <div class="mx-auto max-w-7xl mb-6">
-                    <div class="bg-red-600 text-white px-4 py-3 rounded-lg">
-                        {error === "create-failed" &&
-                            "Failed to create transaction. Please try again."}
-                        {error === "update-failed" &&
-                            "Failed to update transaction. Please try again."}
-                        {error === "delete-failed" &&
-                            "Failed to delete transaction. Please try again."}
-                    </div>
-                </div>
-            )
-        }
 
         <div class="mx-auto max-w-7xl">
             <!-- Transactions List -->
@@ -504,6 +477,7 @@ const error = url.searchParams.get("error");
 </Layout>
 
 <TransactionModal />
+{toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
 <Footer />
 <LogoutScript />

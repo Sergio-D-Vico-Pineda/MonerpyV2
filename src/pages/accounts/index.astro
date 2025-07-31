@@ -4,6 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import AccountModal from "@comps/AccountModal.astro";
+import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 
 const user = Astro.locals.user;
@@ -13,6 +14,9 @@ if (!user) {
 }
 
 // Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
 if (Astro.request.method === "POST") {
     const formData = await Astro.request.formData();
     const action = formData.get("_action") as string;
@@ -20,12 +24,14 @@ if (Astro.request.method === "POST") {
     if (action === "create") {
         const result = await Astro.callAction(actions.createAccount, formData);
         if (result.data?.ok) {
-            return Astro.redirect("/accounts?success=created");
+            toastMessage = "Account created successfully!";
+            toastType = "success";
         }
     } else if (action === "delete") {
         const result = await Astro.callAction(actions.deleteAccount, formData);
         if (result.data?.ok) {
-            return Astro.redirect("/accounts?success=deleted");
+            toastMessage = "Account deleted successfully!";
+            toastType = "success";
         }
     }
 }
@@ -39,10 +45,6 @@ const accountsResult = userInFamily
     ? await Astro.callAction(actions.getAccountsList, { includeDeleted: false })
     : { data: { ok: false, accounts: [] } };
 const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
-
-// Get URL parameters for success messages
-const url = new URL(Astro.request.url);
-const success = url.searchParams.get("success");
 
 // Account type options for display
 const accountTypes = [
@@ -58,21 +60,6 @@ const accountTypes = [
 <Layout title="Accounts" description="Manage your accounts">
     <main class="bg-gray-900 p-8 min-h-screen text-white">
         <Header currentPage="accounts" user={user} />
-
-        {
-            success && (
-                <div class="mx-auto max-w-7xl mb-6">
-                    <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
-                        {success === "created" &&
-                            "Account created successfully!"}
-                        {success === "deleted" &&
-                            "Account deleted successfully!"}
-                        {success === "updated" &&
-                            "Account updated successfully!"}
-                    </div>
-                </div>
-            )
-        }
 
         <div class="mx-auto max-w-7xl">
             {
@@ -228,4 +215,5 @@ const accountTypes = [
 
     <Footer />
     <LogoutScript />
+    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>

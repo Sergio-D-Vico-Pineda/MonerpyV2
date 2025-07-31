@@ -3,6 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
+import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay } from '../../lib/date-utils.ts';
 
@@ -13,6 +14,9 @@ if (!user) {
 }
 
 // Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
   const action = formData.get("_action") as string;
@@ -20,22 +24,26 @@ if (Astro.request.method === "POST") {
   if (action === "createFamily") {
     const result = await Astro.callAction(actions.createFamily, formData);
     if (result.data?.ok) {
-      return Astro.redirect("/families?success=created");
+      toastMessage = "Family created successfully!";
+      toastType = "success";
     }
   } else if (action === "joinFamily") {
     const result = await Astro.callAction(actions.joinFamily, formData);
     if (result.data?.ok) {
-      return Astro.redirect("/families?success=joined");
+      toastMessage = "Successfully joined the family!";
+      toastType = "success";
     }
   } else if (action === "leaveFamily") {
     const result = await Astro.callAction(actions.leaveFamily, formData);
     if (result.data?.ok) {
-      return Astro.redirect("/families?success=left");
+      toastMessage = "Successfully left the family!";
+      toastType = "success";
     }
   } else if (action === "updateRole") {
     const result = await Astro.callAction(actions.updateUserRole, formData);
     if (result.data?.ok) {
-      return Astro.redirect("/families?success=roleUpdated");
+      toastMessage = "User role updated successfully!";
+      toastType = "success";
     }
   } else if (action === "removeUser") {
     const result = await Astro.callAction(
@@ -43,7 +51,8 @@ if (Astro.request.method === "POST") {
       formData,
     );
     if (result.data?.ok) {
-      return Astro.redirect("/families?success=userRemoved");
+      toastMessage = "User removed from family successfully!";
+      toastType = "success";
     }
   }
 }
@@ -61,30 +70,11 @@ const familyDetails = familyDetailsResult.data?.ok
 const userRole = familyDetailsResult.data?.ok
   ? familyDetailsResult.data.userRole
   : null;
-
-// Get URL parameters for success messages
-const url = new URL(Astro.request.url);
-const success = url.searchParams.get("success");
 ---
 
 <Layout title="Family Management" description="Manage your family and members">
   <main class="bg-gray-900 p-8 min-h-screen text-white">
     <Header currentPage="families" user={user} />
-
-    {
-      success && (
-        <div class="mx-auto max-w-7xl mb-6">
-          <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
-            {success === "created" && "Family created successfully!"}
-            {success === "joined" && "Joined family successfully!"}
-            {success === "left" && "Left family successfully!"}
-            {success === "roleUpdated" && "User role updated successfully!"}
-            {success === "userRemoved" &&
-              "User removed from family successfully!"}
-          </div>
-        </div>
-      )
-    }
 
     <div class="mx-auto max-w-7xl">
       {
@@ -365,4 +355,5 @@ const success = url.searchParams.get("success");
 
   <Footer />
   <LogoutScript />
+  {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>

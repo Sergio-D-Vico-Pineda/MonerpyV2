@@ -3,6 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
+import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay } from "@lib/date-utils.ts";
 
@@ -27,6 +28,9 @@ if (!userInFamily) {
 }
 
 // Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
 if (Astro.request.method === "POST") {
     const formData = await Astro.request.formData();
     const action = formData.get("_action") as string;
@@ -34,7 +38,8 @@ if (Astro.request.method === "POST") {
     if (action === "update") {
         const result = await Astro.callAction(actions.updateAccount, formData);
         if (result.data?.ok) {
-            return Astro.redirect(`/accounts/${accountId}?success=updated`);
+            toastMessage = "Account updated successfully!";
+            toastType = "success";
         }
     }
 }
@@ -48,10 +53,6 @@ if (!accountResult.data?.ok || !accountResult.data.account) {
 }
 
 const account = accountResult.data.account;
-
-// Get URL parameters for success messages
-const url = new URL(Astro.request.url);
-const success = url.searchParams.get("success");
 
 // Account type options
 const accountTypes = [
@@ -443,4 +444,5 @@ const colors = [
             }
         });
     </script>
+    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>
