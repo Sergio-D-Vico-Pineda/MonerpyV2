@@ -1,7 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
-import { formatDateTimeLocal, getCurrentDateTime } from '../../lib/date-utils.js';
+import { formatDateTimeLocal, getCurrentDateTime } from '@lib/date-utils.ts';
 
 export const createTransaction = defineAction({
     accept: 'form',

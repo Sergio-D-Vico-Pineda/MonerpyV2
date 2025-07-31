@@ -1,5 +1,5 @@
 import { prisma } from '@prisma/index.js';
-import { getCurrentDateTime, getCurrentDate } from '../../lib/date-utils.js';
+import { getCurrentDateTime, getCurrentDate } from '@lib/date-utils.ts';
 
 /**
  * Updates daily balance records for an account

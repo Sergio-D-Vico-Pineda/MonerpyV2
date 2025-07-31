@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { createSession } from '@lib/session-manager.ts';
 import { hashPassword } from '@lib/password.ts';
-import { getCurrentDateTime } from '../../lib/date-utils.js';
+import { getCurrentDateTime } from '@lib/date-utils.ts';
 
 export const create = defineAction({
     accept: 'form',

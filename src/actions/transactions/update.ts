@@ -1,14 +1,14 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
-import { formatDateTimeLocal, getCurrentDateTime } from '../../lib/date-utils.js';
+import { formatDateTimeLocal, getCurrentDateTime } from '@lib/date-utils.ts';
 
 export const updateTransaction = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Transaction ID is required"),
         accountId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account is required"),
-        categoryId: z.string().optional().transform(val => val && val !== '' ? parseInt(val) : undefined),
+        categoryId: z.string().nullable().transform(val => val && val !== '' ? parseInt(val) : undefined),
         date: z.string().min(1, "Date is required"),
         name: z.string().trim().min(1, "Transaction name is required"),
         amount: z.string().transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0, "Amount must be a positive number"),
