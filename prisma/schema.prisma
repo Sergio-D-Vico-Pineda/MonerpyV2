@@ -9,11 +9,11 @@ datasource db {
 }
 
 model Family {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  deletedAt DateTime?
+  createdAt String  // YYYY-MM-DD HH:mm:ss
+  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   users      User[]
@@ -34,9 +34,9 @@ model User {
   email        String    @unique
   passwordHash String
   role         UserRole  @default(Member)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now())
-  deletedAt    DateTime?
+  createdAt    String    // YYYY-MM-DD HH:mm:ss
+  updatedAt    String    // YYYY-MM-DD HH:mm:ss
+  deletedAt    String?   // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family?                @relation(fields: [familyId], references: [id])
@@ -62,9 +62,9 @@ model Account {
   accountType AccountType
   balance     Float       @default(0.0)
   color       String      @default("#6172F3")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now())
-  deletedAt   DateTime?
+  createdAt   String      // YYYY-MM-DD HH:mm:ss
+  updatedAt   String      // YYYY-MM-DD HH:mm:ss
+  deletedAt   String?     // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family                 @relation(fields: [familyId], references: [id])
@@ -77,14 +77,14 @@ model Account {
 }
 
 model AccountBalance {
-  id          Int       @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   accountId   Int
-  date        DateTime // YYYY-MM-DD
+  date        String  // YYYY-MM-DD (date only)
   balance     Float
-  cashBalance Float     @default(0.0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  deletedAt   DateTime?
+  cashBalance Float   @default(0.0)
+  createdAt   String  // YYYY-MM-DD HH:mm:ss
+  updatedAt   String  // YYYY-MM-DD HH:mm:ss
+  deletedAt   String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   account Account @relation(fields: [accountId], references: [id])
@@ -94,14 +94,14 @@ model AccountBalance {
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   familyId  Int
   name      String
-  color     String    @default("#6172F3")
+  color     String  @default("#6172F3")
   parentId  Int?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  deletedAt DateTime?
+  createdAt String  // YYYY-MM-DD HH:mm:ss
+  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family                 @relation(fields: [familyId], references: [id])
@@ -115,13 +115,13 @@ model Category {
 }
 
 model Tag {
-  id        Int       @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   familyId  Int
   name      String
-  color     String    @default("#e99537")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  deletedAt DateTime?
+  color     String  @default("#e99537")
+  createdAt String  // YYYY-MM-DD HH:mm:ss
+  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family                 @relation(fields: [familyId], references: [id])
@@ -145,13 +145,13 @@ model Transaction {
   accountId  Int
   userId     Int
   categoryId Int?
-  date       DateTime // YYYY-MM-DD
+  date       String          // YYYY-MM-DD HH:mm:ss
   name       String
   amount     Float
   type       TransactionType
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @default(now())
-  deletedAt  DateTime?
+  createdAt  String          // YYYY-MM-DD HH:mm:ss
+  updatedAt  String          // YYYY-MM-DD HH:mm:ss
+  deletedAt  String?         // YYYY-MM-DD HH:mm:ss
 
   // Relations
   account      Account                  @relation(fields: [accountId], references: [id])
@@ -186,13 +186,13 @@ model RecurringTransaction {
   dayOfMonth       Int? // para la frecuencia mensual y anual
   dayOfWeek        Int? // 0 (domingo) a 6 (sábado) para semanal
   timeOfDay        String? // formato "HH:mm:ss"
-  startDate        DateTime
-  endDate          DateTime?
+  startDate        String  // YYYY-MM-DD HH:mm:ss
+  endDate          String? // YYYY-MM-DD HH:mm:ss
   maxOccurrences   Int?
-  occurrencesCount Int             @default(0)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @default(now())
-  deletedAt        DateTime?
+  occurrencesCount Int     @default(0)
+  createdAt        String  // YYYY-MM-DD HH:mm:ss
+  updatedAt        String  // YYYY-MM-DD HH:mm:ss
+  deletedAt        String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   account  Account                   @relation(fields: [accountId], references: [id])
@@ -207,12 +207,12 @@ model RecurringTransaction {
 }
 
 model RecurringTransactionLog {
-  id                     Int      @id @default(autoincrement())
+  id                     Int    @id @default(autoincrement())
   recurringTransactionId Int
-  generatedTransactionId Int?     @unique
-  executionTime          DateTime // unix timestamp
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @default(now())
+  generatedTransactionId Int?   @unique
+  executionTime          String // YYYY-MM-DD HH:mm:ss
+  createdAt              String // YYYY-MM-DD HH:mm:ss
+  updatedAt              String // YYYY-MM-DD HH:mm:ss
 
   // Relations
   recurringTransaction RecurringTransaction @relation(fields: [recurringTransactionId], references: [id])
