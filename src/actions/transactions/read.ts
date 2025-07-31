@@ -49,10 +49,10 @@ export const getTransactions = defineAction({
                 where.type = input.type;
             }
             if (input.startDate) {
-                where.date = { ...where.date, gte: new Date(input.startDate) };
+                where.date = { ...where.date, gte: input.startDate };
             }
             if (input.endDate) {
-                where.date = { ...where.date, lte: new Date(input.endDate) };
+                where.date = { ...where.date, lte: input.endDate };
             }
 
             const skip = (input.page - 1) * input.limit;

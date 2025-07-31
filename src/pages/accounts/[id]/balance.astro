@@ -4,6 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import { actions } from "astro:actions";
+import { formatDateForDisplay } from '../../../lib/date-utils.js';
 
 const user = Astro.locals.user;
 
@@ -272,18 +273,7 @@ const timePeriods = [
                                                         return (
                                                             <tr class="border-b border-gray-700 hover:bg-gray-700 transition-colors">
                                                                 <td class="py-3 px-4 text-white">
-                                                                    {new Date(
-                                                                        record.date,
-                                                                    ).toLocaleDateString(
-                                                                        "es-ES",
-                                                                        {
-                                                                            year: "numeric",
-                                                                            month: "short",
-                                                                            day: "numeric",
-                                                                            weekday:
-                                                                                "short",
-                                                                        },
-                                                                    )}
+                                                                    {formatDateForDisplay(record.date, { includeTime: false, dateStyle: 'long' })}
                                                                 </td>
                                                                 <td
                                                                     class={`py-3 px-4 text-right font-semibold ${

@@ -4,6 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import { actions } from "astro:actions";
+import { formatDateForDisplay } from '../../lib/date-utils.ts';
 
 const user = Astro.locals.user;
 
@@ -245,7 +246,7 @@ const success = url.searchParams.get("success");
                         <p class="text-sm text-gray-300">{member.email}</p>
                         <p class="text-xs text-gray-400">
                           Joined{" "}
-                          {new Date(member.createdAt).toLocaleDateString()}
+                          {formatDateForDisplay(member.createdAt, { includeTime: false })}
                         </p>
                       </div>
                     </div>

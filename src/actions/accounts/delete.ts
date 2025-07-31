@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const deleteAccount = defineAction({
     accept: 'form',
@@ -41,8 +42,8 @@ export const deleteAccount = defineAction({
             const deletedAccount = await prisma.account.update({
                 where: { id: input.id },
                 data: {
-                    deletedAt: new Date(),
-                    updatedAt: new Date()
+                    deletedAt: getCurrentDateTime(),
+                    updatedAt: getCurrentDateTime()
                 }
             });
 
@@ -109,7 +110,7 @@ export const restoreAccount = defineAction({
                 where: { id: input.id },
                 data: {
                     deletedAt: null,
-                    updatedAt: new Date()
+                    updatedAt: getCurrentDateTime()
                 }
             });
 

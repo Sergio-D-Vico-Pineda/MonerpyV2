@@ -4,6 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import { actions } from "astro:actions";
+import { formatDateForDisplay } from "../../lib/date-utils.js";
 
 const user = Astro.locals.user;
 
@@ -297,14 +298,12 @@ const colors = [
                                                         {transaction.name}
                                                     </p>
                                                     <p class="text-gray-400 text-sm">
-                                                        {new Date(
+                                                        {formatDateForDisplay(
                                                             transaction.date,
-                                                        ).toLocaleDateString(
-                                                            "es-ES",
                                                             {
-                                                                year: "numeric",
-                                                                month: "short",
-                                                                day: "numeric",
+                                                                includeTime: false,
+                                                                dateStyle:
+                                                                    "short",
                                                             },
                                                         )}
                                                     </p>
@@ -375,14 +374,11 @@ const colors = [
                                         .map((balance: any) => (
                                             <div class="flex items-center justify-between py-2">
                                                 <p class="text-gray-400">
-                                                    {new Date(
+                                                    {formatDateForDisplay(
                                                         balance.date,
-                                                    ).toLocaleDateString(
-                                                        "es-ES",
                                                         {
-                                                            year: "numeric",
-                                                            month: "short",
-                                                            day: "numeric",
+                                                            includeTime: false,
+                                                            dateStyle: "short",
                                                         },
                                                     )}
                                                 </p>

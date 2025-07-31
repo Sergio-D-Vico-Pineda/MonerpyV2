@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const deleteTransaction = defineAction({
     accept: 'form',
@@ -44,7 +45,7 @@ export const deleteTransaction = defineAction({
             await prisma.transaction.update({
                 where: { id: input.id },
                 data: {
-                    deletedAt: new Date()
+                    deletedAt: getCurrentDateTime()
                 }
             });
 

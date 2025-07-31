@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import { getCurrentDateTime } from '../../lib/date-utils.js';
 
 export const updateAccount = defineAction({
     accept: 'form',
@@ -63,7 +64,7 @@ export const updateAccount = defineAction({
                     name: input.name,
                     accountType: input.accountType,
                     color: input.color,
-                    updatedAt: new Date()
+                    updatedAt: getCurrentDateTime()
                 }
             });
 
