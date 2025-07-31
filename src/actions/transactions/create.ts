@@ -87,7 +87,7 @@ export const createTransaction = defineAction({
             // Handle tags
             if (input.tags.length > 0) {
                 const tagConnections = [];
-                
+
                 for (const tagName of input.tags) {
                     let tag = await prisma.tag.findFirst({
                         where: {

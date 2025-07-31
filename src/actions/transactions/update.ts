@@ -107,7 +107,7 @@ export const updateTransaction = defineAction({
             // Handle tags
             if (input.tags.length > 0) {
                 const tagConnections = [];
-                
+
                 for (const tagName of input.tags) {
                     let tag = await prisma.tag.findFirst({
                         where: {
@@ -142,7 +142,7 @@ export const updateTransaction = defineAction({
             // Update account balances
             // First, reverse the old transaction's effect
             const oldBalanceChange = existingTransaction.type === 'Income' ? -existingTransaction.amount : existingTransaction.amount;
-            
+
             // If account changed, update both accounts
             if (existingTransaction.accountId !== input.accountId) {
                 // Update old account
@@ -158,7 +158,7 @@ export const updateTransaction = defineAction({
 
             // Apply new transaction's effect
             const newBalanceChange = input.type === 'Income' ? input.amount : -input.amount;
-            const netChange = existingTransaction.accountId === input.accountId ? 
+            const netChange = existingTransaction.accountId === input.accountId ?
                 oldBalanceChange + newBalanceChange : newBalanceChange;
 
             await prisma.account.update({
