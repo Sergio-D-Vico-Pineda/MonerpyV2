@@ -4,7 +4,7 @@ import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from '../../lib/date-utils.js';
+import { formatDateForDisplay } from '@lib/date-utils.ts';
 
 const user = Astro.locals.user;
 
@@ -124,7 +124,7 @@ const accountTypes = [
                                                         account.accountType}
                                                 </p>
                                                 <p class="text-xs text-gray-500 mt-1">
-                                                    Deleted on:{" "}
+                                                    Deleted on:
                                                     {formatDateForDisplay(account.deletedAt, { includeTime: true, dateStyle: 'long' })}
                                                 </p>
                                             </div>
