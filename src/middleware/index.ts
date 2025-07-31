@@ -5,12 +5,13 @@ import { validateSession } from '@lib/session-manager.ts';
 export const onRequest = defineMiddleware(async (context, next) => {
     const { request, url, cookies, locals, redirect } = context;
 
-    console.log(`[MIDDLEWARE] Processing request: ${url.pathname}`);
-
     // Ignore Chrome DevTools requests and return 404
     if (url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
         return new Response('Not Found', { status: 404 });
+    } else {
+        console.log(`[MIDDLEWARE] Processing request: ${url.pathname}`);
     }
+
 
     // Log action requests for debugging
     if (url.pathname.startsWith('/_actions/')) {
