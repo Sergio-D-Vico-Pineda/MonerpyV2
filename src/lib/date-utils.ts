@@ -149,13 +149,30 @@ export function getDatePart(dateTimeString: string): string {
  * @returns Time part "HH:mm:ss"
  */
 export function getTimePart(dateTimeString: string): string {
-    return dateTimeString.split(' ')[1] || '00:00:00';
+    const timePart = dateTimeString.split(' ')[1] || '00:00:00';
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+
+    return `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
 }
 
 /**
- * Gets current date in "YYYY-MM-DD" format (date only, no time)
- * @returns Current local date string
+ * Gets the time part only from a date-time string without seconds
+ * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
+ * @returns Time part "HH:mm AM/PM"
  */
+export function getTimePartWithoutSeconds(dateTimeString: string): string {
+    const timePart = dateTimeString.split(' ')[1] || '00:00:00';
+    const [hours, minutes] = timePart.split(':').map(Number);
+
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+
+    return `${adjustedHours}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
 export function getCurrentDate(): string {
     const now = new Date();
 
