@@ -1,0 +1,363 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Footer from "@comps/Footer.astro";
+import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+  return Astro.redirect("/login");
+}
+
+// Handle form submissions
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("_action") as string;
+
+  if (action === "createFamily") {
+    const result = await Astro.callAction(actions.createFamily, formData);
+    if (result.data?.ok) {
+      return Astro.redirect("/families?success=created");
+    }
+  } else if (action === "joinFamily") {
+    const result = await Astro.callAction(actions.joinFamily, formData);
+    if (result.data?.ok) {
+      return Astro.redirect("/families?success=joined");
+    }
+  } else if (action === "leaveFamily") {
+    const result = await Astro.callAction(actions.leaveFamily, formData);
+    if (result.data?.ok) {
+      return Astro.redirect("/families?success=left");
+    }
+  } else if (action === "updateRole") {
+    const result = await Astro.callAction(actions.updateUserRole, formData);
+    if (result.data?.ok) {
+      return Astro.redirect("/families?success=roleUpdated");
+    }
+  } else if (action === "removeUser") {
+    const result = await Astro.callAction(
+      actions.removeUserFromFamily,
+      formData,
+    );
+    if (result.data?.ok) {
+      return Astro.redirect("/families?success=userRemoved");
+    }
+  }
+}
+
+// Get data for the page
+const [familiesResult, familyDetailsResult] = await Promise.all([
+  Astro.callAction(actions.getFamilies, {}),
+  Astro.callAction(actions.getFamilyDetails, {}),
+]);
+
+const families = familiesResult.data?.ok ? familiesResult.data.families : [];
+const familyDetails = familyDetailsResult.data?.ok
+  ? familyDetailsResult.data.family
+  : null;
+const userRole = familyDetailsResult.data?.ok
+  ? familyDetailsResult.data.userRole
+  : null;
+
+// Get URL parameters for success messages
+const url = new URL(Astro.request.url);
+const success = url.searchParams.get("success");
+---
+
+<Layout title="Family Management" description="Manage your family and members">
+  <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <Header currentPage="families" user={user} />
+
+    {
+      success && (
+        <div class="mx-auto max-w-7xl mb-6">
+          <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
+            {success === "created" && "Family created successfully!"}
+            {success === "joined" && "Joined family successfully!"}
+            {success === "left" && "Left family successfully!"}
+            {success === "roleUpdated" && "User role updated successfully!"}
+            {success === "userRemoved" &&
+              "User removed from family successfully!"}
+          </div>
+        </div>
+      )
+    }
+
+    <div class="mx-auto max-w-7xl">
+      {
+        !familyDetails ? (
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+              <h2 class="mb-6 font-semibold text-purple-400 text-xl">
+                Create New Family
+              </h2>
+
+              <form method="POST" class="space-y-4">
+                <input type="hidden" name="_action" value="createFamily" />
+
+                <div>
+                  <label
+                    for="familyName"
+                    class="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Family Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="familyName"
+                    name="name"
+                    required
+                    placeholder="Enter family name"
+                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
+                >
+                  Create Family
+                </button>
+              </form>
+            </div>
+
+            <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+              <h2 class="mb-6 font-semibold text-purple-400 text-xl">
+                Join Existing Family
+              </h2>
+
+              <form method="POST" class="space-y-4">
+                <input type="hidden" name="_action" value="joinFamily" />
+
+                <div>
+                  <label
+                    for="familySelect"
+                    class="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Select Family *
+                  </label>
+                  <select
+                    id="familySelect"
+                    name="familyId"
+                    required
+                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="">Choose a family to join</option>
+                    {families &&
+                      families.map((family) => (
+                        <option value={family.id}>
+                          {family.name} ({family._count.users} members)
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white transition duration-200"
+                >
+                  Join Family
+                </button>
+              </form>
+
+              <div class="mt-4 p-3 bg-gray-700 rounded-lg">
+                <p class="text-sm text-gray-300">
+                  <strong>Note:</strong> You can only belong to one family at a
+                  time. Joining a family will give you access to shared
+                  accounts, categories, and transactions.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="space-y-8">
+            <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="font-semibold text-purple-400 text-xl">
+                  Family: {familyDetails.name}
+                </h2>
+                <div class="flex gap-3">
+                  <span
+                    class={`px-3 py-1 rounded text-sm ${
+                      userRole === "Admin" ? "bg-purple-600" : "bg-blue-600"
+                    }`}
+                  >
+                    {userRole}
+                  </span>
+                  <form
+                    method="POST"
+                    onsubmit="return confirm('Are you sure you want to leave this family?')"
+                  >
+                    <input type="hidden" name="_action" value="leaveFamily" />
+                    <button
+                      type="submit"
+                      class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm text-white transition duration-200"
+                    >
+                      Leave Family
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-purple-400">
+                    {familyDetails.users.length}
+                  </div>
+                  <div class="text-gray-300">Members</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-400">
+                    {familyDetails._count.accounts}
+                  </div>
+                  <div class="text-gray-300">Accounts</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-400">
+                    {familyDetails._count.categories}
+                  </div>
+                  <div class="text-gray-300">Categories</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+              <h3 class="mb-6 font-semibold text-purple-400 text-xl">
+                Family Members
+              </h3>
+
+              <div class="space-y-3">
+                {familyDetails.users.map((member) => (
+                  <div class="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-semibold">
+                          {member.username.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 class="font-medium text-white">
+                          {member.username}
+                        </h4>
+                        <p class="text-sm text-gray-300">{member.email}</p>
+                        <p class="text-xs text-gray-400">
+                          Joined{" "}
+                          {new Date(member.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                      <span
+                        class={`px-3 py-1 rounded text-sm ${
+                          member.role === "Admin"
+                            ? "bg-purple-600"
+                            : "bg-blue-600"
+                        }`}
+                      >
+                        {member.role}
+                      </span>
+
+                      {userRole === "Admin" && member.id !== user.id && (
+                        <div class="flex gap-2">
+                          <form method="POST" class="inline">
+                            <input
+                              type="hidden"
+                              name="_action"
+                              value="updateRole"
+                            />
+                            <input
+                              type="hidden"
+                              name="userId"
+                              value={member.id}
+                            />
+                            <input
+                              type="hidden"
+                              name="role"
+                              value={
+                                member.role === "Admin" ? "Member" : "Admin"
+                              }
+                            />
+                            <button
+                              type="submit"
+                              class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm text-white transition duration-200"
+                            >
+                              {member.role === "Admin" ? "Demote" : "Promote"}
+                            </button>
+                          </form>
+
+                          <form
+                            method="POST"
+                            class="inline"
+                            onsubmit="return confirm('Are you sure you want to remove this user from the family?')"
+                          >
+                            <input
+                              type="hidden"
+                              name="_action"
+                              value="removeUser"
+                            />
+                            <input
+                              type="hidden"
+                              name="userId"
+                              value={member.id}
+                            />
+                            <button
+                              type="submit"
+                              class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm text-white transition duration-200"
+                            >
+                              Remove
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {familyDetails.accounts.length > 0 && (
+              <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                <h3 class="mb-6 font-semibold text-purple-400 text-xl">
+                  Family Accounts
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {familyDetails.accounts.map((account) => (
+                    <div class="bg-gray-700 rounded-lg p-4">
+                      <div class="flex items-center gap-3 mb-2">
+                        <div
+                          class="w-4 h-4 rounded-full"
+                          style={`background-color: ${account.color}`}
+                        />
+                        <h4 class="font-medium text-white">{account.name}</h4>
+                      </div>
+                      <p class="text-sm text-gray-300 mb-1">
+                        {account.accountType}
+                      </p>
+                      <p
+                        class={`text-lg font-semibold ${
+                          account.balance >= 0
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        €{account.balance.toFixed(2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      }
+    </div>
+  </main>
+
+  <Footer />
+  <LogoutScript />
+</Layout>
