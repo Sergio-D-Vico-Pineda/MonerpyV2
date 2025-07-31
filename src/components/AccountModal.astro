@@ -1,0 +1,225 @@
+---
+// Account type options
+const accountTypes = [
+    { value: "Cash", label: "Cash", icon: "💵" },
+    { value: "Checking", label: "Checking Account", icon: "🏦" },
+    { value: "Savings", label: "Savings Account", icon: "💰" },
+    { value: "CreditCard", label: "Credit Card", icon: "💳" },
+    { value: "Investment", label: "Investment Account", icon: "📈" },
+    { value: "Loan", label: "Loan Account", icon: "🏠" },
+];
+
+// Predefined colors
+const colors = [
+    "#6172F3",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#8B5CF6",
+    "#06B6D4",
+    "#84CC16",
+    "#F97316",
+    "#EC4899",
+    "#6B7280",
+    "#14B8A6",
+    "#F43F5E",
+];
+---
+
+<!-- Modal Background -->
+<div id="accountModal" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-700">
+                <h2 class="text-xl font-semibold text-purple-400">Create Account</h2>
+                <button
+                    type="button"
+                    id="closeModal"
+                    class="text-gray-400 hover:text-white transition-colors"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="_action" value="create" />
+
+                    <div>
+                        <label
+                            for="name"
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
+                            Account Name *
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Enter account name"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            for="accountType"
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
+                            Account Type *
+                        </label>
+                        <select
+                            id="accountType"
+                            name="accountType"
+                            required
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        >
+                            <option value="">Select account type</option>
+                            {accountTypes.map((type) => (
+                                <option value={type.value}>
+                                    {type.icon} {type.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label
+                            for="initialBalance"
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
+                            Initial Balance
+                        </label>
+                        <input
+                            type="number"
+                            id="initialBalance"
+                            name="initialBalance"
+                            step="0.01"
+                            value="0"
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="0.00"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            for="color"
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
+                            Account Color
+                        </label>
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="color"
+                                id="color"
+                                name="color"
+                                value="#6172F3"
+                                class="w-12 h-10 border border-gray-600 rounded cursor-pointer"
+                            />
+                            <input
+                                type="text"
+                                id="colorHex"
+                                name="colorHex"
+                                value="#6172F3"
+                                pattern="^#[0-9A-Fa-f]{6}$"
+                                class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                placeholder="#6172F3"
+                            />
+                        </div>
+
+                        <div class="mt-3 grid grid-cols-6 gap-2">
+                            {colors.map((color) => (
+                                <button
+                                    type="button"
+                                    class="w-8 h-8 rounded border-2 border-gray-600 hover:border-white transition-colors"
+                                    style={`background-color: ${color}`}
+                                    onclick={`document.getElementById('color').value = '${color}'; document.getElementById('colorHex').value = '${color}';`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-4">
+                        <button
+                            type="button"
+                            id="cancelBtn"
+                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        >
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("accountModal");
+        const closeModalBtn = document.getElementById("closeModal");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const colorPicker = document.getElementById("color") as HTMLInputElement;
+        const colorHex = document.getElementById("colorHex") as HTMLInputElement;
+
+        // Modal controls
+        function showModal() {
+            if (modal) {
+                modal.classList.remove("hidden");
+                document.body.style.overflow = "hidden";
+            }
+        }
+
+        function hideModal() {
+            if (modal) {
+                modal.classList.add("hidden");
+                document.body.style.overflow = "auto";
+            }
+        }
+
+        // Close modal events
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", hideModal);
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", hideModal);
+        }
+
+        // Close modal when clicking outside
+        if (modal) {
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+        }
+
+        // Color picker synchronization
+        if (colorPicker && colorHex) {
+            colorPicker.addEventListener("change", function () {
+                colorHex.value = this.value;
+            });
+
+            colorHex.addEventListener("input", function () {
+                if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                    colorPicker.value = this.value;
+                }
+            });
+        }
+
+        // Expose showModal function globally
+        (window as any).showAccountModal = showModal;
+    });
+</script>
