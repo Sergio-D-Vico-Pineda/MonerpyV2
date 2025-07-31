@@ -2,19 +2,18 @@
 import Layout from "@layouts/Layout.astro";
 import Footer from "@comps/Footer.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
 
-// The user information is now available in Astro.locals.user thanks to our middleware
 const user = Astro.locals.user;
 
 if (!user) {
-  // This shouldn't happen if middleware is working correctly, but just in case
   return Astro.redirect("/login");
 }
 
 // Extract userId for compatibility with existing code
 const userId = user.id;
 
-/* const groups = await prisma.transactionGroup.findMany({
+/* const categories = await prisma.category.findMany({
   where: {
     userId,
     softDeleted: false,
@@ -35,40 +34,9 @@ const userId = user.id;
 // The calendar functionality is implemented in the script section, allowing users to view their transactions by date
 ---
 
-<Layout title="Dashboard">
+<Layout title="Dashboard" description="Your financial dashboard overview">
   <main class="bg-gray-900 p-8 min-h-screen text-white">
-    <header class="flex justify-between items-center mx-auto mb-8 max-w-7xl">
-      <nav class="flex items-baseline gap-x-4">
-        <h2 class="font-semibold text-purple-300 hover:text-purple-100 text-lg">
-          <a href="/">Home</a>
-        </h2>
-        <h1 class="font-bold text-purple-500 text-4xl cursor-default">
-          Dashboard
-        </h1>
-        <h2 class="font-semibold text-purple-300 hover:text-purple-100 text-lg">
-          <a href="/transactions">Transactions</a>
-        </h2>
-        <h2 class="font-semibold text-purple-300 hover:text-purple-100 text-lg">
-          <a href="/recurring-transactions">Recurring</a>
-        </h2>
-      </nav>
-      <div class="flex items-center gap-x-4">
-        <a
-          href="/profile"
-          class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
-        >
-          Profile {user.username}
-        </a>
-        <form id="logoutForm" method="POST" class="inline">
-          <button
-            type="submit"
-            class="bg-red-700 hover:bg-red-900 px-4 py-2 rounded text-white transition duration-200"
-          >
-            Logout
-          </button>
-        </form>
-      </div>
-    </header>
+    <Header currentPage="dashboard" user={user} />
 
     <section class="flex flex-wrap justify-between gap-6 mx-auto max-w-7xl">
       <article class="bg-gray-800 shadow-lg px-4 py-3.5 rounded-lg grow">
