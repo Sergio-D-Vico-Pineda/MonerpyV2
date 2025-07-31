@@ -69,7 +69,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                                     value={account.id}
                                     data-color={account.color}
                                 >
-                                    {account.name} ({account.accountType}) -{" "}
+                                    {account.name} ({account.accountType}) -
                                     {new Intl.NumberFormat("es-ES", {
                                         style: "currency",
                                         currency: "EUR",
@@ -276,7 +276,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
     import {
         getCurrentDateTimeLocal,
         formatToDateTimeLocal,
-    } from "../lib/date-utils.js";
+    } from "@lib/date-utils.ts";
 
     // Modal functionality
     const modal = document.getElementById("transactionModal");

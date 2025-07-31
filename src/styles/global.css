@@ -3,3 +3,18 @@
 body {
     @apply bg-gray-800 text-white;
 }
+
+/* Custom gray shades for better design */
+.bg-gray-750 {
+    background-color: rgb(55, 65, 81);
+}
+
+.bg-gray-650 {
+    background-color: rgb(75, 85, 99);
+}
+
+/* Hover effects for transaction cards */
+.transaction-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
