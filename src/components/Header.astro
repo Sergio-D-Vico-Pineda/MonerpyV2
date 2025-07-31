@@ -1,0 +1,69 @@
+---
+export interface Props {
+    currentPage: "home" | "dashboard" | "transactions" | "accounts" | "families" | "profile";
+    user: {
+        username: string;
+    };
+}
+
+const { currentPage, user } = Astro.props;
+
+// Define navigation items with their routes and labels
+const navigationItems = [
+    { key: "home", href: "/", label: "Home" },
+    { key: "dashboard", href: "/dashboard", label: "Dashboard" },
+    { key: "transactions", href: "/transactions", label: "Transactions" },
+    { key: "accounts", href: "/accounts", label: "Accounts" },
+    { key: "families", href: "/families", label: "Families" },
+];
+
+// Profile is handled separately since it appears in the right side of the header
+// Only show it in navigation if it's the current page
+if (currentPage === "profile") {
+    navigationItems.push({
+        key: "profile",
+        href: "/profile",
+        label: "Profile",
+    });
+}
+
+// Find the current page item to get its label for the main heading
+const currentPageItem = navigationItems.find(
+    (item) => item.key === currentPage,
+);
+const currentPageLabel = currentPageItem?.label || "Dashboard";
+---
+
+<header class="flex justify-between items-center mx-auto mb-8 max-w-7xl">
+    <nav class="flex items-baseline gap-x-4">
+        {
+            navigationItems.map((item) =>
+                item.key === currentPage ? (
+                    <h1 class="font-bold text-purple-500 text-4xl cursor-default">
+                        {item.label}
+                    </h1>
+                ) : (
+                    <h2 class="font-semibold text-purple-300 hover:text-purple-100 text-lg">
+                        <a href={item.href}>{item.label}</a>
+                    </h2>
+                ),
+            )
+        }
+    </nav>
+    <div class="flex items-center gap-x-4">
+        <a
+            href="/profile"
+            class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
+        >
+            Profile {user.username}
+        </a>
+        <form id="logoutForm" method="POST" class="inline">
+            <button
+                type="submit"
+                class="bg-red-700 hover:bg-red-900 px-4 py-2 rounded text-white transition duration-200"
+            >
+                Logout
+            </button>
+        </form>
+    </div>
+</header>
