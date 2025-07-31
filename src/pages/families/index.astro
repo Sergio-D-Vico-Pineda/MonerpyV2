@@ -345,7 +345,11 @@ const success = url.searchParams.get("success");
                             : "text-red-400"
                         }`}
                       >
-                        €{account.balance.toFixed(2)}
+                        {new Intl.NumberFormat("es-ES", {
+                          style: "currency", 
+                          currency: "EUR",
+                          minimumFractionDigits: 2,
+                        }).format(account.balance)}
                       </p>
                     </div>
                   ))}

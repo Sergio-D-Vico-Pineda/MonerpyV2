@@ -132,8 +132,11 @@ const success = url.searchParams.get("success");
                                                 data-color={account.color}
                                             >
                                                 {account.name} (
-                                                {account.accountType}) - €
-                                                {account.balance.toFixed(2)}
+                                                {account.accountType}) - {new Intl.NumberFormat("es-ES", {
+                                                    style: "currency",
+                                                    currency: "EUR",
+                                                    minimumFractionDigits: 2,
+                                                }).format(account.balance)}
                                             </option>
                                         ))
                                 }
@@ -469,10 +472,11 @@ const success = url.searchParams.get("success");
                                                     "Income"
                                                         ? "+"
                                                         : "-"}
-                                                    €
-                                                    {transaction.amount.toFixed(
-                                                        2,
-                                                    )}
+                                                    {new Intl.NumberFormat("es-ES", {
+                                                        style: "currency",
+                                                        currency: "EUR",
+                                                        minimumFractionDigits: 2,
+                                                    }).format(transaction.amount)}
                                                 </div>
                                             </div>
 
