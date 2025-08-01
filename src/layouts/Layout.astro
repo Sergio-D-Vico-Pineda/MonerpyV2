@@ -23,5 +23,16 @@ const { title, description }: Props = Astro.props;
 	<body>
 		<slot />
 		<Toast />
+		<script is:inline>
+			document.addEventListener("DOMContentLoaded", function () {
+				if (window.history.replaceState) {
+					window.history.replaceState(
+						null,
+						null,
+						window.location.href,
+					);
+				}
+			});
+		</script>
 	</body>
 </html>
