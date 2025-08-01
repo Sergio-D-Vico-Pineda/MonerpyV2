@@ -1,0 +1,60 @@
+---
+import Bin from "@svg/Bin.astro";
+
+interface Props {
+    category: {
+        id: number;
+        name: string;
+        color: string;
+        _count?: {
+            transactions?: number;
+            children?: number;
+        };
+    };
+    isChild?: boolean;
+    showSubcategoriesCount?: boolean;
+}
+
+const {
+    category,
+    isChild = false,
+    showSubcategoriesCount = false,
+} = Astro.props;
+---
+
+<div
+    class={`flex items-center justify-between ${isChild ? "pl-6 px-4 py-3 border-b border-gray-500 last:border-b-0" : "p-4"}`}
+>
+    <div class="flex items-center space-x-3">
+        {isChild && <i class="text-gray-400">└─</i>}
+        <div
+            class={`${isChild ? "w-3 h-3" : "w-4 h-4"} rounded-full`}
+            style={`background-color: ${category.color}`}
+        >
+        </div>
+        <div>
+            <h3 class={`font-semibold text-white ${isChild ? "text-sm" : ""}`}>
+                {category.name}
+            </h3>
+            <p class="text-sm text-gray-400">
+                {category._count?.transactions || 0} transactions
+                {
+                    showSubcategoriesCount && category._count?.children && (
+                        <span> • {category._count.children} subcategories</span>
+                    )
+                }
+            </p>
+        </div>
+    </div>
+    <div class="flex items-center space-x-2">
+        <button
+            type="button"
+            class="delete-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
+            data-category-id={category.id}
+            data-category-name={category.name}
+            title={`Delete ${isChild ? "Subcategory" : "Category"}`}
+        >
+            <Bin />
+        </button>
+    </div>
+</div>

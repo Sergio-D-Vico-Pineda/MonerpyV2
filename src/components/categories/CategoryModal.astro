@@ -168,8 +168,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                             />
                             <button
                                 type="button"
-                                onclick="useCustomColor()"
-                                class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-lg transition-colors"
+                                class="use-custom-color-btn px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-lg transition-colors"
                             >
                                 Use Custom
                             </button>
@@ -263,6 +262,12 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                     hideModal();
                 }
             });
+        }
+
+        // Handle use custom color button
+        const useCustomColorBtn = document.querySelector(".use-custom-color-btn");
+        if (useCustomColorBtn) {
+            useCustomColorBtn.addEventListener("click", useCustomColor);
         }
 
         // Custom color functionality
