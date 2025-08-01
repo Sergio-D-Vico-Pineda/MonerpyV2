@@ -37,7 +37,17 @@ export const getTags = defineAction({
                     color: true,
                     createdAt: true,
                     updatedAt: true,
-                    deletedAt: true
+                    deletedAt: true,
+                    _count: {
+                        select: {
+                            transactions: {
+                                where: { deletedAt: null }
+                            },
+                            recurringTransactions: {
+                                where: { deletedAt: null }
+                            }
+                        }
+                    }
                 },
                 orderBy: [
                     { name: 'asc' }
@@ -93,8 +103,8 @@ export const getTag = defineAction({
                 return { ok: false, error: "Tag not found" };
             }
 
-            return { 
-                ok: true, 
+            return {
+                ok: true,
                 tag: {
                     ...tag,
                     transactionCount: tag.transactions.length

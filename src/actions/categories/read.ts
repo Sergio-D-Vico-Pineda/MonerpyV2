@@ -41,6 +41,16 @@ export const getCategories = defineAction({
                     createdAt: true,
                     updatedAt: true,
                     deletedAt: true,
+                    _count: {
+                        select: {
+                            transactions: {
+                                where: { deletedAt: null }
+                            },
+                            children: {
+                                where: { deletedAt: null }
+                            }
+                        }
+                    },
                     children: {
                         where: input?.includeDeleted ? {} : { deletedAt: null },
                         select: {
@@ -127,8 +137,8 @@ export const getCategory = defineAction({
                 return { ok: false, error: "Category not found" };
             }
 
-            return { 
-                ok: true, 
+            return {
+                ok: true,
                 category: {
                     ...category,
                     transactionCount: category.transactions.length
