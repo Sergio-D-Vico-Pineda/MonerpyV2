@@ -88,18 +88,6 @@ const colors = [
     <main class="bg-gray-900 p-8 min-h-screen text-white">
         <Header currentPage="accounts" user={user} />
 
-        <!-- Success Messages -->
-        {
-            success && (
-                <div class="mx-auto max-w-7xl mb-6">
-                    <div class="bg-green-600 text-white px-4 py-3 rounded-lg">
-                        {success === "updated" &&
-                            "Account updated successfully!"}
-                    </div>
-                </div>
-            )
-        }
-
         <div class="mx-auto max-w-7xl">
             <!-- Back Link -->
             <div class="mb-6">

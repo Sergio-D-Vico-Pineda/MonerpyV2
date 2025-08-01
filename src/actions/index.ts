@@ -12,6 +12,17 @@ import {
     getTags
 } from "./transactions/index.ts";
 import {
+    createRecurringTransaction,
+    getRecurringTransactions,
+    getRecurringTransaction,
+    updateRecurringTransaction,
+    deleteRecurringTransaction,
+    getAccounts as getAccountsForRecurring,
+    getCategories as getCategoriesForRecurring,
+    getTags as getTagsForRecurring,
+    generateRecurringTransactions
+} from "./recurring-transactions/index.ts";
+import {
     createFamily,
     joinFamily,
     leaveFamily,
@@ -31,6 +42,22 @@ import {
     updateDailyBalance,
     recalculateAccountBalance
 } from "./accounts/index.ts";
+import {
+    createCategory,
+    getCategories as getCategoriesList,
+    getCategory,
+    updateCategory,
+    deleteCategory,
+    restoreCategory
+} from "./categories/index.ts";
+import {
+    createTag,
+    getTags as getTagsList,
+    getTag,
+    updateTag,
+    deleteTag,
+    restoreTag
+} from "./tags/index.ts";
 
 export const server = {
     login: login,
@@ -44,6 +71,15 @@ export const server = {
     getAccounts,
     getCategories,
     getTags,
+    createRecurringTransaction,
+    getRecurringTransactions,
+    getRecurringTransaction,
+    updateRecurringTransaction,
+    deleteRecurringTransaction,
+    getAccountsForRecurring,
+    getCategoriesForRecurring,
+    getTagsForRecurring,
+    generateRecurringTransactions,
     createFamily,
     joinFamily,
     leaveFamily,
@@ -59,5 +95,17 @@ export const server = {
     deleteAccount,
     restoreAccount,
     updateDailyBalance,
-    recalculateAccountBalance
+    recalculateAccountBalance,
+    createCategory,
+    getCategoriesList,
+    getCategory,
+    updateCategory,
+    deleteCategory,
+    restoreCategory,
+    createTag,
+    getTagsList,
+    getTag,
+    updateTag,
+    deleteTag,
+    restoreTag
 };

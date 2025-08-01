@@ -98,7 +98,7 @@ const userId = user.id;
                   Add Income
                 </a>
                 <a
-                  href="/recurring-transactions/new?type=income"
+                  href="/recurring?type=income"
                   class="text-sm flex-1/3 bg-green-800 hover:bg-green-900 p-2 rounded-r text-center text-nowrap transition duration-200"
                 >
                   Recurring
@@ -112,7 +112,7 @@ const userId = user.id;
                   Add Expense
                 </a>
                 <a
-                  href="/recurring-transactions/new?type=expense"
+                  href="/recurring?type=expense"
                   class="text-sm flex-1/3 bg-red-800 hover:bg-red-900 p-2 rounded-r text-center text-nowrap transition duration-200"
                 >
                   Recurring
@@ -470,7 +470,7 @@ const userId = user.id;
           cellContent += '<div class="space-y-1 mt-6">';
           dayEvents.forEach((event) => {
             cellContent += `
-              <a href="${event.recurring ? "/recurring-transactions" : "/transactions"}/${event.id}/edit" 
+              <a href="${event.recurring ? "/recurring" : "/transactions"}/${event.id}/edit" 
                  class="block text-sm p-1 rounded ${
                    event.type === "income"
                      ? event.recurring

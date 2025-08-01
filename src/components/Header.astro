@@ -4,7 +4,10 @@ export interface Props {
         | "home"
         | "dashboard"
         | "transactions"
+        | "recurring"
         | "accounts"
+        | "categories"
+        | "tags"
         | "families"
         | "profile";
     user: {
@@ -19,7 +22,10 @@ const navigationItems = [
     { key: "home", href: "/", label: "Home" },
     { key: "dashboard", href: "/dashboard", label: "Dashboard" },
     { key: "transactions", href: "/transactions", label: "Transactions" },
+    { key: "recurring", href: "/recurring", label: "Recurring" },
     { key: "accounts", href: "/accounts", label: "Accounts" },
+    { key: "categories", href: "/categories", label: "Categories" },
+    { key: "tags", href: "/tags", label: "Tags" },
     { key: "families", href: "/families", label: "Families" },
 ];
 
