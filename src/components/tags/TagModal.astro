@@ -121,3 +121,93 @@ const colors = [
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("tagModal");
+        const closeModalBtn = document.getElementById("closeTagModal");
+        const cancelBtn = document.getElementById("cancelTagButton");
+        const customColorInput = document.getElementById("customTagColor") as HTMLInputElement;
+
+        // Modal controls
+        function showModal() {
+            if (modal) {
+                modal.classList.remove("hidden");
+                document.body.style.overflow = "hidden";
+                
+                // Focus on name input
+                const nameInput = modal.querySelector('input[name="name"]') as HTMLInputElement;
+                nameInput?.focus();
+            }
+        }
+
+        function hideModal() {
+            if (modal) {
+                modal.classList.add("hidden");
+                document.body.style.overflow = "auto";
+                
+                // Reset form
+                const form = modal.querySelector("form") as HTMLFormElement;
+                if (form) {
+                    form.reset();
+                    // Reset to first color option (orange)
+                    const firstColorRadio = form.querySelector('input[name="color"]') as HTMLInputElement;
+                    if (firstColorRadio) {
+                        firstColorRadio.checked = true;
+                    }
+                    // Remove any custom color hidden input
+                    const customColorHidden = document.getElementById("customTagColorHidden");
+                    if (customColorHidden) {
+                        customColorHidden.remove();
+                    }
+                }
+            }
+        }
+
+        // Close modal events
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", hideModal);
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", hideModal);
+        }
+
+        // Close modal when clicking outside
+        if (modal) {
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+        }
+
+        // Custom color functionality
+        function useCustomTagColor() {
+            if (customColorInput) {
+                const customColor = customColorInput.value;
+                const colorRadios = document.querySelectorAll('input[name="color"]') as NodeListOf<HTMLInputElement>;
+
+                // Uncheck all radio buttons
+                colorRadios.forEach((radio) => (radio.checked = false));
+
+                // Create or update a hidden input for custom color
+                let customColorHidden = document.getElementById("customTagColorHidden") as HTMLInputElement;
+                if (!customColorHidden) {
+                    customColorHidden = document.createElement("input");
+                    customColorHidden.type = "hidden";
+                    customColorHidden.name = "color";
+                    customColorHidden.id = "customTagColorHidden";
+                    customColorInput.parentElement?.appendChild(customColorHidden);
+                }
+                customColorHidden.value = customColor;
+            }
+        }
+
+        // Make useCustomTagColor available globally for the onclick handler
+        (window as any).useCustomTagColor = useCustomTagColor;
+
+        // Expose showModal function globally
+        (window as any).showTagModal = showModal;
+    });
+</script>
