@@ -1,0 +1,452 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Footer from "@comps/Footer.astro";
+import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
+import CategoryModal from "@comps/CategoryModal.astro";
+import ToastScript from "@comps/ToastScript.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const action = formData.get("_action") as string;
+
+    if (action === "create") {
+        const result = await Astro.callAction(actions.createCategory, formData);
+        if (result.data?.ok) {
+            toastMessage = "Category created successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to create category";
+            toastType = "error";
+        }
+    } else if (action === "update") {
+        const result = await Astro.callAction(actions.updateCategory, formData);
+        if (result.data?.ok) {
+            toastMessage = "Category updated successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to update category";
+            toastType = "error";
+        }
+    } else if (action === "delete") {
+        const result = await Astro.callAction(actions.deleteCategory, formData);
+        if (result.data?.ok) {
+            toastMessage = "Category deleted successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to delete category";
+            toastType = "error";
+        }
+    } else if (action === "restore") {
+        const result = await Astro.callAction(actions.restoreCategory, formData);
+        if (result.data?.ok) {
+            toastMessage = "Category restored successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to restore category";
+            toastType = "error";
+        }
+    }
+}
+
+// Check if user is in a family first
+const userResult = await Astro.callAction(actions.getFamilyDetails, {});
+const userInFamily = userResult.data?.ok && userResult.data.family;
+
+// Get categories data only if user is in a family
+const categoriesResult = userInFamily
+    ? await Astro.callAction(actions.getCategoriesList, { includeDeleted: false })
+    : { data: { ok: false, categories: [] } };
+const categories = categoriesResult.data?.ok ? categoriesResult.data.categories : [];
+
+// Organize categories into parent-child hierarchy
+const parentCategories = categories?.filter(cat => !cat.parentId) || [];
+const childCategories = categories?.filter(cat => cat.parentId) || [];
+---
+
+<Layout title="Categories" description="Manage your transaction categories">
+    <main class="bg-gray-900 p-8 min-h-screen text-white">
+        <Header currentPage="categories" user={user} />
+
+        <div class="mx-auto max-w-7xl">
+            {
+                !userInFamily ? (
+                    <div>
+                        <div class="bg-gray-800 shadow-lg px-8 py-12 rounded-lg text-center">
+                            <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
+                            <h2 class="text-2xl font-bold text-purple-400 mb-4">
+                                Join a Family First
+                            </h2>
+                            <p class="text-gray-300 mb-6 max-w-md mx-auto">
+                                You need to be part of a family to create and
+                                manage categories. Families help organize finances
+                                and allow multiple members to collaborate.
+                            </p>
+                            <div class="space-y-4">
+                                <a
+                                    href="/families"
+                                    class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                                >
+                                    Go to Families Page
+                                </a>
+                                <p class="text-sm text-gray-400">
+                                    Create a new family or join an existing one
+                                    to get started
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="font-semibold text-purple-400 text-xl">
+                                Categories
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <button
+                                    type="button"
+                                    onclick="openCategoryModal()"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    ➕ Add Category
+                                </button>
+                            </div>
+                        </div>
+
+                        {(categories?.length || 0) === 0 ? (
+                            <div class="text-center py-12">
+                                <div class="text-6xl mb-4">📂</div>
+                                <h3 class="text-xl font-semibold text-gray-300 mb-2">
+                                    No Categories Yet
+                                </h3>
+                                <p class="text-gray-400 mb-6">
+                                    Create categories to organize your transactions better.
+                                </p>
+                                <button
+                                    type="button"
+                                    onclick="openCategoryModal()"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    Create Your First Category
+                                </button>
+                            </div>
+                        ) : (
+                            <div class="space-y-4">
+                                {parentCategories.map((category) => {
+                                    const children = childCategories.filter(child => child.parentId === category.id);
+                                    return (
+                                        <div class="bg-gray-700 rounded-lg overflow-hidden">
+                                            <!-- Parent Category -->
+                                            <div class="p-4">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div 
+                                                            class="w-4 h-4 rounded-full"
+                                                            style={`background-color: ${category.color}`}
+                                                        ></div>
+                                                        <div>
+                                                            <h3 class="font-semibold text-white">
+                                                                {category.name}
+                                                            </h3>
+                                                            <p class="text-sm text-gray-400">
+                                                                {(category as any)._count?.transactions || 0} transactions • 
+                                                                {(category as any)._count?.children || 0} subcategories
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <button
+                                                            type="button"
+                                                            onclick={`editCategory(${category.id}, '${category.name}', '${category.color}', ${category.parentId || 'null'})`}
+                                                            class="text-blue-400 hover:text-blue-300 transition-colors"
+                                                            title="Edit Category"
+                                                        >
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onclick={`deleteCategory(${category.id}, '${category.name}')`}
+                                                            class="text-red-400 hover:text-red-300 transition-colors"
+                                                            title="Delete Category"
+                                                        >
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onclick={`openCategoryModal(${category.id})`}
+                                                            class="text-green-400 hover:text-green-300 transition-colors"
+                                                            title="Add Subcategory"
+                                                        >
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Subcategories -->
+                                            {children.length > 0 && (
+                                                <div class="bg-gray-600 border-t border-gray-500">
+                                                    {children.map((child) => (
+                                                        <div class="px-4 py-3 border-b border-gray-500 last:border-b-0">
+                                                            <div class="flex items-center justify-between pl-6">
+                                                                <div class="flex items-center space-x-3">
+                                                                    <div class="text-gray-400">└─</div>
+                                                                    <div 
+                                                                        class="w-3 h-3 rounded-full"
+                                                                        style={`background-color: ${child.color}`}
+                                                                    ></div>
+                                                                    <div>
+                                                                        <h4 class="font-medium text-white">
+                                                                            {child.name}
+                                                                        </h4>
+                                                                        <p class="text-sm text-gray-400">
+                                                                            {(child as any)._count?.transactions || 0} transactions
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex items-center space-x-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onclick={`editCategory(${child.id}, '${child.name}', '${child.color}', ${child.parentId})`}
+                                                                        class="text-blue-400 hover:text-blue-300 transition-colors"
+                                                                        title="Edit Subcategory"
+                                                                    >
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onclick={`deleteCategory(${child.id}, '${child.name}')`}
+                                                                        class="text-red-400 hover:text-red-300 transition-colors"
+                                                                        title="Delete Subcategory"
+                                                                    >
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                
+                                {/* Categories without parent (but not already shown) */}
+                                {childCategories.filter(cat => !parentCategories.find(parent => parent.id === cat.parentId)).map((category) => (
+                                    <div class="bg-gray-700 rounded-lg p-4">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-3">
+                                                <div 
+                                                    class="w-4 h-4 rounded-full"
+                                                    style={`background-color: ${category.color}`}
+                                                ></div>
+                                                <div>
+                                                    <h3 class="font-semibold text-white">
+                                                        {category.name}
+                                                    </h3>
+                                                    <p class="text-sm text-gray-400">
+                                                        {(category as any)._count?.transactions || 0} transactions
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <button
+                                                    type="button"
+                                                    onclick={`editCategory(${category.id}, '${category.name}', '${category.color}', ${category.parentId || 'null'})`}
+                                                    class="text-blue-400 hover:text-blue-300 transition-colors"
+                                                    title="Edit Category"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onclick={`deleteCategory(${category.id}, '${category.name}')`}
+                                                    class="text-red-400 hover:text-red-300 transition-colors"
+                                                    title="Delete Category"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+        </div>
+
+        <Footer />
+        <LogoutScript />
+        <CategoryModal categories={parentCategories} />
+    </main>
+
+    <ToastScript message={toastMessage} type={toastType} />
+</Layout>
+
+<script is:inline>
+function openCategoryModal(parentId = null) {
+    const modal = document.getElementById('categoryModal');
+    const form = modal?.querySelector('form');
+    const titleElement = modal?.querySelector('h2');
+    const actionInput = form?.querySelector('input[name="_action"]');
+    const idInput = form?.querySelector('input[name="id"]');
+    const parentSelect = form?.querySelector('select[name="parentId"]');
+    
+    if (!modal || !form || !titleElement || !actionInput || !parentSelect) return;
+    
+    // Reset form
+    form.reset();
+    
+    if (parentId) {
+        // Adding subcategory
+        titleElement.textContent = 'Add Subcategory';
+        actionInput.value = 'create';
+        parentSelect.value = parentId.toString();
+        parentSelect.disabled = true;
+        if (idInput) idInput.remove();
+    } else {
+        // Adding main category
+        titleElement.textContent = 'Add Category';
+        actionInput.value = 'create';
+        parentSelect.disabled = false;
+        if (idInput) idInput.remove();
+    }
+    
+    modal.classList.remove('hidden');
+    const nameInput = form.querySelector('input[name="name"]');
+    nameInput?.focus();
+}
+
+function editCategory(id, name, color, parentId) {
+    const modal = document.getElementById('categoryModal');
+    const form = modal?.querySelector('form');
+    const titleElement = modal?.querySelector('h2');
+    const actionInput = form?.querySelector('input[name="_action"]');
+    let idInput = form?.querySelector('input[name="id"]');
+    const parentSelect = form?.querySelector('select[name="parentId"]');
+    
+    if (!modal || !form || !titleElement || !actionInput || !parentSelect) return;
+    
+    titleElement.textContent = 'Edit Category';
+    actionInput.value = 'update';
+    
+    // Add or update ID input
+    if (!idInput) {
+        idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        form.appendChild(idInput);
+    }
+    idInput.value = id.toString();
+    
+    // Set form values
+    const nameInput = form.querySelector('input[name="name"]');
+    const colorRadios = form.querySelectorAll('input[name="color"]');
+    
+    if (nameInput) nameInput.value = name;
+    
+    // Set color selection
+    let colorFound = false;
+    colorRadios.forEach(radio => {
+        if (radio.value === color) {
+            radio.checked = true;
+            colorFound = true;
+        } else {
+            radio.checked = false;
+        }
+    });
+    
+    // If color not found in predefined colors, use custom color
+    if (!colorFound) {
+        const customColorInput = document.getElementById('customColor');
+        if (customColorInput) {
+            customColorInput.value = color;
+            // Trigger custom color usage
+            useCustomColor();
+        }
+    }
+    
+    parentSelect.value = parentId ? parentId.toString() : '';
+    parentSelect.disabled = false;
+    
+    modal.classList.remove('hidden');
+    nameInput?.focus();
+}
+
+function useCustomColor() {
+    const customColorInput = document.getElementById('customColor');
+    const colorRadios = document.querySelectorAll('input[name="color"]');
+    
+    if (customColorInput) {
+        const customColor = customColorInput.value;
+        
+        // Uncheck all radio buttons
+        colorRadios.forEach(radio => radio.checked = false);
+        
+        // Create or update a hidden input for custom color
+        let customColorHidden = document.getElementById('customColorHidden');
+        if (!customColorHidden) {
+            customColorHidden = document.createElement('input');
+            customColorHidden.type = 'hidden';
+            customColorHidden.name = 'color';
+            customColorHidden.id = 'customColorHidden';
+            customColorInput.parentElement?.appendChild(customColorHidden);
+        }
+        customColorHidden.value = customColor;
+    }
+}
+
+function deleteCategory(id, name) {
+    if (confirm(`Are you sure you want to delete the category "${name}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="_action" value="delete">
+            <input type="hidden" name="id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Close modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('closeCategoryModal')?.addEventListener('click', function() {
+        document.getElementById('categoryModal')?.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('categoryModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+});
+</script>
