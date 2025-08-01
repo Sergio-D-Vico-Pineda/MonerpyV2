@@ -1,0 +1,335 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Footer from "@comps/Footer.astro";
+import LogoutScript from "@comps/LogoutScript.astro";
+import Header from "@comps/Header.astro";
+import TagModal from "@comps/TagModal.astro";
+import ToastScript from "@comps/ToastScript.astro";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Handle form submissions
+let toastMessage = "";
+let toastType = "success";
+
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const action = formData.get("_action") as string;
+
+    if (action === "create") {
+        const result = await Astro.callAction(actions.createTag, formData);
+        if (result.data?.ok) {
+            toastMessage = "Tag created successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to create tag";
+            toastType = "error";
+        }
+    } else if (action === "update") {
+        const result = await Astro.callAction(actions.updateTag, formData);
+        if (result.data?.ok) {
+            toastMessage = "Tag updated successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to update tag";
+            toastType = "error";
+        }
+    } else if (action === "delete") {
+        const result = await Astro.callAction(actions.deleteTag, formData);
+        if (result.data?.ok) {
+            toastMessage = "Tag deleted successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to delete tag";
+            toastType = "error";
+        }
+    } else if (action === "restore") {
+        const result = await Astro.callAction(actions.restoreTag, formData);
+        if (result.data?.ok) {
+            toastMessage = "Tag restored successfully!";
+            toastType = "success";
+        } else {
+            toastMessage = result.data?.error || "Failed to restore tag";
+            toastType = "error";
+        }
+    }
+}
+
+// Check if user is in a family first
+const userResult = await Astro.callAction(actions.getFamilyDetails, {});
+const userInFamily = userResult.data?.ok && userResult.data.family;
+
+// Get tags data only if user is in a family
+const tagsResult = userInFamily
+    ? await Astro.callAction(actions.getTagsList, { includeDeleted: false })
+    : { data: { ok: false, tags: [] } };
+const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
+---
+
+<Layout title="Tags" description="Manage your transaction tags">
+    <main class="bg-gray-900 p-8 min-h-screen text-white">
+        <Header currentPage="tags" user={user} />
+
+        <div class="mx-auto max-w-7xl">
+            {
+                !userInFamily ? (
+                    <div>
+                        <div class="bg-gray-800 shadow-lg px-8 py-12 rounded-lg text-center">
+                            <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
+                            <h2 class="text-2xl font-bold text-purple-400 mb-4">
+                                Join a Family First
+                            </h2>
+                            <p class="text-gray-300 mb-6 max-w-md mx-auto">
+                                You need to be part of a family to create and
+                                manage tags. Families help organize finances
+                                and allow multiple members to collaborate.
+                            </p>
+                            <div class="space-y-4">
+                                <a
+                                    href="/families"
+                                    class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                                >
+                                    Go to Families Page
+                                </a>
+                                <p class="text-sm text-gray-400">
+                                    Create a new family or join an existing one
+                                    to get started
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="font-semibold text-purple-400 text-xl">
+                                Tags
+                            </h2>
+                            <div class="flex items-center space-x-4">
+                                <button
+                                    type="button"
+                                    onclick="openTagModal()"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    🏷️ Add Tag
+                                </button>
+                            </div>
+                        </div>
+
+                        {tags && tags.length === 0 ? (
+                            <div class="text-center py-12">
+                                <div class="text-6xl mb-4">🏷️</div>
+                                <h3 class="text-xl font-semibold text-gray-300 mb-2">
+                                    No Tags Yet
+                                </h3>
+                                <p class="text-gray-400 mb-6">
+                                    Create tags to label and organize your transactions better.
+                                </p>
+                                <button
+                                    type="button"
+                                    onclick="openTagModal()"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    Create Your First Tag
+                                </button>
+                            </div>
+                        ) : (
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {tags && tags.map((tag) => (
+                                    <div class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center space-x-3 flex-1">
+                                                <div 
+                                                    class="w-4 h-4 rounded-full flex-shrink-0"
+                                                    style={`background-color: ${tag.color}`}
+                                                ></div>
+                                                <div class="min-w-0 flex-1">
+                                                    <h3 class="font-semibold text-white truncate">
+                                                        {tag.name}
+                                                    </h3>
+                                                    <p class="text-sm text-gray-400">
+                                                        {(tag as any)._count?.transactions || 0} transactions
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-2 ml-2">
+                                                <button
+                                                    type="button"
+                                                    onclick={`editTag(${tag.id}, '${tag.name}', '${tag.color}')`}
+                                                    class="text-blue-400 hover:text-blue-300 transition-colors p-1"
+                                                    title="Edit Tag"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onclick={`deleteTag(${tag.id}, '${tag.name}')`}
+                                                    class="text-red-400 hover:text-red-300 transition-colors p-1"
+                                                    title="Delete Tag"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+        </div>
+
+        <Footer />
+        <LogoutScript />
+        <TagModal />
+    </main>
+
+    <ToastScript message={toastMessage} type={toastType} />
+</Layout>
+
+<script is:inline>
+function openTagModal() {
+    const modal = document.getElementById('tagModal');
+    const form = modal?.querySelector('form');
+    const titleElement = modal?.querySelector('h2');
+    const actionInput = form?.querySelector('input[name="_action"]');
+    const idInput = form?.querySelector('input[name="id"]');
+    
+    if (!modal || !form || !titleElement || !actionInput) return;
+    
+    // Reset form
+    form.reset();
+    
+    titleElement.textContent = 'Add Tag';
+    actionInput.value = 'create';
+    if (idInput) idInput.remove();
+    
+    modal.classList.remove('hidden');
+    const nameInput = form.querySelector('input[name="name"]');
+    nameInput?.focus();
+}
+
+function editTag(id, name, color) {
+    const modal = document.getElementById('tagModal');
+    const form = modal?.querySelector('form');
+    const titleElement = modal?.querySelector('h2');
+    const actionInput = form?.querySelector('input[name="_action"]');
+    let idInput = form?.querySelector('input[name="id"]');
+    
+    if (!modal || !form || !titleElement || !actionInput) return;
+    
+    titleElement.textContent = 'Edit Tag';
+    actionInput.value = 'update';
+    
+    // Add or update ID input
+    if (!idInput) {
+        idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        form.appendChild(idInput);
+    }
+    idInput.value = id.toString();
+    
+    // Set form values
+    const nameInput = form.querySelector('input[name="name"]');
+    const colorInputs = form.querySelectorAll('input[name="color"]');
+    
+    if (nameInput) nameInput.value = name;
+    
+    // Set color
+    let colorFound = false;
+    colorInputs.forEach(input => {
+        if (input.value === color) {
+            input.checked = true;
+            colorFound = true;
+        } else {
+            input.checked = false;
+        }
+    });
+    
+    // If color not found in predefined colors, use custom color
+    if (!colorFound) {
+        const customColorInput = document.getElementById('customTagColor');
+        if (customColorInput) {
+            customColorInput.value = color;
+            // Create hidden input for custom color
+            let customColorHidden = document.getElementById('customTagColorHidden');
+            if (!customColorHidden) {
+                customColorHidden = document.createElement('input');
+                customColorHidden.type = 'hidden';
+                customColorHidden.name = 'color';
+                customColorHidden.id = 'customTagColorHidden';
+                form.appendChild(customColorHidden);
+            }
+            customColorHidden.value = color;
+        }
+    }
+    
+    modal.classList.remove('hidden');
+    nameInput?.focus();
+}
+
+function deleteTag(id, name) {
+    if (confirm(`Are you sure you want to delete the tag "${name}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="_action" value="delete">
+            <input type="hidden" name="id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function useCustomTagColor() {
+    const customColorInput = document.getElementById('customTagColor');
+    const colorRadios = document.querySelectorAll('input[name="color"]');
+    
+    if (customColorInput) {
+        const customColor = customColorInput.value;
+        
+        // Uncheck all radio buttons
+        colorRadios.forEach(radio => radio.checked = false);
+        
+        // Create or update a hidden input for custom color
+        let customColorHidden = document.getElementById('customTagColorHidden');
+        if (!customColorHidden) {
+            customColorHidden = document.createElement('input');
+            customColorHidden.type = 'hidden';
+            customColorHidden.name = 'color';
+            customColorHidden.id = 'customTagColorHidden';
+            customColorInput.parentElement?.appendChild(customColorHidden);
+        }
+        customColorHidden.value = customColor;
+    }
+}
+
+// Close modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('closeTagModal')?.addEventListener('click', function() {
+        document.getElementById('tagModal')?.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('tagModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+
+    // Cancel button functionality
+    document.getElementById('cancelTagButton')?.addEventListener('click', function() {
+        document.getElementById('tagModal')?.classList.add('hidden');
+    });
+});
+</script>
