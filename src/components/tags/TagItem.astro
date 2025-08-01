@@ -1,0 +1,47 @@
+---
+import Bin from "@svg/Bin.astro";
+
+interface Props {
+    tag: {
+        id: number;
+        name: string;
+        color: string;
+        _count?: {
+            transactions?: number;
+        };
+    };
+}
+
+const { tag } = Astro.props;
+---
+
+<div class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3 flex-1">
+            <div
+                class="w-4 h-4 rounded-full flex-shrink-0"
+                style={`background-color: ${tag.color}`}
+            >
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="font-semibold text-white truncate">
+                    {tag.name}
+                </h3>
+                <p class="text-sm text-gray-400">
+                    {tag._count?.transactions || 0} transactions
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 ml-2">
+            <button
+                type="button"
+                class="delete-tag-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
+                data-tag-id={tag.id}
+                data-tag-name={tag.name}
+                title="Delete Tag"
+            >
+                <Bin />
+            </button>
+        </div>
+    </div>
+</div>

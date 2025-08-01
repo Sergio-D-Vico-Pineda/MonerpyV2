@@ -92,8 +92,7 @@ const colors = [
                             />
                             <button
                                 type="button"
-                                onclick="useCustomTagColor()"
-                                class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-lg transition-colors"
+                                class="use-custom-tag-color-btn px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-lg transition-colors"
                             >
                                 Use Custom
                             </button>
@@ -180,6 +179,12 @@ const colors = [
                     hideModal();
                 }
             });
+        }
+
+        // Handle use custom color button
+        const useCustomColorBtn = document.querySelector(".use-custom-tag-color-btn");
+        if (useCustomColorBtn) {
+            useCustomColorBtn.addEventListener("click", useCustomTagColor);
         }
 
         // Custom color functionality
