@@ -16,6 +16,9 @@
       "@comps/*": [
         "src/components/*"
       ],
+      "@svg/*": [
+        "src/components/svgs/*"
+      ],
       "@layouts/*": [
         "src/layouts/*"
       ],
