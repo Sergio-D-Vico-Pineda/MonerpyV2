@@ -43,7 +43,7 @@ const userId = user.id;
         <h2 class="mb-4 font-semibold text-purple-400 text-xl">
           Monthly Overview
         </h2>
-        <div class="space-y-2" id="monthOverview">
+        <div class="flex flex-col gap-y-2" id="monthOverview">
           <p class="flex justify-between items-baseline">
             <span>Income this month:</span>
             <span class="text-green-500 text-xl" data-monthly-income
@@ -70,7 +70,7 @@ const userId = user.id;
         <h2 class="mb-4 font-semibold text-purple-400 text-xl">
           Groups Overview
         </h2>
-        <div class="space-y-2">
+        <div class="flex flex-col gap-y-2">
           <p class="flex justify-between items-baseline">
             <span>Groups:</span>
             <span class="text-purple-300 text-xs">
@@ -87,7 +87,7 @@ const userId = user.id;
         <h2 class="mb-4 font-semibold text-purple-400 text-xl">
           Quick Actions
         </h2>
-        <div class="space-y-3 overflow-y-auto">
+        <div class="flex flex-col gap-y-3 overflow-y-auto">
           <div class="flex flex-wrap justify-between gap-3 w-full">
             <div class="inline-flex justify-between gap-x-3 grow-[2]">
               <div class="inline-flex w-full rounded">
@@ -467,7 +467,7 @@ const userId = user.id;
             `[updateCalendar] Processing day ${day} (${realDate}) with events:`,
             dayEvents,
           );
-          cellContent += '<div class="space-y-1 mt-6">';
+          cellContent += '<div class="flex flex-col gap-y-1 mt-6">';
           dayEvents.forEach((event) => {
             cellContent += `
               <a href="${event.recurring ? "/recurring" : "/transactions"}/${event.id}/edit" 

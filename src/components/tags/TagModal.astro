@@ -36,7 +36,7 @@ const colors = [
 
             <!-- Modal Content -->
             <div class="p-6">
-                <form method="POST" class="space-y-4">
+                <form method="POST" class="flex flex-col gap-y-4">
                     <input type="hidden" name="_action" value="create" />
 
                     <!-- Tag Name -->
@@ -83,7 +83,7 @@ const colors = [
                         <label for="customTagColor" class="block text-sm font-medium text-gray-200 mb-2">
                             Or Choose Custom Color
                         </label>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-x-2">
                             <input
                                 type="color"
                                 id="customTagColor"
@@ -100,7 +100,7 @@ const colors = [
                     </div>
 
                     <!-- Submit Buttons -->
-                    <div class="flex items-center justify-end space-x-3 pt-4">
+                    <div class="flex items-center justify-end gap-x-3 pt-4">
                         <button
                             type="button"
                             id="cancelTagButton"

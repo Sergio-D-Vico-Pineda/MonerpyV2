@@ -65,7 +65,7 @@ const months = [
             </button>
         </div>
 
-        <form id="recurringTransactionForm" method="POST" class="space-y-6">
+        <form id="recurringTransactionForm" method="POST" class="flex flex-col gap-y-6">
             <input
                 type="hidden"
                 name="_action"
@@ -76,7 +76,7 @@ const months = [
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Left Column -->
-                <div class="space-y-4">
+                <div class="flex flex-col gap-y-4">
                     <!-- Account Selection -->
                     <div>
                         <label
@@ -231,7 +231,7 @@ const months = [
                 </div>
 
                 <!-- Right Column -->
-                <div class="space-y-4">
+                <div class="flex flex-col gap-y-4">
                     <!-- Frequency -->
                     <div>
                         <label
@@ -340,8 +340,8 @@ const months = [
                         <label class="block text-sm font-medium text-gray-300 mb-2">
                             End Condition *
                         </label>
-                        <div class="space-y-2">
-                            <label class="flex items-center space-x-2">
+                        <div class="gap-y-2">
+                            <label class="flex items-center gap-x-2">
                                 <input
                                     type="radio"
                                     name="endCondition"
@@ -351,7 +351,7 @@ const months = [
                                 />
                                 <span class="text-white">Never ends</span>
                             </label>
-                            <label class="flex items-center space-x-2">
+                            <label class="flex items-center gap-x-2">
                                 <input
                                     type="radio"
                                     name="endCondition"
@@ -360,7 +360,7 @@ const months = [
                                 />
                                 <span class="text-white">End by date</span>
                             </label>
-                            <label class="flex items-center space-x-2">
+                            <label class="flex items-center gap-x-2">
                                 <input
                                     type="radio"
                                     name="endCondition"

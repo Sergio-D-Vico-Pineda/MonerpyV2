@@ -5,7 +5,7 @@ import LogoutScript from "@comps/LogoutScript.astro";
 import Header from "@comps/Header.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from '../../lib/date-utils.ts';
+import { formatDateForDisplay } from "../../lib/date-utils.ts";
 
 const user = Astro.locals.user;
 
@@ -85,7 +85,7 @@ const userRole = familyDetailsResult.data?.ok
                 Create New Family
               </h2>
 
-              <form method="POST" class="space-y-4">
+              <form method="POST" class="flex flex-col gap-y-4">
                 <input type="hidden" name="_action" value="createFamily" />
 
                 <div>
@@ -119,7 +119,7 @@ const userRole = familyDetailsResult.data?.ok
                 Join Existing Family
               </h2>
 
-              <form method="POST" class="space-y-4">
+              <form method="POST" class="flex flex-col gap-y-4">
                 <input type="hidden" name="_action" value="joinFamily" />
 
                 <div>
@@ -163,7 +163,7 @@ const userRole = familyDetailsResult.data?.ok
             </div>
           </div>
         ) : (
-          <div class="space-y-8">
+          <div class="flex flex-col gap-y-8">
             <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
               <div class="flex justify-between items-center mb-6">
                 <h2 class="font-semibold text-purple-400 text-xl">
@@ -219,7 +219,7 @@ const userRole = familyDetailsResult.data?.ok
                 Family Members
               </h3>
 
-              <div class="space-y-3">
+              <div class="flex flex-col gap-y-3">
                 {familyDetails.users.map((member) => (
                   <div class="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
                     <div class="flex items-center gap-4">
@@ -236,7 +236,9 @@ const userRole = familyDetailsResult.data?.ok
                         <p class="text-sm text-gray-300">{member.email}</p>
                         <p class="text-xs text-gray-400">
                           Joined
-                          {formatDateForDisplay(member.createdAt, { includeTime: false })}
+                          {formatDateForDisplay(member.createdAt, {
+                            includeTime: false,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -337,7 +339,7 @@ const userRole = familyDetailsResult.data?.ok
                         }`}
                       >
                         {new Intl.NumberFormat("es-ES", {
-                          style: "currency", 
+                          style: "currency",
                           currency: "EUR",
                           minimumFractionDigits: 2,
                         }).format(account.balance)}

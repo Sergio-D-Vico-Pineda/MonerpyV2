@@ -78,7 +78,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
 
             <!-- Modal Content -->
             <div class="p-6">
-                <form method="POST" class="space-y-4">
+                <form method="POST" class="flex flex-col gap-y-4">
                     <input type="hidden" name="_action" value="create" />
 
                     <!-- Category Name -->
@@ -159,7 +159,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                         >
                             Or Choose Custom Color
                         </label>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center gap-x-2">
                             <input
                                 type="color"
                                 id="customColor"
@@ -176,7 +176,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                     </div>
 
                     <!-- Submit Buttons -->
-                    <div class="flex items-center justify-end space-x-3 pt-4">
+                    <div class="flex items-center justify-end gap-x-3 pt-4">
                         <button
                             type="button"
                             id="cancelCategoryButton"

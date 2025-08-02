@@ -1,5 +1,5 @@
 ---
-import Bin from "@svg/Bin.astro";
+import Bin from "@svg/mono/Bin.astro";
 
 interface Props {
     tag: {
@@ -17,7 +17,7 @@ const { tag } = Astro.props;
 
 <div class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
     <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3 flex-1">
+        <div class="flex items-center gap-x-3 flex-1">
             <div
                 class="w-4 h-4 rounded-full flex-shrink-0"
                 style={`background-color: ${tag.color}`}
@@ -32,7 +32,7 @@ const { tag } = Astro.props;
                 </p>
             </div>
         </div>
-        <div class="flex items-center space-x-2 ml-2">
+        <div class="flex items-center gap-x-2 ml-2">
             <button
                 type="button"
                 class="delete-tag-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"

@@ -84,7 +84,7 @@ const timePeriods = [
             <div class="mb-6">
                 <a
                     href={`/accounts/${accountId}`}
-                    class="text-purple-400 hover:text-purple-300 flex items-center space-x-2"
+                    class="text-purple-400 hover:text-purple-300 flex items-center gap-x-2"
                 >
                     <span>←</span>
                     <span>Back to {account.name}</span>
@@ -107,7 +107,7 @@ const timePeriods = [
                             Time Period
                         </h2>
 
-                        <div class="space-y-2">
+                        <div class="flex flex-col gap-y-2">
                             {
                                 timePeriods.map((period) => (
                                     <a
@@ -126,14 +126,14 @@ const timePeriods = [
 
                         <!-- Custom Period -->
                         <div class="mt-4 pt-4 border-t border-gray-700">
-                            <form method="GET" class="space-y-2">
+                            <form method="GET" class="gap-y-2">
                                 <label
                                     for="customDays"
                                     class="block text-sm font-medium text-gray-300"
                                 >
                                     Custom (days)
                                 </label>
-                                <div class="flex space-x-2">
+                                <div class="flex gap-x-2">
                                     <input
                                         type="number"
                                         id="customDays"

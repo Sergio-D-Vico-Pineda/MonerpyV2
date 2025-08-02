@@ -124,11 +124,11 @@ const accountTypes = [
                                 </p>
                             </div>
                         ) : (
-                            <div class="space-y-4">
+                            <div class="flex flex-col gap-y-4">
                                 {accounts &&
                                     accounts.map((account) => (
                                         <div class="bg-gray-700 rounded-lg p-4 flex items-center justify-between">
-                                            <div class="flex items-center space-x-4">
+                                            <div class="flex items-center gap-x-4">
                                                 <div
                                                     class="w-4 h-4 rounded-full"
                                                     style={`background-color: ${account.color}`}
@@ -148,7 +148,7 @@ const accountTypes = [
                                                 </div>
                                             </div>
 
-                                            <div class="flex items-center space-x-4">
+                                            <div class="flex items-center gap-x-4">
                                                 <div class="text-right">
                                                     <p
                                                         class={`font-semibold ${account.balance >= 0 ? "text-green-400" : "text-red-400"}`}
@@ -167,7 +167,7 @@ const accountTypes = [
                                                     </p>
                                                 </div>
 
-                                                <div class="flex items-center space-x-2">
+                                                <div class="flex items-center gap-x-2">
                                                     <a
                                                         href={`/accounts/${account.id}`}
                                                         class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"

@@ -93,7 +93,7 @@ const colors = [
             <div class="mb-6">
                 <a
                     href="/accounts"
-                    class="text-purple-400 hover:text-purple-300 flex items-center space-x-2"
+                    class="text-purple-400 hover:text-purple-300 flex items-center gap-x-2"
                 >
                     <span>←</span>
                     <span>Back to Accounts</span>
@@ -102,10 +102,10 @@ const colors = [
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Account Details & Edit Form -->
-                <div class="space-y-6">
+                <div class="flex flex-col gap-y-6">
                     <!-- Account Overview -->
                     <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
-                        <div class="flex items-center space-x-4 mb-4">
+                        <div class="flex items-center gap-x-4 mb-4">
                             <div
                                 class="w-6 h-6 rounded-full"
                                 style={`background-color: ${account.color}`}
@@ -161,7 +161,7 @@ const colors = [
                             Edit Account
                         </h2>
 
-                        <form method="POST" class="space-y-4">
+                        <form method="POST" class="flex flex-col gap-y-4">
                             <input
                                 type="hidden"
                                 name="_action"
@@ -225,7 +225,7 @@ const colors = [
                                 >
                                     Account Color
                                 </label>
-                                <div class="flex items-center space-x-3">
+                                <div class="flex items-center gap-x-3">
                                     <input
                                         type="color"
                                         id="color"
@@ -268,7 +268,7 @@ const colors = [
                 </div>
 
                 <!-- Account Activity & Balance History -->
-                <div class="space-y-6">
+                <div class="flex flex-col gap-y-6">
                     <!-- Recent Transactions -->
                     <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
                         <h2 class="mb-4 font-semibold text-purple-400 text-xl">
@@ -278,7 +278,7 @@ const colors = [
                         {
                             account.transactions &&
                             account.transactions.length > 0 ? (
-                                <div class="space-y-3">
+                                <div class="flex flex-col gap-y-3">
                                     {account.transactions.map(
                                         (transaction: any) => (
                                             <div class="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
@@ -357,7 +357,7 @@ const colors = [
                         {
                             account.accountBalances &&
                             account.accountBalances.length > 0 ? (
-                                <div class="space-y-3">
+                                <div class="flex flex-col gap-y-3">
                                     {account.accountBalances
                                         .slice(0, 5)
                                         .map((balance: any) => (

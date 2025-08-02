@@ -2,7 +2,7 @@
 // Toast component to display notifications
 ---
 
-<div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 space-y-3 max-w-md w-full px-4"></div>
+<div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-y-3 max-w-md w-full px-4"></div>
 
 <script>
 interface Toast {
@@ -95,7 +95,7 @@ class ToastManager {
         toastElement.style.opacity = '0';
 
         toastElement.innerHTML = `
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center gap-x-3">
                 <span class="text-lg">${this.getToastIcon(toast.type)}</span>
                 <span>${toast.message}</span>
             </div>
