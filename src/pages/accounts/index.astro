@@ -6,6 +6,10 @@ import Header from "@comps/Header.astro";
 import AccountModal from "@comps/AccountModal.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
+import JoinFamily from "@/components/JoinFamily.astro";
+import CreditCard from "@/components/svgs/mono/CreditCard.astro";
+import Bin from "@/components/svgs/mono/Bin.astro";
+import Plus from "@/components/svgs/mono/Plus.astro";
 
 const user = Astro.locals.user;
 
@@ -64,64 +68,41 @@ const accountTypes = [
         <div class="mx-auto max-w-7xl">
             {
                 !userInFamily ? (
-                    <div>
-                        <div class="bg-gray-800 shadow-lg px-8 py-12 rounded-lg text-center">
-                            <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
-                            <h2 class="text-2xl font-bold text-purple-400 mb-4">
-                                Join a Family First
-                            </h2>
-                            <p class="text-gray-300 mb-6 max-w-md mx-auto">
-                                You need to be part of a family to create and
-                                manage accounts. Families help organize finances
-                                and allow multiple members to collaborate.
-                            </p>
-                            <div class="space-y-4">
-                                <a
-                                    href="/families"
-                                    class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                                >
-                                    Go to Families Page
-                                </a>
-                                <p class="text-sm text-gray-400">
-                                    Create a new family or join an existing one
-                                    to get started
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <JoinFamily />
                 ) : (
                     <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
                         <div class="flex items-center justify-between mb-6">
-                            <h2 class="font-semibold text-purple-400 text-xl">
-                                Your Accounts
-                            </h2>
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-baseline-last gap-4">
+                                <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-2">
+                                    Your Accounts
+                                </h2>
+                                <a
+                                    href="/accounts/deleted"
+                                    class="text-purple-400 hover:text-purple-300 flex items-center gap-2"
+                                >
+                                    <Bin />
+                                    <span>Deleted Accounts</span>
+                                </a>
+                            </div>
+                            <div class="flex items-center gap-x-4">
                                 <button
                                     type="button"
                                     onclick="showAccountModal()"
                                     class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                    title="Create a new account"
                                 >
-                                    Create Account
+                                    <Plus />
                                 </button>
-                                <a
-                                    href="/accounts/deleted"
-                                    class="text-gray-400 hover:text-white text-sm underline"
-                                >
-                                    View Deleted Accounts
-                                </a>
                             </div>
                         </div>
 
                         {accounts && accounts.length === 0 ? (
                             <div class="text-center py-12 text-gray-400">
-                                <div class="text-6xl mb-4">🏦</div>
-                                <p class="text-xl mb-2">
-                                    No accounts yet
-                                </p>
-                                <p>
-                                    Create your first account to get
-                                    started!
-                                </p>
+                                <div class="mb-4">
+                                    <CreditCard class="w-20 h-20 mx-auto text-purple-400" />
+                                </div>
+                                <p class="text-xl mb-2">No accounts yet</p>
+                                <p>Create your first account to get started!</p>
                             </div>
                         ) : (
                             <div class="flex flex-col gap-y-4">
@@ -157,8 +138,7 @@ const accountTypes = [
                                                             "es-ES",
                                                             {
                                                                 style: "currency",
-                                                                currency:
-                                                                    "EUR",
+                                                                currency: "EUR",
                                                                 minimumFractionDigits: 2,
                                                             },
                                                         ).format(
@@ -186,9 +166,7 @@ const accountTypes = [
                                                         <input
                                                             type="hidden"
                                                             name="id"
-                                                            value={
-                                                                account.id
-                                                            }
+                                                            value={account.id}
                                                         />
                                                         <button
                                                             type="submit"
