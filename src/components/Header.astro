@@ -1,4 +1,8 @@
 ---
+import Logout from "@svg/mono/Logout.astro";
+import User from "./svgs/mono/User.astro";
+import Home from "./svgs/mono/Home.astro";
+
 export interface Props {
     currentPage:
         | "home"
@@ -43,7 +47,6 @@ if (currentPage === "profile") {
 const currentPageItem = navigationItems.find(
     (item) => item.key === currentPage,
 );
-const currentPageLabel = currentPageItem?.label || "Dashboard";
 ---
 
 <header class="flex justify-between items-center mx-auto mb-8 max-w-7xl">
@@ -65,16 +68,19 @@ const currentPageLabel = currentPageItem?.label || "Dashboard";
     <div class="flex items-center gap-x-4">
         <a
             href="/profile"
-            class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
+            class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200 flex items-center gap-2"
+            title="Go to Profile"
         >
-            Profile {user.username}
+            <User />
+            {user.username}
         </a>
         <form id="logoutForm" method="POST" class="inline">
             <button
                 type="submit"
-                class="bg-red-700 hover:bg-red-900 px-4 py-2 rounded text-white transition duration-200"
+                class="bg-red-700 hover:bg-red-900 px-3 py-2 rounded text-white transition duration-200 flex items-center gap-2"
+                title="Log out your account"
             >
-                Logout
+                Logout <Logout />
             </button>
         </form>
     </div>

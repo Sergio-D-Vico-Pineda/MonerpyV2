@@ -1,6 +1,9 @@
 ---
+import Logout from "@/components/svgs/mono/Logout.astro";
+import Login from "@/components/svgs/mono/Login.astro";
 import LogoutScript from "@comps/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
+import Home from "@/components/svgs/mono/Home.astro";
 
 // Check if user is authenticated via the new middleware system
 const user = Astro.locals.user;
@@ -17,25 +20,25 @@ const user = Astro.locals.user;
 		<div class="flex justify-center gap-6">
 			<a
 				href="/dashboard"
-				class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold"
+				class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
 			>
-				Dashboard
+				<Home /> Dashboard
 			</a>
 			{
 				!user ? (
 					<a
 						href="/login"
-						class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold"
+						class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
 					>
-						Login
+						Login <Login />
 					</a>
 				) : (
 					<form id="logoutForm" class="inline">
 						<button
 							type="submit"
-							class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold"
+							class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold flex items-center gap-2 "
 						>
-							Logout
+							Logout <Logout />
 						</button>
 					</form>
 				)

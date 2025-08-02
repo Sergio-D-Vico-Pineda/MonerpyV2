@@ -8,6 +8,9 @@ import DeleteTagConfirmModal from "@comps/tags/DeleteTagConfirmModal.astro";
 import Header from "@comps/Header.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
+import JoinFamily from "@/components/JoinFamily.astro";
+import Plus from "@/components/svgs/mono/Plus.astro";
+import Tag from "@/components/svgs/mono/Tag.astro";
 
 const user = Astro.locals.user;
 
@@ -80,35 +83,12 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
         <div class="mx-auto max-w-7xl">
             {
                 !userInFamily ? (
-                    <div>
-                        <div class="bg-gray-800 shadow-lg px-8 py-12 rounded-lg text-center">
-                            <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
-                            <h2 class="text-2xl font-bold text-purple-400 mb-4">
-                                Join a Family First
-                            </h2>
-                            <p class="text-gray-300 mb-6 max-w-md mx-auto">
-                                You need to be part of a family to create and
-                                manage tags. Families help organize finances and
-                                allow multiple members to collaborate.
-                            </p>
-                            <div class="space-y-4">
-                                <a
-                                    href="/families"
-                                    class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                                >
-                                    Go to Families Page
-                                </a>
-                                <p class="text-sm text-gray-400">
-                                    Create a new family or join an existing one
-                                    to get started
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <JoinFamily />
                 ) : (
                     <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
                         <div class="flex items-center justify-between mb-6">
-                            <h2 class="font-semibold text-purple-400 text-xl">
+                            <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
+                                <Tag />
                                 Tags
                             </h2>
                             <div class="flex items-center gap-x-4">
@@ -116,7 +96,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                                     type="button"
                                     class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                                 >
-                                    🏷️ Add Tag
+                                    <Plus />
                                 </button>
                             </div>
                         </div>
