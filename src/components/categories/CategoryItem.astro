@@ -12,14 +12,15 @@ interface Props {
         };
     };
     isChild?: boolean;
-    showSubcategoriesCount?: boolean;
 }
 
-const {
-    category,
-    isChild = false,
-    showSubcategoriesCount = false,
-} = Astro.props;
+const { category, isChild = false } = Astro.props;
+
+category._count = category._count || {};
+
+category._count.children = category._count.children || 0;
+
+const thereIsSubcategories = category._count.children > 0;
 ---
 
 <div
@@ -28,7 +29,7 @@ const {
     <div class="flex items-center space-x-3">
         {isChild && <i class="text-gray-400">└─</i>}
         <div
-            class={`${isChild ? "w-3 h-3" : "w-4 h-4"} rounded-full`}
+            class={`rounded-full ${isChild ? "w-3 h-3" : "w-4 h-4"}`}
             style={`background-color: ${category.color}`}
         >
         </div>
@@ -39,8 +40,8 @@ const {
             <p class="text-sm text-gray-400">
                 {category._count?.transactions || 0} transactions
                 {
-                    showSubcategoriesCount && category._count?.children && (
-                        <span> • {category._count.children} subcategories</span>
+                    thereIsSubcategories && (
+                        <span>• {category._count.children} subcategories</span>
                     )
                 }
             </p>
