@@ -6,6 +6,7 @@ import Header from "@comps/Header.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay } from "../../lib/date-utils.ts";
+import Users from "@/components/svgs/mono/Users.astro";
 
 const user = Astro.locals.user;
 
@@ -166,8 +167,8 @@ const userRole = familyDetailsResult.data?.ok
           <div class="flex flex-col gap-y-8">
             <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
               <div class="flex justify-between items-center mb-6">
-                <h2 class="font-semibold text-purple-400 text-xl">
-                  Family: {familyDetails.name}
+                <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-2">
+                  <Users /> Family: {familyDetails.name}
                 </h2>
                 <div class="flex gap-3">
                   <span
