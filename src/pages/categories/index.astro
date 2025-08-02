@@ -170,10 +170,7 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                                     );
                                     return (
                                         <div class="bg-gray-700 rounded-lg overflow-hidden">
-                                            <CategoryItem
-                                                category={category}
-                                                showSubcategoriesCount={true}
-                                            />
+                                            <CategoryItem category={category} />
 
                                             {children.length > 0 && (
                                                 <div class="bg-gray-600 border-t border-gray-500">
