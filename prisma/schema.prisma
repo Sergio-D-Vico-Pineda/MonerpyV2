@@ -11,8 +11,8 @@ datasource db {
 model Family {
   id        Int     @id @default(autoincrement())
   name      String
-  createdAt String  // YYYY-MM-DD HH:mm:ss
-  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  createdAt String // YYYY-MM-DD HH:mm:ss
+  updatedAt String // YYYY-MM-DD HH:mm:ss
   deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
@@ -28,15 +28,15 @@ enum UserRole {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   familyId     Int?
   username     String
-  email        String    @unique
+  email        String   @unique
   passwordHash String
-  role         UserRole  @default(Member)
-  createdAt    String    // YYYY-MM-DD HH:mm:ss
-  updatedAt    String    // YYYY-MM-DD HH:mm:ss
-  deletedAt    String?   // YYYY-MM-DD HH:mm:ss
+  role         UserRole @default(Member)
+  createdAt    String // YYYY-MM-DD HH:mm:ss
+  updatedAt    String // YYYY-MM-DD HH:mm:ss
+  deletedAt    String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family?                @relation(fields: [familyId], references: [id])
@@ -62,9 +62,9 @@ model Account {
   accountType AccountType
   balance     Float       @default(0.0)
   color       String      @default("#6172F3")
-  createdAt   String      // YYYY-MM-DD HH:mm:ss
-  updatedAt   String      // YYYY-MM-DD HH:mm:ss
-  deletedAt   String?     // YYYY-MM-DD HH:mm:ss
+  createdAt   String // YYYY-MM-DD HH:mm:ss
+  updatedAt   String // YYYY-MM-DD HH:mm:ss
+  deletedAt   String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   family                Family                 @relation(fields: [familyId], references: [id])
@@ -79,11 +79,11 @@ model Account {
 model AccountBalance {
   id          Int     @id @default(autoincrement())
   accountId   Int
-  date        String  // YYYY-MM-DD (date only)
+  date        String // YYYY-MM-DD (date only)
   balance     Float
   cashBalance Float   @default(0.0)
-  createdAt   String  // YYYY-MM-DD HH:mm:ss
-  updatedAt   String  // YYYY-MM-DD HH:mm:ss
+  createdAt   String // YYYY-MM-DD HH:mm:ss
+  updatedAt   String // YYYY-MM-DD HH:mm:ss
   deletedAt   String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
@@ -99,8 +99,8 @@ model Category {
   name      String
   color     String  @default("#6172F3")
   parentId  Int?
-  createdAt String  // YYYY-MM-DD HH:mm:ss
-  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  createdAt String // YYYY-MM-DD HH:mm:ss
+  updatedAt String // YYYY-MM-DD HH:mm:ss
   deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
@@ -119,8 +119,8 @@ model Tag {
   familyId  Int
   name      String
   color     String  @default("#e99537")
-  createdAt String  // YYYY-MM-DD HH:mm:ss
-  updatedAt String  // YYYY-MM-DD HH:mm:ss
+  createdAt String // YYYY-MM-DD HH:mm:ss
+  updatedAt String // YYYY-MM-DD HH:mm:ss
   deletedAt String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
@@ -145,13 +145,13 @@ model Transaction {
   accountId  Int
   userId     Int
   categoryId Int?
-  date       String          // YYYY-MM-DD HH:mm:ss
+  date       String // YYYY-MM-DD HH:mm:ss
   name       String
   amount     Float
   type       TransactionType
-  createdAt  String          // YYYY-MM-DD HH:mm:ss
-  updatedAt  String          // YYYY-MM-DD HH:mm:ss
-  deletedAt  String?         // YYYY-MM-DD HH:mm:ss
+  createdAt  String // YYYY-MM-DD HH:mm:ss
+  updatedAt  String // YYYY-MM-DD HH:mm:ss
+  deletedAt  String? // YYYY-MM-DD HH:mm:ss
 
   // Relations
   account      Account                  @relation(fields: [accountId], references: [id])
@@ -183,15 +183,16 @@ model RecurringTransaction {
   amount           Float
   type             TransactionType
   frequency        Frequency
-  dayOfMonth       Int? // para la frecuencia mensual y anual
-  dayOfWeek        Int? // 0 (domingo) a 6 (sábado) para semanal
-  timeOfDay        String? // formato "HH:mm:ss"
-  startDate        String  // YYYY-MM-DD HH:mm:ss
+  month            Int? // yearly frequency
+  dayOfMonth       Int? // monthly and yearly frequency
+  dayOfWeek        Int? // 0 (sunday) a 6 (saturday) weekly frequency
+  timeOfDay        String? // HH:mm:ss
+  startDate        String // YYYY-MM-DD HH:mm:ss
   endDate          String? // YYYY-MM-DD HH:mm:ss
   maxOccurrences   Int?
-  occurrencesCount Int     @default(0)
-  createdAt        String  // YYYY-MM-DD HH:mm:ss
-  updatedAt        String  // YYYY-MM-DD HH:mm:ss
+  occurrencesCount Int             @default(0)
+  createdAt        String // YYYY-MM-DD HH:mm:ss
+  updatedAt        String // YYYY-MM-DD HH:mm:ss
   deletedAt        String? // YYYY-MM-DD HH:mm:ss
 
   // Relations

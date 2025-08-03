@@ -8,7 +8,7 @@ pnpm prisma init --datasource-provider sqlite --output prisma
 
 
 commands to update database
-npx prisma migrate dev --name NAME
+pnpm prisma migrate dev --name NAME
 wsl turso db shell monerpyv2 < ./prisma/migrations/...
 
 scrypt
