@@ -1,40 +1,77 @@
 ---
 import Bin from "@svg/mono/Bin.astro";
+import Edit from "@svg/mono/Edit.astro";
+import Save from "@svg/mono/Save.astro";
+import X from "@svg/mono/X.astro";
 
 interface Props {
     category: {
         id: number;
         name: string;
         color: string;
+        parentId?: number | null;
         _count?: {
             transactions?: number;
             children?: number;
         };
     };
     isChild?: boolean;
+    allCategories?: Array<{
+        id: number;
+        name: string;
+        color: string;
+        parentId?: number | null;
+    }>;
 }
 
-const { category, isChild = false } = Astro.props;
+const { category, isChild = false, allCategories = [] } = Astro.props;
 
 category._count = category._count || {};
-
 category._count.children = category._count.children || 0;
 
 const thereIsSubcategories = category._count.children > 0;
+
+// Get parent categories for dropdown (exclude current category and its children)
+const parentCategories = allCategories.filter(
+    (cat) =>
+        !cat.parentId && // Only parent categories
+        cat.id !== category.id && // Exclude current category
+        !isDescendantOf(cat.id, category.id, allCategories), // Exclude descendants
+);
+
+// Helper function to check if a category is a descendant of another
+function isDescendantOf(
+    potentialParentId: number,
+    categoryId: number,
+    categories: typeof allCategories,
+): boolean {
+    const children = categories.filter((cat) => cat.parentId === categoryId);
+    return children.some(
+        (child) =>
+            child.id === potentialParentId ||
+            isDescendantOf(potentialParentId, child.id, categories),
+    );
+}
 ---
 
 <div
     class={`flex items-center justify-between ${isChild ? "pl-6 px-4 py-3 border-b border-gray-500 last:border-b-0" : "p-4"}`}
+    data-category-id={category.id}
 >
-    <div class="flex items-center gap-x-3">
+    <!-- Display Mode -->
+    <div class="category-display flex items-center gap-x-3 flex-1">
         {isChild && <i class="text-gray-400">└─</i>}
         <div
-            class={`rounded-full ${isChild ? "w-3 h-3" : "w-4 h-4"}`}
+            class={`category-color-display rounded-full cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all ${isChild ? "w-3 h-3" : "w-4 h-4"}`}
             style={`background-color: ${category.color}`}
+            title="Click to edit color"
         >
         </div>
-        <div>
-            <h3 class={`font-semibold text-white ${isChild ? "text-sm" : ""}`}>
+        <div class="flex-1">
+            <h3
+                class={`category-name-display font-semibold text-white cursor-pointer hover:text-purple-300 transition-colors w-fit ${isChild ? "text-sm" : ""}`}
+                title="Click to edit name"
+            >
                 {category.name}
             </h3>
             <p class="text-sm text-gray-400">
@@ -47,15 +84,113 @@ const thereIsSubcategories = category._count.children > 0;
             </p>
         </div>
     </div>
+
+    <!-- Edit Mode -->
+    <div class="category-edit hidden py-1">
+        <form class="edit-category-form flex items-center gap-x-3 w-full">
+            <input type="hidden" name="categoryId" value={category.id} />
+
+            <div class="flex items-center gap-x-2">
+                {isChild && <i class="text-gray-400">└─</i>}
+                <select
+                    name="parentId"
+                    class="parent-select text-xs bg-gray-600 text-white border border-gray-500 rounded px-2 py-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    title="Change parent category"
+                >
+                    <option value="">No Parent</option>
+                    {
+                        parentCategories.map((parent) => (
+                            <option
+                                value={parent.id}
+                                selected={parent.id === category.parentId}
+                            >
+                                {parent.name}
+                            </option>
+                        ))
+                    }
+                </select>
+            </div>
+
+            <label class="relative cursor-pointer">
+                <input
+                    type="color"
+                    name="color"
+                    value={category.color}
+                    class="category-color-input absolute bottom-0 right-0 w-0 h-0 opacity-0"
+                />
+                <div
+                    class="w-4 h-4 rounded-full shadow-md border-2 border-white flex items-center justify-center"
+                    style={`background-color: ${category.color}`}
+                >
+                </div>
+            </label>
+
+            <input
+                type="text"
+                name="name"
+                value={category.name}
+                class={`category-name-input flex-1 bg-gray-700 text-white border border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent ${isChild ? "text-sm" : ""}`}
+                placeholder="Category name"
+                required
+            />
+        </form>
+    </div>
+
+    <!-- Action Buttons -->
     <div class="flex items-center gap-x-2">
-        <button
-            type="button"
-            class="delete-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
-            data-category-id={category.id}
-            data-category-name={category.name}
-            title={`Delete ${isChild ? "Subcategory" : "Category"}`}
-        >
-            <Bin />
-        </button>
+        <!-- Display Mode Buttons -->
+        <div class="category-actions">
+            <button
+                type="button"
+                class="edit-category-btn group text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-900/20"
+                data-category-id={category.id}
+                title="Edit Category"
+            >
+                <Edit />
+            </button>
+            <button
+                type="button"
+                class="delete-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
+                data-category-id={category.id}
+                data-category-name={category.name}
+                title={`Delete ${isChild ? "Subcategory" : "Category"}`}
+            >
+                <Bin />
+            </button>
+        </div>
+
+        <!-- Edit Mode Buttons -->
+        <div class="category-edit-actions hidden">
+            <button
+                type="button"
+                class="save-category-btn group text-green-400 hover:text-green-300 transition-colors p-1 rounded hover:bg-green-900/20"
+                data-category-id={category.id}
+                title="Save Changes"
+            >
+                <Save />
+            </button>
+            <button
+                type="button"
+                class="cancel-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-gray-900/20"
+                data-category-id={category.id}
+                title="Cancel Editing"
+            >
+                <X />
+            </button>
+        </div>
     </div>
 </div>
+
+<script>
+    // Keep the visible swatch in sync
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('input[type="color"]').forEach((input) => {
+            input.addEventListener("input", (e) => {
+                const target = e.target as HTMLInputElement;
+                const preview = target.nextElementSibling as HTMLDivElement;
+
+                preview.style.backgroundColor = target.value;
+            });
+        });
+    });
+</script>

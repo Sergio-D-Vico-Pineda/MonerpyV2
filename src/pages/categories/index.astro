@@ -147,7 +147,10 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                                 );
                                 return (
                                     <div class="bg-gray-700 rounded-lg overflow-hidden">
-                                        <CategoryItem category={category} />
+                                        <CategoryItem
+                                            category={category}
+                                            allCategories={categories}
+                                        />
 
                                         {children.length > 0 && (
                                             <div class="bg-gray-600 border-t border-gray-500">
@@ -155,6 +158,9 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                                                     <CategoryItem
                                                         category={child}
                                                         isChild={true}
+                                                        allCategories={
+                                                            categories
+                                                        }
                                                     />
                                                 ))}
                                             </div>
@@ -174,7 +180,10 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                                 )
                                 .map((category) => (
                                     // <div class="bg-gray-700 rounded-lg p-4">
-                                    <CategoryItem category={category} />
+                                    <CategoryItem
+                                        category={category}
+                                        allCategories={categories}
+                                    />
                                     // </div>
                                 ))}
                         </div>
@@ -208,11 +217,15 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
 
     // Make function globally available
     (window as any).deleteCategory = deleteCategory;
+    // Alternative function for modal-based confirmation
+    (window as any).deleteCategoryWithModal = deleteCategoryWithModal;
 
-    // Set up event delegation for delete buttons
     document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("click", (event) => {
-            const deleteButton = (event.target as Element)?.closest(
+            const clickedElement = event.target as Element;
+
+            // Handle delete buttons
+            const deleteButton = clickedElement?.closest(
                 ".delete-category-btn",
             );
             if (deleteButton) {
@@ -226,10 +239,11 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                 if (categoryId && categoryName) {
                     deleteCategoryWithModal(categoryId, categoryName);
                 }
+                return;
             }
 
             // Handle add category button clicks
-            const addCategoryButton = (event.target as Element)?.closest(
+            const addCategoryButton = clickedElement?.closest(
                 ".add-category-btn, .create-first-category-btn",
             );
             if (addCategoryButton) {
@@ -237,9 +251,384 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                 if ((window as any).showCategoryModal) {
                     (window as any).showCategoryModal();
                 }
+                return;
+            }
+
+            // Handle edit button clicks
+            const editButton = clickedElement?.closest(".edit-category-btn");
+            if (editButton) {
+                event.preventDefault();
+                const categoryId = parseInt(
+                    editButton.getAttribute("data-category-id") || "0",
+                );
+                if (categoryId) {
+                    enterEditMode(categoryId);
+                }
+                return;
+            }
+
+            // Handle save button clicks
+            const saveButton = clickedElement?.closest(".save-category-btn");
+            if (saveButton) {
+                event.preventDefault();
+                const categoryId = parseInt(
+                    saveButton.getAttribute("data-category-id") || "0",
+                );
+                if (categoryId) {
+                    saveCategoryChanges(categoryId);
+                }
+                return;
+            }
+
+            // Handle cancel button clicks
+            const cancelButton = clickedElement?.closest(
+                ".cancel-category-btn",
+            );
+            if (cancelButton) {
+                event.preventDefault();
+                const categoryId = parseInt(
+                    cancelButton.getAttribute("data-category-id") || "0",
+                );
+                if (categoryId) {
+                    exitEditMode(categoryId);
+                }
+                return;
+            }
+
+            // Handle direct clicks on name and color for editing
+            const nameDisplay = clickedElement?.closest(
+                ".category-name-display",
+            );
+            const colorDisplay = clickedElement?.closest(
+                ".category-color-display",
+            );
+
+            if (nameDisplay || colorDisplay) {
+                const categoryItem = (nameDisplay || colorDisplay)?.closest(
+                    "[data-category-id]",
+                );
+                if (categoryItem) {
+                    const categoryId = parseInt(
+                        categoryItem.getAttribute("data-category-id") || "0",
+                    );
+                    if (categoryId) {
+                        enterEditMode(categoryId);
+                    }
+                }
+                return;
+            }
+        });
+
+        // Handle keyboard events for editing
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                // Cancel any active editing
+                const editingCategory = document.querySelector(
+                    "[data-category-id] .category-edit:not(.hidden)",
+                );
+                if (editingCategory) {
+                    const categoryItem =
+                        editingCategory.closest("[data-category-id]");
+                    if (categoryItem) {
+                        const categoryId = parseInt(
+                            categoryItem.getAttribute("data-category-id") ||
+                                "0",
+                        );
+                        if (categoryId) {
+                            exitEditMode(categoryId);
+                        }
+                    }
+                }
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                // Save any active editing if Enter is pressed in an input
+                const activeInput = document.activeElement;
+                if (
+                    activeInput &&
+                    (activeInput.classList.contains("category-name-input") ||
+                        activeInput.classList.contains("parent-select"))
+                ) {
+                    event.preventDefault();
+                    const categoryItem =
+                        activeInput.closest("[data-category-id]");
+                    if (categoryItem) {
+                        const categoryId = parseInt(
+                            categoryItem.getAttribute("data-category-id") ||
+                                "0",
+                        );
+                        if (categoryId) {
+                            saveCategoryChanges(categoryId);
+                        }
+                    }
+                }
             }
         });
     });
+
+    // Inline editing functions
+    function enterEditMode(categoryId: number) {
+        // Exit any other editing modes first
+        const otherEditingItems = document.querySelectorAll(
+            "[data-category-id] .category-edit:not(.hidden)",
+        );
+        otherEditingItems.forEach((item) => {
+            const otherCategoryItem = item.closest("[data-category-id]");
+            if (otherCategoryItem) {
+                const otherCategoryId = parseInt(
+                    otherCategoryItem.getAttribute("data-category-id") || "0",
+                );
+                if (otherCategoryId && otherCategoryId !== categoryId) {
+                    exitEditMode(otherCategoryId);
+                }
+            }
+        });
+
+        const categoryItem = document.querySelector(
+            `[data-category-id="${categoryId}"]`,
+        );
+        if (!categoryItem) return;
+
+        // Hide display mode, show edit mode
+        const displayMode = categoryItem.querySelector(".category-display");
+        const editMode = categoryItem.querySelector(".category-edit");
+        const displayActions = categoryItem.querySelector(".category-actions");
+        const editActions = categoryItem.querySelector(
+            ".category-edit-actions",
+        );
+
+        if (displayMode) displayMode.classList.add("hidden");
+        if (editMode) editMode.classList.remove("hidden");
+        if (displayActions) displayActions.classList.add("hidden");
+        if (editActions) editActions.classList.remove("hidden");
+
+        // Add highlight
+        categoryItem.classList.add(
+            "bg-purple-900/20",
+            "ring-2",
+            "ring-purple-500/50",
+        );
+
+        // Disable other delete buttons
+        const allDeleteButtons = document.querySelectorAll(
+            ".delete-category-btn",
+        );
+        allDeleteButtons.forEach((btn) => {
+            const btnCategoryId = parseInt(
+                btn.getAttribute("data-category-id") || "0",
+            );
+            if (btnCategoryId !== categoryId) {
+                (btn as HTMLButtonElement).disabled = true;
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+            }
+        });
+
+        // Focus on name input
+        const nameInput = categoryItem.querySelector(
+            ".category-name-input",
+        ) as HTMLInputElement;
+        if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+        }
+    }
+
+    function exitEditMode(categoryId: number) {
+        const categoryItem = document.querySelector(
+            `[data-category-id="${categoryId}"]`,
+        );
+        if (!categoryItem) return;
+
+        // Show display mode, hide edit mode
+        const displayMode = categoryItem.querySelector(".category-display");
+        const editMode = categoryItem.querySelector(".category-edit");
+        const displayActions = categoryItem.querySelector(".category-actions");
+        const editActions = categoryItem.querySelector(
+            ".category-edit-actions",
+        );
+
+        if (displayMode) displayMode.classList.remove("hidden");
+        if (editMode) editMode.classList.add("hidden");
+        if (displayActions) displayActions.classList.remove("hidden");
+        if (editActions) editActions.classList.add("hidden");
+
+        // Remove highlight
+        categoryItem.classList.remove(
+            "bg-purple-900/20",
+            "ring-2",
+            "ring-purple-500/50",
+        );
+
+        // Re-enable all delete buttons
+        const allDeleteButtons = document.querySelectorAll(
+            ".delete-category-btn",
+        );
+        allDeleteButtons.forEach((btn) => {
+            (btn as HTMLButtonElement).disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+        });
+
+        // Reset form to original values
+        const form = categoryItem.querySelector(
+            ".edit-category-form",
+        ) as HTMLFormElement;
+        if (form) {
+            // Get original values from display elements
+            const nameDisplay = categoryItem.querySelector(
+                ".category-name-display",
+            );
+            const colorDisplay = categoryItem.querySelector(
+                ".category-color-display",
+            ) as HTMLDivElement;
+
+            if (nameDisplay && colorDisplay) {
+                const nameInput = form.querySelector(
+                    ".category-name-input",
+                ) as HTMLInputElement;
+                const colorInput = form.querySelector(
+                    ".category-color-input",
+                ) as HTMLInputElement;
+
+                if (nameInput)
+                    nameInput.value = nameDisplay.textContent?.trim() || "";
+                if (colorInput) {
+                    const originalColor = colorDisplay.style.backgroundColor;
+                    const rgbValues = originalColor
+                        .replace(/[^\d,]/g, "")
+                        .split(",")
+                        .map((val) => parseInt(val.trim()))
+                        .filter((val) => !isNaN(val));
+                    let hexColor = "#";
+                    if (rgbValues.length === 3) {
+                        hexColor += rgbValues
+                            .map((val) => val.toString(16).padStart(2, "0"))
+                            .join("");
+                    } else {
+                        // Fallback to default color if parsing fails
+                        hexColor = "#000000"; // Default to black
+                    }
+                    colorInput.value = hexColor;
+                    const preview =
+                        colorInput.nextElementSibling as HTMLDivElement;
+
+                    preview.style.backgroundColor = originalColor;
+                }
+            }
+        }
+    }
+
+    async function saveCategoryChanges(categoryId: number) {
+        const categoryItem = document.querySelector(
+            `[data-category-id="${categoryId}"]`,
+        );
+        if (!categoryItem) return;
+
+        const form = categoryItem.querySelector(
+            ".edit-category-form",
+        ) as HTMLFormElement;
+        if (!form) return;
+
+        const formData = new FormData(form);
+        formData.set("_action", "update");
+        formData.set("id", categoryId.toString());
+
+        // Validate required fields
+        const name = formData.get("name") as string;
+        if (!name || name.trim() === "") {
+            ToastService.showToast({
+                message: "Category name is required",
+                type: "error",
+            });
+            return;
+        }
+
+        // Check for duplicate names
+        const currentName = categoryItem
+            .querySelector(".category-name-display")
+            ?.textContent?.trim();
+        if (name !== currentName) {
+            const allCategoryNames = Array.from(
+                document.querySelectorAll(".category-name-display"),
+            )
+                .map((el) => el.textContent?.trim().toLowerCase())
+                .filter((n) => n && n !== currentName?.toLowerCase());
+
+            if (allCategoryNames.includes(name.toLowerCase())) {
+                ToastService.showToast({
+                    message: "A category with this name already exists",
+                    type: "error",
+                });
+                return;
+            }
+        }
+
+        try {
+            // Show loading state
+            const saveButton = categoryItem.querySelector(
+                ".save-category-btn",
+            ) as HTMLButtonElement;
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.innerHTML =
+                    '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+            }
+
+            const result = await actions.updateCategory(formData);
+
+            if (result.data?.ok) {
+                // Update display elements with new values
+                const nameDisplay = categoryItem.querySelector(
+                    ".category-name-display",
+                );
+                const colorDisplay = categoryItem.querySelector(
+                    ".category-color-display",
+                );
+
+                if (nameDisplay) nameDisplay.textContent = name;
+                if (colorDisplay) {
+                    const color = formData.get("color") as string;
+                    colorDisplay.setAttribute(
+                        "style",
+                        `background-color: ${color}`,
+                    );
+                }
+
+                // Update delete button data
+                const deleteButton = categoryItem.querySelector(
+                    ".delete-category-btn",
+                );
+                if (deleteButton) {
+                    deleteButton.setAttribute("data-category-name", name);
+                }
+
+                exitEditMode(categoryId);
+
+                ToastService.showToast({
+                    message: "Category updated successfully!",
+                    type: "success",
+                });
+            } else {
+                ToastService.showToast({
+                    message: result.data?.error || "Failed to update category",
+                    type: "error",
+                });
+            }
+        } catch (err) {
+            console.error("Error updating category:", err);
+            ToastService.showToast({
+                message: "An unexpected error occurred",
+                type: "error",
+            });
+        } finally {
+            // Reset save button
+            const saveButton = categoryItem.querySelector(
+                ".save-category-btn",
+            ) as HTMLButtonElement;
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.innerHTML =
+                    '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.2929 2.29289C16.6834 1.90237 17.3166 1.90237 17.7071 2.29289L21.7071 6.29289C22.0976 6.68342 22.0976 7.31658 21.7071 7.70711L8.70711 20.7071C8.51957 20.8946 8.26522 21 8 21H4C3.44772 21 3 20.5523 3 20V16C3 15.7348 3.10536 15.4804 3.29289 15.2929L13.2927 5.2931L16.2929 2.29289ZM14 7.41421L5 16.4142V19H7.58579L16.5858 10L14 7.41421ZM18 8.58579L19.5858 7L17 4.41421L15.4142 6L18 8.58579Z"/></svg>';
+            }
+        }
+    }
 
     async function deleteCategory(id: number, name: string) {
         // Option 1: Simple confirm dialog (current implementation)
@@ -249,9 +638,6 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
             await performDeletion(id, name);
         }
     }
-
-    // Alternative function for modal-based confirmation
-    (window as any).deleteCategoryWithModal = deleteCategoryWithModal;
 
     function deleteCategoryWithModal(id: number, name: string) {
         if (window.deleteConfirmModal) {
