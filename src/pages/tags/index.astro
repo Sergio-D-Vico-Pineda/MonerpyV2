@@ -152,12 +152,13 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
     // Make function globally available
     (window as any).deleteTag = deleteTag;
 
-    // Set up event delegation for delete buttons
+    // Set up event delegation for all buttons
     document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("click", (event) => {
-            const deleteButton = (event.target as Element)?.closest(
-                ".delete-tag-btn",
-            );
+            const clickedElement = event.target as Element;
+
+            // Handle delete buttons
+            const deleteButton = clickedElement?.closest(".delete-tag-btn");
             if (deleteButton) {
                 event.preventDefault();
                 const tagId = parseInt(
@@ -169,10 +170,11 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                 if (tagId && tagName) {
                     deleteTagWithModal(tagId, tagName);
                 }
+                return;
             }
 
             // Handle add tag button clicks
-            const addTagButton = (event.target as Element)?.closest(
+            const addTagButton = clickedElement?.closest(
                 ".add-tag-btn, .create-first-tag-btn",
             );
             if (addTagButton) {
@@ -180,9 +182,333 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                 if ((window as any).showTagModal) {
                     (window as any).showTagModal();
                 }
+                return;
+            }
+
+            // Handle edit button clicks
+            const editButton = clickedElement?.closest(".edit-tag-btn");
+            if (editButton) {
+                event.preventDefault();
+                const tagId = parseInt(
+                    editButton.getAttribute("data-tag-id") || "0",
+                );
+                if (tagId) {
+                    enterTagEditMode(tagId);
+                }
+                return;
+            }
+
+            // Handle save button clicks
+            const saveButton = clickedElement?.closest(".save-tag-btn");
+            if (saveButton) {
+                event.preventDefault();
+                const tagId = parseInt(
+                    saveButton.getAttribute("data-tag-id") || "0",
+                );
+                if (tagId) {
+                    saveTagChanges(tagId);
+                }
+                return;
+            }
+
+            // Handle cancel button clicks
+            const cancelButton = clickedElement?.closest(".cancel-tag-btn");
+            if (cancelButton) {
+                event.preventDefault();
+                const tagId = parseInt(
+                    cancelButton.getAttribute("data-tag-id") || "0",
+                );
+                if (tagId) {
+                    exitTagEditMode(tagId);
+                }
+                return;
+            }
+
+            // Handle direct clicks on name and color for editing
+            const nameDisplay = clickedElement?.closest(".tag-name-display");
+            const colorDisplay = clickedElement?.closest(".tag-color-display");
+
+            if (nameDisplay || colorDisplay) {
+                const tagItem = (nameDisplay || colorDisplay)?.closest(
+                    "[data-tag-id]",
+                );
+                if (tagItem) {
+                    const tagId = parseInt(
+                        tagItem.getAttribute("data-tag-id") || "0",
+                    );
+                    if (tagId) {
+                        enterTagEditMode(tagId);
+                    }
+                }
+                return;
+            }
+        });
+
+        // Handle keyboard events for editing
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                // Cancel any active editing
+                const editingTag = document.querySelector(
+                    "[data-tag-id] .tag-edit:not(.hidden)",
+                );
+                if (editingTag) {
+                    const tagItem = editingTag.closest("[data-tag-id]");
+                    if (tagItem) {
+                        const tagId = parseInt(
+                            tagItem.getAttribute("data-tag-id") || "0",
+                        );
+                        if (tagId) {
+                            exitTagEditMode(tagId);
+                        }
+                    }
+                }
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                // Save any active editing if Enter is pressed in an input
+                const activeInput = document.activeElement;
+                if (
+                    activeInput &&
+                    activeInput.classList.contains("tag-name-input")
+                ) {
+                    event.preventDefault();
+                    const tagItem = activeInput.closest("[data-tag-id]");
+                    if (tagItem) {
+                        const tagId = parseInt(
+                            tagItem.getAttribute("data-tag-id") || "0",
+                        );
+                        if (tagId) {
+                            saveTagChanges(tagId);
+                        }
+                    }
+                }
             }
         });
     });
+
+    // Inline editing functions for tags
+    function enterTagEditMode(tagId: number) {
+        // Exit any other editing modes first
+        const otherEditingItems = document.querySelectorAll(
+            "[data-tag-id] .tag-edit:not(.hidden)",
+        );
+        otherEditingItems.forEach((item) => {
+            const otherTagItem = item.closest("[data-tag-id]");
+            if (otherTagItem) {
+                const otherTagId = parseInt(
+                    otherTagItem.getAttribute("data-tag-id") || "0",
+                );
+                if (otherTagId && otherTagId !== tagId) {
+                    exitTagEditMode(otherTagId);
+                }
+            }
+        });
+
+        const tagItem = document.querySelector(`[data-tag-id="${tagId}"]`);
+        if (!tagItem) return;
+
+        // Hide display mode, show edit mode
+        const displayMode = tagItem.querySelector(".tag-display");
+        const editMode = tagItem.querySelector(".tag-edit");
+
+        if (displayMode) displayMode.classList.add("hidden");
+        if (editMode) {
+            editMode.classList.remove("hidden");
+            editMode.classList.add("flex");
+        }
+
+        // Add highlight
+        tagItem.classList.add("bg-purple-400/30");
+
+        // Disable other delete buttons
+        const allDeleteButtons = document.querySelectorAll(".delete-tag-btn");
+        allDeleteButtons.forEach((btn) => {
+            const btnTagId = parseInt(btn.getAttribute("data-tag-id") || "0");
+            if (btnTagId !== tagId) {
+                (btn as HTMLButtonElement).disabled = true;
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+            }
+        });
+
+        // Focus on name input
+        const nameInput = tagItem.querySelector(
+            ".tag-name-input",
+        ) as HTMLInputElement;
+        if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+        }
+    }
+
+    function exitTagEditMode(tagId: number) {
+        const tagItem = document.querySelector(`[data-tag-id="${tagId}"]`);
+        if (!tagItem) return;
+
+        // Show display mode, hide edit mode
+        const displayMode = tagItem.querySelector(".tag-display");
+        const editMode = tagItem.querySelector(".tag-edit");
+
+        if (displayMode) displayMode.classList.remove("hidden");
+        if (editMode) editMode.classList.add("hidden");
+
+        // Remove highlight
+        tagItem.classList.remove("bg-purple-400/30");
+
+        // Re-enable all delete buttons
+        const allDeleteButtons = document.querySelectorAll(".delete-tag-btn");
+        allDeleteButtons.forEach((btn) => {
+            (btn as HTMLButtonElement).disabled = false;
+            btn.classList.remove("opacity-50", "cursor-not-allowed");
+        });
+
+        // Reset form to original values
+        const form = tagItem.querySelector(".edit-tag-form") as HTMLFormElement;
+        if (form) {
+            // Get original values from display elements
+            const nameDisplay = tagItem.querySelector(".tag-name-display");
+            const colorDisplay = tagItem.querySelector(
+                ".tag-color-display",
+            ) as HTMLDivElement;
+
+            if (nameDisplay && colorDisplay) {
+                const nameInput = form.querySelector(
+                    ".tag-name-input",
+                ) as HTMLInputElement;
+                const colorInput = form.querySelector(
+                    ".tag-color-input",
+                ) as HTMLInputElement;
+
+                if (nameInput)
+                    nameInput.value = nameDisplay.textContent?.trim() || "";
+                if (colorInput) {
+                    const originalColor = colorDisplay.style.backgroundColor;
+                    const rgbValues = originalColor
+                        .replace(/[^\d,]/g, "")
+                        .split(",")
+                        .map((val) => parseInt(val.trim()))
+                        .filter((val) => !isNaN(val));
+                    let hexColor = "#";
+                    if (rgbValues.length === 3) {
+                        hexColor += rgbValues
+                            .map((val) => val.toString(16).padStart(2, "0"))
+                            .join("");
+                    } else {
+                        // Fallback to default color if parsing fails
+                        hexColor = "#000000"; // Default to black
+                    }
+                    colorInput.value = hexColor;
+                    const preview =
+                        colorInput.nextElementSibling as HTMLDivElement;
+
+                    preview.style.backgroundColor = originalColor;
+                }
+            }
+        }
+    }
+
+    async function saveTagChanges(tagId: number) {
+        const tagItem = document.querySelector(`[data-tag-id="${tagId}"]`);
+        if (!tagItem) return;
+
+        const form = tagItem.querySelector(".edit-tag-form") as HTMLFormElement;
+        if (!form) return;
+
+        const formData = new FormData(form);
+        formData.set("_action", "update");
+        formData.set("id", tagId.toString());
+
+        // Validate required fields
+        const name = formData.get("name") as string;
+        if (!name || name.trim() === "") {
+            ToastService.showToast({
+                message: "Tag name is required",
+                type: "error",
+            });
+            return;
+        }
+
+        // Check for duplicate names
+        const currentName = tagItem
+            .querySelector(".tag-name-display")
+            ?.textContent?.trim();
+        if (name !== currentName) {
+            const allTagNames = Array.from(
+                document.querySelectorAll(".tag-name-display"),
+            )
+                .map((el) => el.textContent?.trim().toLowerCase())
+                .filter((n) => n && n !== currentName?.toLowerCase());
+
+            if (allTagNames.includes(name.toLowerCase())) {
+                ToastService.showToast({
+                    message: "A tag with this name already exists",
+                    type: "error",
+                });
+                return;
+            }
+        }
+
+        try {
+            // Show loading state
+            const saveButton = tagItem.querySelector(
+                ".save-tag-btn",
+            ) as HTMLButtonElement;
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.innerHTML =
+                    '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+            }
+
+            const result = await actions.updateTag(formData);
+
+            if (result.data?.ok) {
+                // Update display elements with new values
+                const nameDisplay = tagItem.querySelector(".tag-name-display");
+                const colorDisplay =
+                    tagItem.querySelector(".tag-color-display");
+
+                if (nameDisplay) nameDisplay.textContent = name;
+                if (colorDisplay) {
+                    const color = formData.get("color") as string;
+                    colorDisplay.setAttribute(
+                        "style",
+                        `background-color: ${color}`,
+                    );
+                }
+
+                // Update delete button data
+                const deleteButton = tagItem.querySelector(".delete-tag-btn");
+                if (deleteButton) {
+                    deleteButton.setAttribute("data-tag-name", name);
+                }
+
+                exitTagEditMode(tagId);
+
+                ToastService.showToast({
+                    message: "Tag updated successfully!",
+                    type: "success",
+                });
+            } else {
+                ToastService.showToast({
+                    message: result.data?.error || "Failed to update tag",
+                    type: "error",
+                });
+            }
+        } catch (err) {
+            console.error("Error updating tag:", err);
+            ToastService.showToast({
+                message: "An unexpected error occurred",
+                type: "error",
+            });
+        } finally {
+            // Reset save button
+            const saveButton = tagItem.querySelector(
+                ".save-tag-btn",
+            ) as HTMLButtonElement;
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.innerHTML =
+                    '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.2929 2.29289C16.6834 1.90237 17.3166 1.90237 17.7071 2.29289L21.7071 6.29289C22.0976 6.68342 22.0976 7.31658 21.7071 7.70711L8.70711 20.7071C8.51957 20.8946 8.26522 21 8 21H4C3.44772 21 3 20.5523 3 20V16C3 15.7348 3.10536 15.4804 3.29289 15.2929L13.2927 5.2931L16.2929 2.29289ZM14 7.41421L5 16.4142V19H7.58579L16.5858 10L14 7.41421ZM18 8.58579L19.5858 7L17 4.41421L15.4142 6L18 8.58579Z"/></svg>';
+            }
+        }
+    }
 
     async function deleteTag(id: number, name: string) {
         // Option 1: Simple confirm dialog (fallback implementation)
