@@ -3,11 +3,13 @@ import Layout from "@layouts/Layout.astro";
 import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
-import SimpleLeft from "@comps/svgs/mono/SimpleLeft.astro";
 import ALeft from "@comps/svgs/mono/ALeft.astro";
 import ARight from "@comps/svgs/mono/ARight.astro";
 import Refresh from "@comps/svgs/mono/Refresh.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
+import TransactionModal from "@comps/modal/TransactionModal.astro";
+import RecurringTransactionModal from "@comps/modal/RecurringTransactionModal.astro";
+import CategoryModal from "@comps/categories/CategoryModal.astro";
 
 const user = Astro.locals.user;
 
@@ -96,40 +98,45 @@ const userId = user.id;
           <div class="flex flex-wrap justify-between gap-3 w-full">
             <div class="inline-flex justify-between gap-x-3 grow-[2]">
               <div class="inline-flex w-full rounded">
-                <a
-                  href="/transactions/new?type=income"
+                <button
+                  type="button"
+                  id="addIncomeBtn"
                   class="text-sm flex-2/3 bg-green-600 hover:bg-green-700 p-2 rounded-l text-center text-nowrap transition duration-200"
                 >
                   Add Income
-                </a>
-                <a
-                  href="/recurring?type=income"
+                </button>
+                <button
+                  type="button"
+                  id="recurringIncomeBtn"
                   class="text-sm flex-1/3 bg-green-800 hover:bg-green-900 p-2 rounded-r text-center text-nowrap transition duration-200"
                 >
                   Recurring
-                </a>
+                </button>
               </div>
               <div class="inline-flex w-full rounded">
-                <a
-                  href="/transactions/new?type=expense"
+                <button
+                  type="button"
+                  id="addExpenseBtn"
                   class="text-sm flex-2/3 bg-red-600 hover:bg-red-700 p-2 rounded-l text-center text-nowrap transition duration-200"
                 >
                   Add Expense
-                </a>
-                <a
-                  href="/recurring?type=expense"
+                </button>
+                <button
+                  type="button"
+                  id="recurringExpenseBtn"
                   class="text-sm flex-1/3 bg-red-800 hover:bg-red-900 p-2 rounded-r text-center text-nowrap transition duration-200"
                 >
                   Recurring
-                </a>
+                </button>
               </div>
             </div>
-            <a
-              href="/transaction-groups/new"
+            <button
+              type="button"
+              id="newGroupBtn"
               class="text-sm block bg-purple-600 hover:bg-purple-700 px-2 py-2 rounded text-white text-center text-nowrap transition duration-200 grow"
             >
               New Group
-            </a>
+            </button>
           </div>
         </div>
       </article>
@@ -558,7 +565,88 @@ const userId = user.id;
     // const initialYear = currentDate.getFullYear();
     // const initialMonth = currentDate.getMonth() + 1;
     loadCurrentMonth();
+
+    // Helper function to open transaction modal with pre-filled type
+    function openTransactionModalWithType(type) {
+      // Wait for modal to be ready
+      setTimeout(() => {
+        if (window.openTransactionModal) {
+          window.openTransactionModal();
+
+          // Pre-fill the transaction type (capitalize first letter)
+          const typeSelect = document.getElementById("type");
+          if (typeSelect) {
+            const capitalizedType =
+              type.charAt(0).toUpperCase() + type.slice(1);
+            typeSelect.value = capitalizedType;
+          }
+        }
+      }, 100);
+    }
+
+    // Helper function to open recurring modal with pre-filled type
+    function openRecurringModalWithType(type) {
+      // Wait for modal to be ready
+      setTimeout(() => {
+        if (window.openRecurringTransactionModal) {
+          window.openRecurringTransactionModal();
+
+          // Pre-fill the transaction type (capitalize first letter)
+          const typeSelect = document.getElementById("recurringType");
+          if (typeSelect) {
+            const capitalizedType =
+              type.charAt(0).toUpperCase() + type.slice(1);
+            typeSelect.value = capitalizedType;
+          }
+        }
+      }, 100);
+    }
+
+    // Add event listeners for modal buttons
+    const addIncomeBtn = document.getElementById("addIncomeBtn");
+    const recurringIncomeBtn = document.getElementById("recurringIncomeBtn");
+    const addExpenseBtn = document.getElementById("addExpenseBtn");
+    const recurringExpenseBtn = document.getElementById("recurringExpenseBtn");
+    const newGroupBtn = document.getElementById("newGroupBtn");
+
+    if (addIncomeBtn) {
+      addIncomeBtn.addEventListener("click", () =>
+        openTransactionModalWithType("income"),
+      );
+    }
+
+    if (recurringIncomeBtn) {
+      recurringIncomeBtn.addEventListener("click", () =>
+        openRecurringModalWithType("income"),
+      );
+    }
+
+    if (addExpenseBtn) {
+      addExpenseBtn.addEventListener("click", () =>
+        openTransactionModalWithType("expense"),
+      );
+    }
+
+    if (recurringExpenseBtn) {
+      recurringExpenseBtn.addEventListener("click", () =>
+        openRecurringModalWithType("expense"),
+      );
+    }
+
+    if (newGroupBtn) {
+      newGroupBtn.addEventListener("click", () => {
+        if (window.showCategoryModal) {
+          window.showCategoryModal();
+        }
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      if (addIncomeBtn) addIncomeBtn.click();
+    });
   </script>
 </Layout>
 
+<TransactionModal />
+<RecurringTransactionModal />
+<CategoryModal />
 <LogoutScript />

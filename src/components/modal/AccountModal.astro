@@ -1,4 +1,7 @@
 ---
+import X from "@svg/mono/X.astro";
+import ColorPicker from "../ColorPicker.astro";
+
 // Account type options
 const accountTypes = [
     { value: "Cash", label: "Cash", icon: "💵" },
@@ -9,21 +12,6 @@ const accountTypes = [
     { value: "Loan", label: "Loan Account", icon: "🏠" },
 ];
 
-// Predefined colors
-const colors = [
-    "#6172F3",
-    "#10B981",
-    "#F59E0B",
-    "#EF4444",
-    "#8B5CF6",
-    "#06B6D4",
-    "#84CC16",
-    "#F97316",
-    "#EC4899",
-    "#6B7280",
-    "#14B8A6",
-    "#F43F5E",
-];
 ---
 
 <!-- Modal Background -->
@@ -34,7 +22,7 @@ const colors = [
         >
             <!-- Modal Header -->
             <div
-                class="flex items-center justify-between p-6 border-b border-gray-700"
+                class="flex items-end justify-between p-6 border-b border-gray-700"
             >
                 <h2 class="text-xl font-semibold text-purple-400">
                     Create Account
@@ -44,18 +32,7 @@ const colors = [
                     id="closeModal"
                     class="text-gray-400 hover:text-white transition-colors"
                 >
-                    <svg
-                        class="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <X class="w-6 h-6" />
                 </button>
             </div>
 
@@ -124,43 +101,7 @@ const colors = [
                     </div>
 
                     <div>
-                        <label
-                            for="color"
-                            class="block text-sm font-medium text-gray-300 mb-2"
-                        >
-                            Account Color
-                        </label>
-                        <div class="flex items-center gap-x-3">
-                            <input
-                                type="color"
-                                id="color"
-                                name="color"
-                                value="#6172F3"
-                                class="w-12 h-10 border border-gray-600 rounded cursor-pointer"
-                            />
-                            <input
-                                type="text"
-                                id="colorHex"
-                                name="colorHex"
-                                value="#6172F3"
-                                pattern="^#[0-9A-Fa-f]{6}$"
-                                class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="#6172F3"
-                            />
-                        </div>
-
-                        <div class="mt-3 grid grid-cols-6 gap-2">
-                            {
-                                colors.map((color) => (
-                                    <button
-                                        type="button"
-                                        class="w-8 h-8 rounded border-2 border-gray-600 hover:border-white transition-colors"
-                                        style={`background-color: ${color}`}
-                                        onclick={`document.getElementById('color').value = '${color}'; document.getElementById('colorHex').value = '${color}';`}
-                                    />
-                                ))
-                            }
-                        </div>
+                        <ColorPicker id="color" formName="Account Color" />
                     </div>
 
                     <div class="flex gap-x-3 pt-4">

@@ -1,4 +1,6 @@
 ---
+import X from "@svg/mono/X.astro";
+
 // Predefined colors for tags
 const colors = [
     "#e99537", // Orange (default)
@@ -24,7 +26,7 @@ const colors = [
         >
             <!-- Modal Header -->
             <div
-                class="flex items-center justify-between p-6 border-b border-gray-700"
+                class="flex items-end justify-between p-6 border-b border-gray-700"
             >
                 <h2 class="text-xl font-semibold text-purple-400">
                     Create Tag
@@ -34,18 +36,7 @@ const colors = [
                     id="closeTagModal"
                     class="text-gray-400 hover:text-white transition-colors"
                 >
-                    <svg
-                        class="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <X class="w-6 h-6" />
                 </button>
             </div>
 

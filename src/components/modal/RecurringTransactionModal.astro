@@ -1,5 +1,6 @@
 ---
 import { actions } from "astro:actions";
+import X from "@svg/mono/X.astro";
 
 // Get data for the modal form
 const [accountsResult, categoriesResult, tagsResult] = await Promise.all([
@@ -49,19 +50,19 @@ const months = [
     <div
         class="bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
     >
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-end mb-6">
             <h2
                 class="font-semibold text-purple-400 text-xl"
-                id="modal-form-title"
+                id="recurring-modal-form-title"
             >
                 Add Recurring Transaction
             </h2>
             <button
                 type="button"
-                id="closeModal"
-                class="text-gray-400 hover:text-white text-2xl"
+                id="closeRecurringModal"
+                class="text-gray-400 hover:text-white"
             >
-                ×
+                <X class="w-6 h-6" />
             </button>
         </div>
 
@@ -73,7 +74,7 @@ const months = [
             <input
                 type="hidden"
                 name="_action"
-                id="form-action"
+                id="recurring-form-action"
                 value="create"
             />
             <input type="hidden" name="id" id="recurring-transaction-id" />
@@ -125,7 +126,7 @@ const months = [
                             Type *
                         </label>
                         <select
-                            id="type"
+                            id="recurringType"
                             name="type"
                             required
                             class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -234,7 +235,7 @@ const months = [
                                 type="color"
                                 id="newCategoryColor"
                                 name="newCategoryColor"
-                                value="#6172F3"
+                                value="#6172f3"
                                 class="w-12 h-10 bg-gray-700 border border-gray-600 rounded-lg"
                             />
                         </div>
@@ -312,8 +313,32 @@ const months = [
                         </p>
                     </div>
 
+                    <!-- Month (for Yearly) -->
+                    <div id="monthContainer" class="hidden">
+                        <label
+                            for="month"
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
+                            Month *
+                        </label>
+                        <select
+                            id="month"
+                            name="month"
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        >
+                            <option value="">Select month</option>
+                            {
+                                months.map((month) => (
+                                    <option value={month.value}>
+                                        {month.label}
+                                    </option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
                     <!-- Time of Day -->
-                    <div>
+                    <div id="timeOfDayContainer" class="hidden">
                         <label
                             for="timeOfDay"
                             class="block text-sm font-medium text-gray-300 mb-2"
@@ -465,11 +490,13 @@ const months = [
                     type="submit"
                     class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
                 >
-                    <span id="submit-text">Add Recurring Transaction</span>
+                    <span id="recurring-submit-text"
+                        >Add Recurring Transaction</span
+                    >
                 </button>
                 <button
                     type="button"
-                    id="modal-cancel-btn"
+                    id="recurring-modal-cancel-btn"
                     class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
                 >
                     Cancel
@@ -482,8 +509,8 @@ const months = [
 <script>
     // Modal functionality
     const modal = document.getElementById("recurringTransactionModal");
-    const closeModal = document.getElementById("closeModal");
-    const cancelBtn = document.getElementById("modal-cancel-btn");
+    const closeModal = document.getElementById("closeRecurringModal");
+    const cancelBtn = document.getElementById("recurring-modal-cancel-btn");
 
     function openModal() {
         if (modal) {
@@ -501,14 +528,14 @@ const months = [
     }
 
     async function resetForm() {
-        const formTitle = document.getElementById("modal-form-title");
+        const formTitle = document.getElementById("recurring-modal-form-title");
         const formAction = document.getElementById(
-            "form-action",
+            "recurring-form-action",
         ) as HTMLInputElement;
         const recurringTransactionId = document.getElementById(
             "recurring-transaction-id",
         ) as HTMLInputElement;
-        const submitText = document.getElementById("submit-text");
+        const submitText = document.getElementById("recurring-submit-text");
         const form = document.getElementById(
             "recurringTransactionForm",
         ) as HTMLFormElement;
@@ -567,10 +594,14 @@ const months = [
     ) as HTMLSelectElement;
     const dayOfWeekContainer = document.getElementById("dayOfWeekContainer");
     const dayOfMonthContainer = document.getElementById("dayOfMonthContainer");
+    const monthContainer = document.getElementById("monthContainer");
+    const timeOfDayContainer = document.getElementById("timeOfDayContainer");
 
     function hideAllFrequencyFields() {
         if (dayOfWeekContainer) dayOfWeekContainer.classList.add("hidden");
         if (dayOfMonthContainer) dayOfMonthContainer.classList.add("hidden");
+        if (monthContainer) monthContainer.classList.add("hidden");
+        if (timeOfDayContainer) timeOfDayContainer.classList.add("hidden");
     }
 
     if (frequencySelect) {
@@ -579,12 +610,22 @@ const months = [
 
             const frequency = this.value;
 
+            // Show time of day for any valid frequency
+            if (frequency && frequency !== "") {
+                if (timeOfDayContainer)
+                    timeOfDayContainer.classList.remove("hidden");
+            }
+
             if (frequency === "Weekly") {
                 if (dayOfWeekContainer)
                     dayOfWeekContainer.classList.remove("hidden");
-            } else if (frequency === "Monthly" || frequency === "Yearly") {
+            } else if (frequency === "Monthly") {
                 if (dayOfMonthContainer)
                     dayOfMonthContainer.classList.remove("hidden");
+            } else if (frequency === "Yearly") {
+                if (dayOfMonthContainer)
+                    dayOfMonthContainer.classList.remove("hidden");
+                if (monthContainer) monthContainer.classList.remove("hidden");
             }
         });
     }
@@ -693,14 +734,14 @@ const months = [
 
     // Function to fill form for editing (will be called from parent page)
     async function fillFormForEdit(recurringTransaction: any) {
-        const formTitle = document.getElementById("modal-form-title");
+        const formTitle = document.getElementById("recurring-modal-form-title");
         const formAction = document.getElementById(
-            "form-action",
+            "recurring-form-action",
         ) as HTMLInputElement;
         const recurringTransactionId = document.getElementById(
             "recurring-transaction-id",
         ) as HTMLInputElement;
-        const submitText = document.getElementById("submit-text");
+        const submitText = document.getElementById("recurring-submit-text");
 
         if (formTitle) formTitle.textContent = "Edit Recurring Transaction";
         if (formAction) formAction.value = "update";
@@ -712,7 +753,9 @@ const months = [
         const accountId = document.getElementById(
             "accountId",
         ) as HTMLSelectElement;
-        const type = document.getElementById("type") as HTMLSelectElement;
+        const type = document.getElementById(
+            "recurringType",
+        ) as HTMLSelectElement;
         const description = document.getElementById(
             "description",
         ) as HTMLInputElement;
@@ -726,6 +769,7 @@ const months = [
         const dayOfMonth = document.getElementById(
             "dayOfMonth",
         ) as HTMLInputElement;
+        const month = document.getElementById("month") as HTMLSelectElement;
         const timeOfDay = document.getElementById(
             "timeOfDay",
         ) as HTMLInputElement;
@@ -754,6 +798,8 @@ const months = [
             dayOfWeek.value = recurringTransaction.dayOfWeek;
         if (dayOfMonth && recurringTransaction.dayOfMonth !== null)
             dayOfMonth.value = recurringTransaction.dayOfMonth;
+        if (month && recurringTransaction.month !== null)
+            month.value = recurringTransaction.month;
         if (timeOfDay) timeOfDay.value = recurringTransaction.timeOfDay;
         if (startDate) {
             // Convert database date string to date input format

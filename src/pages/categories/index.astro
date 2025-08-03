@@ -287,19 +287,18 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
         });
 
         // Handle add category button clicks
-        document.addEventListener("click", (event) => {
-            const clickedElement = event.target as Element;
+        const addCategoryButton = document.getElementById(
+            "addCategoryButton",
+        ) as HTMLButtonElement;
 
-            const addCategoryButton = clickedElement?.closest(
-                ".add-category-btn, .create-first-category-btn",
-            );
-            if (addCategoryButton) {
-                event.preventDefault();
+        if (addCategoryButton) {
+            addCategoryButton.addEventListener("click", (event) => {
                 if ((window as any).showCategoryModal) {
                     (window as any).showCategoryModal();
                 }
-                return;
-            }
-        });
+            });
+        }
+
+        addCategoryButton.click();
     });
 </script>

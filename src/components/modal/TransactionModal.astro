@@ -1,5 +1,6 @@
 ---
 import { actions } from "astro:actions";
+import X from "@svg/mono/X.astro";
 
 // Get data for the modal form
 const [accountsResult, categoriesResult, tagsResult] = await Promise.all([
@@ -22,7 +23,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
     <div
         class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4"
     >
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-end mb-6">
             <h2
                 class="font-semibold text-purple-400 text-xl"
                 id="modal-form-title"
@@ -32,9 +33,9 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
             <button
                 type="button"
                 id="closeModal"
-                class="text-gray-400 hover:text-white text-2xl"
+                class="text-gray-400 hover:text-white"
             >
-                ×
+                <X class="w-6 h-6" />
             </button>
         </div>
 
@@ -210,7 +211,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                         type="color"
                         id="newCategoryColor"
                         name="newCategoryColor"
-                        value="#6172F3"
+                        value="#6172f3"
                         class="w-12 h-10 bg-gray-700 border border-gray-600 rounded-lg"
                     />
                 </div>
@@ -257,7 +258,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                     type="submit"
                     class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
                 >
-                    <span id="submit-text">Add Transaction</span>
+                    <span id="submit-text">Save Transaction</span>
                 </button>
                 <button
                     type="button"
@@ -298,20 +299,18 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
         }
     }
 
-    async function resetForm() {
-        const formTitle = document.getElementById("modal-form-title");
-        const formAction = document.getElementById(
-            "form-action",
-        ) as HTMLInputElement;
-        const transactionId = document.getElementById(
-            "transaction-id",
-        ) as HTMLInputElement;
-        const submitText = document.getElementById("submit-text");
-        const form = document.getElementById(
-            "transactionForm",
-        ) as HTMLFormElement;
-        const dateInput = document.getElementById("date") as HTMLInputElement;
+    const dateInput = document.getElementById("date") as HTMLInputElement;
+    const formTitle = document.getElementById("modal-form-title");
+    const formAction = document.getElementById(
+        "form-action",
+    ) as HTMLInputElement;
+    const transactionId = document.getElementById(
+        "transaction-id",
+    ) as HTMLInputElement;
+    const submitText = document.getElementById("submit-text");
+    const form = document.getElementById("transactionForm") as HTMLFormElement;
 
+    async function resetForm() {
         if (formTitle) formTitle.textContent = "Add Transaction";
         if (formAction) formAction.value = "create";
         if (transactionId) transactionId.value = "";
@@ -342,7 +341,6 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
 
     // Set today's date as default
     (() => {
-        const dateInput = document.getElementById("date") as HTMLInputElement;
         if (dateInput) {
             dateInput.value = getCurrentDateTimeLocal();
         }
@@ -373,11 +371,12 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
     const newCategoryInput = document.getElementById(
         "newCategory",
     ) as HTMLInputElement;
+    const categorySelect = document.getElementById(
+        "categoryId",
+    ) as HTMLSelectElement;
+
     if (newCategoryInput) {
         newCategoryInput.addEventListener("input", function () {
-            const categorySelect = document.getElementById(
-                "categoryId",
-            ) as HTMLSelectElement;
             if (categorySelect) {
                 if (this.value.trim()) {
                     categorySelect.disabled = true;
@@ -389,14 +388,8 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
         });
     }
 
-    const categorySelect = document.getElementById(
-        "categoryId",
-    ) as HTMLSelectElement;
     if (categorySelect) {
         categorySelect.addEventListener("change", function () {
-            const newCategoryInput = document.getElementById(
-                "newCategory",
-            ) as HTMLInputElement;
             if (newCategoryInput) {
                 if (this.value) {
                     newCategoryInput.disabled = true;
@@ -408,34 +401,22 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
         });
     }
 
+    const accountId = document.getElementById("accountId") as HTMLSelectElement;
+    const type = document.getElementById("type") as HTMLSelectElement;
+    const name = document.getElementById("name") as HTMLInputElement;
+    const amount = document.getElementById("amount") as HTMLInputElement;
+    const date = document.getElementById("date") as HTMLInputElement;
+    const categoryId = document.getElementById(
+        "categoryId",
+    ) as HTMLSelectElement;
+    const tags = document.getElementById("tags") as HTMLInputElement;
+
     // Function to fill form for editing (will be called from parent page)
     async function fillFormForEdit(transaction: any) {
-        const formTitle = document.getElementById("modal-form-title");
-        const formAction = document.getElementById(
-            "form-action",
-        ) as HTMLInputElement;
-        const transactionId = document.getElementById(
-            "transaction-id",
-        ) as HTMLInputElement;
-        const submitText = document.getElementById("submit-text");
-
         if (formTitle) formTitle.textContent = "Edit Transaction";
         if (formAction) formAction.value = "update";
         if (transactionId) transactionId.value = transaction.id;
         if (submitText) submitText.textContent = "Update Transaction";
-
-        // Fill form with transaction data
-        const accountId = document.getElementById(
-            "accountId",
-        ) as HTMLSelectElement;
-        const type = document.getElementById("type") as HTMLSelectElement;
-        const name = document.getElementById("name") as HTMLInputElement;
-        const amount = document.getElementById("amount") as HTMLInputElement;
-        const date = document.getElementById("date") as HTMLInputElement;
-        const categoryId = document.getElementById(
-            "categoryId",
-        ) as HTMLSelectElement;
-        const tags = document.getElementById("tags") as HTMLInputElement;
 
         if (accountId) accountId.value = transaction.accountId;
         if (type) type.value = transaction.type;
