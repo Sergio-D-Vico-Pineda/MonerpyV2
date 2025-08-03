@@ -19,17 +19,32 @@ const colors = [
 <!-- Modal Background -->
 <div id="tagModal" class="fixed inset-0 bg-black/50 z-50 hidden">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div
+            class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        >
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-700">
-                <h2 class="text-xl font-semibold text-purple-400">Create Tag</h2>
+            <div
+                class="flex items-center justify-between p-6 border-b border-gray-700"
+            >
+                <h2 class="text-xl font-semibold text-purple-400">
+                    Create Tag
+                </h2>
                 <button
                     type="button"
                     id="closeTagModal"
                     class="text-gray-400 hover:text-white transition-colors"
                 >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
@@ -41,7 +56,10 @@ const colors = [
 
                     <!-- Tag Name -->
                     <div>
-                        <label for="tagName" class="block text-sm font-medium text-gray-200 mb-2">
+                        <label
+                            for="tagName"
+                            class="block text-sm font-medium text-gray-200 mb-2"
+                        >
                             Tag Name
                         </label>
                         <input
@@ -56,31 +74,38 @@ const colors = [
 
                     <!-- Color Picker -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-200 mb-2">
+                        <label
+                            class="block text-sm font-medium text-gray-200 mb-2"
+                        >
                             Tag Color
                         </label>
                         <div class="grid grid-cols-6 gap-2">
-                            {colors.map((color, index) => (
-                                <label class="relative cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="color"
-                                        value={color}
-                                        checked={index === 0}
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-8 h-8 rounded-full border-2 border-transparent peer-checked:border-white peer-checked:ring-2 peer-checked:ring-purple-500 hover:scale-110 transition-transform"
-                                        style={`background-color: ${color}`}
-                                    ></div>
-                                </label>
-                            ))}
+                            {
+                                colors.map((color, index) => (
+                                    <label class="relative cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="color"
+                                            value={color}
+                                            checked={index === 0}
+                                            class="sr-only peer"
+                                        />
+                                        <div
+                                            class="w-8 h-8 rounded-full border-2 border-transparent peer-checked:border-white peer-checked:ring-2 peer-checked:ring-purple-500 hover:scale-110 transition-transform"
+                                            style={`background-color: ${color}`}
+                                        />
+                                    </label>
+                                ))
+                            }
                         </div>
                     </div>
 
                     <!-- Custom Color Input -->
                     <div>
-                        <label for="customTagColor" class="block text-sm font-medium text-gray-200 mb-2">
+                        <label
+                            for="customTagColor"
+                            class="block text-sm font-medium text-gray-200 mb-2"
+                        >
                             Or Choose Custom Color
                         </label>
                         <div class="flex items-center gap-x-2">
@@ -126,16 +151,20 @@ const colors = [
         const modal = document.getElementById("tagModal");
         const closeModalBtn = document.getElementById("closeTagModal");
         const cancelBtn = document.getElementById("cancelTagButton");
-        const customColorInput = document.getElementById("customTagColor") as HTMLInputElement;
+        const customColorInput = document.getElementById(
+            "customTagColor",
+        ) as HTMLInputElement;
 
         // Modal controls
         function showModal() {
             if (modal) {
                 modal.classList.remove("hidden");
                 document.body.style.overflow = "hidden";
-                
+
                 // Focus on name input
-                const nameInput = modal.querySelector('input[name="name"]') as HTMLInputElement;
+                const nameInput = modal.querySelector(
+                    'input[name="name"]',
+                ) as HTMLInputElement;
                 nameInput?.focus();
             }
         }
@@ -144,18 +173,22 @@ const colors = [
             if (modal) {
                 modal.classList.add("hidden");
                 document.body.style.overflow = "auto";
-                
+
                 // Reset form
                 const form = modal.querySelector("form") as HTMLFormElement;
                 if (form) {
                     form.reset();
                     // Reset to first color option (orange)
-                    const firstColorRadio = form.querySelector('input[name="color"]') as HTMLInputElement;
+                    const firstColorRadio = form.querySelector(
+                        'input[name="color"]',
+                    ) as HTMLInputElement;
                     if (firstColorRadio) {
                         firstColorRadio.checked = true;
                     }
                     // Remove any custom color hidden input
-                    const customColorHidden = document.getElementById("customTagColorHidden");
+                    const customColorHidden = document.getElementById(
+                        "customTagColorHidden",
+                    );
                     if (customColorHidden) {
                         customColorHidden.remove();
                     }
@@ -182,7 +215,9 @@ const colors = [
         }
 
         // Handle use custom color button
-        const useCustomColorBtn = document.querySelector(".use-custom-tag-color-btn");
+        const useCustomColorBtn = document.querySelector(
+            ".use-custom-tag-color-btn",
+        );
         if (useCustomColorBtn) {
             useCustomColorBtn.addEventListener("click", useCustomTagColor);
         }
@@ -191,19 +226,25 @@ const colors = [
         function useCustomTagColor() {
             if (customColorInput) {
                 const customColor = customColorInput.value;
-                const colorRadios = document.querySelectorAll('input[name="color"]') as NodeListOf<HTMLInputElement>;
+                const colorRadios = document.querySelectorAll(
+                    'input[name="color"]',
+                ) as NodeListOf<HTMLInputElement>;
 
                 // Uncheck all radio buttons
                 colorRadios.forEach((radio) => (radio.checked = false));
 
                 // Create or update a hidden input for custom color
-                let customColorHidden = document.getElementById("customTagColorHidden") as HTMLInputElement;
+                let customColorHidden = document.getElementById(
+                    "customTagColorHidden",
+                ) as HTMLInputElement;
                 if (!customColorHidden) {
                     customColorHidden = document.createElement("input");
                     customColorHidden.type = "hidden";
                     customColorHidden.name = "color";
                     customColorHidden.id = "customTagColorHidden";
-                    customColorInput.parentElement?.appendChild(customColorHidden);
+                    customColorInput.parentElement?.appendChild(
+                        customColorHidden,
+                    );
                 }
                 customColorHidden.value = customColor;
             }

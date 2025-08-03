@@ -116,15 +116,398 @@ const { tag } = Astro.props;
 </div>
 
 <script>
-    // Keep the visible swatch in sync
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll('input[type="color"]').forEach((input) => {
-            input.addEventListener("input", (e) => {
-                const target = e.target as HTMLInputElement;
-                const preview = target.nextElementSibling as HTMLDivElement;
+    import { actions } from "astro:actions";
+    import { ToastService } from "@lib/toast.ts";
 
-                preview.style.backgroundColor = target.value;
+    document.addEventListener("DOMContentLoaded", () => {
+        // Find all tag items and attach listeners
+        document.querySelectorAll("[data-tag-id]").forEach((tagItem) => {
+            const tagId = parseInt(tagItem.getAttribute("data-tag-id") || "0");
+            if (!tagId) return;
+
+            // Skip if already initialized
+            if (tagItem.hasAttribute("data-initialized")) return;
+            tagItem.setAttribute("data-initialized", "true");
+
+            // Emit custom events
+            function emitTagEvent(eventName: string, detail: any = {}) {
+                const event = new CustomEvent(eventName, {
+                    detail: { tagId, ...detail },
+                    bubbles: true,
+                });
+                tagItem.dispatchEvent(event);
+            }
+
+            // Color picker sync
+            const colorInput = tagItem.querySelector(
+                'input[type="color"]',
+            ) as HTMLInputElement;
+            const colorPreview = tagItem.querySelector(
+                ".tag-color-input + div",
+            ) as HTMLDivElement;
+
+            if (colorInput && colorPreview) {
+                colorInput.addEventListener("input", (e) => {
+                    const target = e.target as HTMLInputElement;
+                    colorPreview.style.backgroundColor = target.value;
+                });
+            }
+
+            // Event delegation for this tag item
+            tagItem.addEventListener("click", (event) => {
+                const target = event.target as Element;
+
+                // Handle edit button clicks
+                if (target.closest(".edit-tag-btn")) {
+                    event.preventDefault();
+                    enterEditMode();
+                    return;
+                }
+
+                // Handle save button clicks
+                if (target.closest(".save-tag-btn")) {
+                    event.preventDefault();
+                    saveTagChanges();
+                    return;
+                }
+
+                // Handle cancel button clicks
+                if (target.closest(".cancel-tag-btn")) {
+                    event.preventDefault();
+                    exitEditMode();
+                    return;
+                }
+
+                // Handle delete button clicks
+                if (target.closest(".delete-tag-btn")) {
+                    event.preventDefault();
+                    const tagName =
+                        target
+                            .closest(".delete-tag-btn")
+                            ?.getAttribute("data-tag-name") || "";
+                    deleteTag(tagName);
+                    return;
+                }
+
+                // Handle direct clicks on name and color for editing
+                if (
+                    target.closest(".tag-name-display") ||
+                    target.closest(".tag-color-display")
+                ) {
+                    event.preventDefault();
+                    enterEditMode();
+                    return;
+                }
             });
+
+            // Handle keyboard events
+            tagItem.addEventListener("keydown", (event) => {
+                const keyboardEvent = event as KeyboardEvent;
+                if (keyboardEvent.key === "Escape") {
+                    const editMode = tagItem.querySelector(
+                        ".tag-edit:not(.hidden)",
+                    );
+                    if (editMode) {
+                        exitEditMode();
+                    }
+                } else if (
+                    keyboardEvent.key === "Enter" &&
+                    !keyboardEvent.shiftKey
+                ) {
+                    const activeInput = document.activeElement;
+                    if (
+                        activeInput &&
+                        activeInput.classList.contains("tag-name-input")
+                    ) {
+                        keyboardEvent.preventDefault();
+                        saveTagChanges();
+                    }
+                }
+            });
+
+            // Edit mode management
+            function enterEditMode() {
+                // Hide display mode, show edit mode
+                const displayMode = tagItem.querySelector(".tag-display");
+                const editMode = tagItem.querySelector(".tag-edit");
+
+                if (displayMode) displayMode.classList.add("hidden");
+                if (editMode) {
+                    editMode.classList.remove("hidden");
+                    editMode.classList.add("flex");
+                }
+
+                // Add highlight
+                tagItem.classList.add(
+                    "bg-purple-900/20",
+                    "ring-2",
+                    "ring-purple-500/50",
+                );
+
+                // Focus on name input
+                const nameInput = tagItem.querySelector(
+                    ".tag-name-input",
+                ) as HTMLInputElement;
+                if (nameInput) {
+                    nameInput.focus();
+                    nameInput.select();
+                }
+
+                // Emit event
+                emitTagEvent("tag-edit-started");
+            }
+
+            function exitEditMode() {
+                // Show display mode, hide edit mode
+                const displayMode = tagItem.querySelector(".tag-display");
+                const editMode = tagItem.querySelector(".tag-edit");
+
+                if (displayMode) displayMode.classList.remove("hidden");
+                if (editMode) {
+                    editMode.classList.add("hidden");
+                    editMode.classList.remove("flex");
+                }
+
+                // Remove highlight
+                tagItem.classList.remove(
+                    "bg-purple-900/20",
+                    "ring-2",
+                    "ring-purple-500/50",
+                );
+
+                // Reset form to original values
+                const form = tagItem.querySelector(
+                    ".edit-tag-form",
+                ) as HTMLFormElement;
+                if (form) {
+                    const nameDisplay =
+                        tagItem.querySelector(".tag-name-display");
+                    const colorDisplay = tagItem.querySelector(
+                        ".tag-color-display",
+                    ) as HTMLDivElement;
+
+                    if (nameDisplay && colorDisplay) {
+                        const nameInput = form.querySelector(
+                            ".tag-name-input",
+                        ) as HTMLInputElement;
+                        const colorInput = form.querySelector(
+                            ".tag-color-input",
+                        ) as HTMLInputElement;
+
+                        if (nameInput)
+                            nameInput.value =
+                                nameDisplay.textContent?.trim() || "";
+                        if (colorInput && colorPreview) {
+                            const originalColor =
+                                colorDisplay.style.backgroundColor;
+                            colorInput.value = rgbToHex(originalColor);
+                            colorPreview.style.backgroundColor = originalColor;
+                        }
+                    }
+                }
+
+                // Emit event
+                emitTagEvent("tag-edit-cancelled");
+            }
+
+            // Convert RGB to HEX
+            function rgbToHex(rgb: string): string {
+                if (rgb.startsWith("#")) return rgb;
+
+                const rgbValues = rgb
+                    .replace(/[^\d,]/g, "")
+                    .split(",")
+                    .map((val) => parseInt(val.trim()))
+                    .filter((val) => !isNaN(val));
+
+                if (rgbValues.length === 3) {
+                    return (
+                        "#" +
+                        rgbValues
+                            .map((val) => val.toString(16).padStart(2, "0"))
+                            .join("")
+                    );
+                }
+                return "#000000";
+            }
+
+            // Save tag changes
+            async function saveTagChanges() {
+                const form = tagItem.querySelector(
+                    ".edit-tag-form",
+                ) as HTMLFormElement;
+                if (!form) return;
+
+                const formData = new FormData(form);
+                formData.set("_action", "update");
+                formData.set("id", tagId.toString());
+
+                // Validate required fields
+                const name = formData.get("name") as string;
+                if (!name || name.trim() === "") {
+                    ToastService.showToast({
+                        message: "Tag name is required",
+                        type: "error",
+                    });
+                    return;
+                }
+
+                try {
+                    // Show loading state
+                    const saveButton = tagItem.querySelector(
+                        ".save-tag-btn",
+                    ) as HTMLButtonElement;
+                    if (saveButton) {
+                        saveButton.disabled = true;
+                        saveButton.innerHTML =
+                            '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+                    }
+
+                    const result = await actions.updateTag(formData);
+
+                    if (result.data?.ok) {
+                        // Update display elements with new values
+                        const nameDisplay =
+                            tagItem.querySelector(".tag-name-display");
+                        const colorDisplay =
+                            tagItem.querySelector(".tag-color-display");
+
+                        if (nameDisplay) nameDisplay.textContent = name;
+                        if (colorDisplay) {
+                            const color = formData.get("color") as string;
+                            colorDisplay.setAttribute(
+                                "style",
+                                `background-color: ${color}`,
+                            );
+                        }
+
+                        // Update delete button data
+                        const deleteButton =
+                            tagItem.querySelector(".delete-tag-btn");
+                        if (deleteButton) {
+                            deleteButton.setAttribute("data-tag-name", name);
+                        }
+
+                        exitEditMode();
+
+                        ToastService.showToast({
+                            message: "Tag updated successfully!",
+                            type: "success",
+                        });
+
+                        // Emit success event
+                        emitTagEvent("tag-updated", {
+                            name,
+                            color: formData.get("color"),
+                        });
+                    } else {
+                        ToastService.showToast({
+                            message:
+                                result.data?.error || "Failed to update tag",
+                            type: "error",
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error updating tag:", err);
+                    ToastService.showToast({
+                        message: "An unexpected error occurred",
+                        type: "error",
+                    });
+                } finally {
+                    // Reset save button
+                    const saveButton = tagItem.querySelector(
+                        ".save-tag-btn",
+                    ) as HTMLButtonElement;
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                        saveButton.innerHTML =
+                            '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.2929 2.29289C16.6834 1.90237 17.3166 1.90237 17.7071 2.29289L21.7071 6.29289C22.0976 6.68342 22.0976 7.31658 21.7071 7.70711L8.70711 20.7071C8.51957 20.8946 8.26522 21 8 21H4C3.44772 21 3 20.5523 3 20V16C3 15.7348 3.10536 15.4804 3.29289 15.2929L13.2927 5.2931L16.2929 2.29289ZM14 7.41421L5 16.4142V19H7.58579L16.5858 10L14 7.41421ZM18 8.58579L19.5858 7L17 4.41421L15.4142 6L18 8.58579Z"/></svg>';
+                    }
+                }
+            }
+
+            // Delete tag
+            async function deleteTag(tagName: string) {
+                // Use the modal if available, otherwise fallback to confirm
+                if ((window as any).deleteTagConfirmModal) {
+                    (window as any).deleteTagConfirmModal.show(tagName, () => {
+                        performTagDeletion(tagName);
+                    });
+                    return;
+                }
+
+                // Fallback to confirm dialog
+                if (
+                    !confirm(
+                        `Are you sure you want to delete the tag "${tagName}"?`,
+                    )
+                ) {
+                    return;
+                }
+
+                performTagDeletion(tagName);
+            }
+
+            // Perform the actual deletion
+            async function performTagDeletion(tagName: string) {
+                try {
+                    // Show loading state
+                    const deleteButton = tagItem.querySelector(
+                        ".delete-tag-btn",
+                    ) as HTMLButtonElement;
+                    if (deleteButton) {
+                        deleteButton.disabled = true;
+                        deleteButton.innerHTML =
+                            '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+                    }
+
+                    const formData = new FormData();
+                    formData.append("id", tagId.toString());
+                    const { data, error } = await actions.deleteTag(formData);
+
+                    if (error) {
+                        console.error("Delete tag error:", error);
+                        ToastService.showToast({
+                            message: "Failed to delete tag: " + error.message,
+                            type: "error",
+                        });
+                    } else if (data?.ok) {
+                        ToastService.showToast({
+                            message: "Tag deleted successfully!",
+                            type: "success",
+                        });
+
+                        // Emit deletion event before removing from DOM
+                        emitTagEvent("tag-deleted", { tagName });
+
+                        // Remove the tag element from DOM
+                        if (tagItem) {
+                            tagItem.remove();
+                        }
+                    } else {
+                        ToastService.showToast({
+                            message: data?.error || "Failed to delete tag",
+                            type: "error",
+                        });
+                    }
+                } catch (err) {
+                    console.error("Unexpected error:", err);
+                    ToastService.showToast({
+                        message: "An unexpected error occurred",
+                        type: "error",
+                    });
+                } finally {
+                    // Reset button state if still exists
+                    const deleteButton = tagItem.querySelector(
+                        ".delete-tag-btn",
+                    ) as HTMLButtonElement;
+                    if (deleteButton) {
+                        deleteButton.disabled = false;
+                        deleteButton.innerHTML =
+                            '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                    }
+                }
+            }
         });
     });
 </script>
