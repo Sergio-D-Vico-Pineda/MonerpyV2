@@ -8,6 +8,7 @@ import { actions } from "astro:actions";
 import { formatDateForDisplay } from "@lib/date-utils.ts";
 import Bin from "@/components/svgs/mono/Bin.astro";
 import ALeft from "@/components/svgs/mono/ALeft.astro";
+import CreditCard from "@/components/svgs/mono/CreditCard.astro";
 
 const user = Astro.locals.user;
 
@@ -69,14 +70,17 @@ const accountTypes = [
         >
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-baseline-last gap-x-4">
-                    <h1 class="font-semibold text-purple-400 text-xl">
+                    <h1
+                        class="font-semibold text-purple-400 text-xl flex items-center gap-x-2"
+                    >
+                        <Bin />
                         Deleted Accounts
                     </h1>
                     <a
                         href="/accounts"
-                        class="text-purple-400 hover:text-purple-300 flex items-end gap-x-2"
+                        class="text-purple-400 hover:text-purple-300 flex items-center gap-x-2"
                     >
-                        <ALeft />
+                        <CreditCard class="w-4 h-4" />
                         <span>Accounts</span>
                     </a>
                 </div>

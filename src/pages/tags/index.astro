@@ -80,54 +80,51 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
     <main class="bg-gray-900 p-8 min-h-screen text-white">
         <Header currentPage="tags" user={user} />
 
-        <div class="mx-auto max-w-7xl">
-            {
-                !userInFamily ? (
-                    <JoinFamily />
-                ) : (
-                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
-                                <Tag />
-                                Tags
-                            </h2>
-                            <div class="flex items-center gap-x-4">
-                                <button
-                                    type="button"
-                                    class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                                >
-                                    <Plus />
-                                </button>
-                            </div>
+        {
+            !userInFamily ? (
+                <JoinFamily />
+            ) : (
+                <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg mx-auto max-w-7xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
+                            <Tag />
+                            Tags
+                        </h2>
+                        <div class="flex items-center gap-x-4">
+                            <button
+                                type="button"
+                                class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                            >
+                                <Plus />
+                            </button>
                         </div>
-
-                        {tags && tags.length === 0 ? (
-                            <div class="text-center py-12">
-                                <div class="text-6xl mb-4">🏷️</div>
-                                <h3 class="text-xl font-semibold text-gray-300 mb-2">
-                                    No Tags Yet
-                                </h3>
-                                <p class="text-gray-400 mb-6">
-                                    Create tags to label and organize your
-                                    transactions better.
-                                </p>
-                                <button
-                                    type="button"
-                                    class="create-first-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                                >
-                                    Create Your First Tag
-                                </button>
-                            </div>
-                        ) : (
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {tags &&
-                                    tags.map((tag) => <TagItem tag={tag} />)}
-                            </div>
-                        )}
                     </div>
-                )
-            }
-        </div>
+
+                    {tags && tags.length === 0 ? (
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">🏷️</div>
+                            <h3 class="text-xl font-semibold text-gray-300 mb-2">
+                                No Tags Yet
+                            </h3>
+                            <p class="text-gray-400 mb-6">
+                                Create tags to label and organize your
+                                transactions better.
+                            </p>
+                            <button
+                                type="button"
+                                class="create-first-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                            >
+                                Create Your First Tag
+                            </button>
+                        </div>
+                    ) : (
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {tags && tags.map((tag) => <TagItem tag={tag} />)}
+                        </div>
+                    )}
+                </div>
+            )
+        }
     </main>
 
     <Footer />

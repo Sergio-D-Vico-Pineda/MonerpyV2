@@ -101,93 +101,87 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
     <main class="bg-gray-900 p-8 min-h-screen text-white">
         <Header currentPage="categories" user={user} />
 
-        <div class="mx-auto max-w-7xl">
-            {
-                !userInFamily ? (
-                    <JoinFamily />
-                ) : (
-                    <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
-                                <Folder />
-                                Categories
-                            </h2>
+        {
+            !userInFamily ? (
+                <JoinFamily />
+            ) : (
+                <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg mx-auto max-w-7xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
+                            <Folder />
+                            Categories
+                        </h2>
 
+                        <button
+                            id="addCategoryButton"
+                            type="button"
+                            class="add-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                        >
+                            <Plus />
+                        </button>
+                    </div>
+
+                    {(categories?.length || 0) === 0 ? (
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">📂</div>
+                            <h3 class="text-xl font-semibold text-gray-300 mb-2">
+                                No Categories Yet
+                            </h3>
+                            <p class="text-gray-400 mb-6">
+                                Create categories to organize your transactions
+                                better.
+                            </p>
                             <button
-                                id="addCategoryButton"
                                 type="button"
-                                class="add-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                id="createCategoryButton"
+                                class="create-first-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                             >
-                                <Plus />
+                                Create Your First Category
                             </button>
                         </div>
-
-                        {(categories?.length || 0) === 0 ? (
-                            <div class="text-center py-12">
-                                <div class="text-6xl mb-4">📂</div>
-                                <h3 class="text-xl font-semibold text-gray-300 mb-2">
-                                    No Categories Yet
-                                </h3>
-                                <p class="text-gray-400 mb-6">
-                                    Create categories to organize your
-                                    transactions better.
-                                </p>
-                                <button
-                                    type="button"
-                                    id="createCategoryButton"
-                                    class="create-first-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                                >
-                                    Create Your First Category
-                                </button>
-                            </div>
-                        ) : (
-                            <div
-                                id="categoryList"
-                                class="flex flex-col gap-y-4"
-                            >
-                                {parentCategories.map((category) => {
-                                    const children = childCategories.filter(
-                                        (child) =>
-                                            child.parentId === category.id,
-                                    );
-                                    return (
-                                        <div class="bg-gray-700 rounded-lg overflow-hidden">
-                                            <CategoryItem category={category} />
-
-                                            {children.length > 0 && (
-                                                <div class="bg-gray-600 border-t border-gray-500">
-                                                    {children.map((child) => (
-                                                        <CategoryItem
-                                                            category={child}
-                                                            isChild={true}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Categories without parent (but not already shown) */}
-                                {childCategories
-                                    .filter(
-                                        (cat) =>
-                                            !parentCategories.find(
-                                                (parent) =>
-                                                    parent.id === cat.parentId,
-                                            ),
-                                    )
-                                    .map((category) => (
-                                        // <div class="bg-gray-700 rounded-lg p-4">
+                    ) : (
+                        <div id="categoryList" class="flex flex-col gap-y-4">
+                            {parentCategories.map((category) => {
+                                const children = childCategories.filter(
+                                    (child) => child.parentId === category.id,
+                                );
+                                return (
+                                    <div class="bg-gray-700 rounded-lg overflow-hidden">
                                         <CategoryItem category={category} />
-                                        // </div>
-                                    ))}
-                            </div>
-                        )}
-                    </div>
-                )
-            }
-        </div>
+
+                                        {children.length > 0 && (
+                                            <div class="bg-gray-600 border-t border-gray-500">
+                                                {children.map((child) => (
+                                                    <CategoryItem
+                                                        category={child}
+                                                        isChild={true}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Categories without parent (but not already shown) */}
+                            {childCategories
+                                .filter(
+                                    (cat) =>
+                                        !parentCategories.find(
+                                            (parent) =>
+                                                parent.id === cat.parentId,
+                                        ),
+                                )
+                                .map((category) => (
+                                    // <div class="bg-gray-700 rounded-lg p-4">
+                                    <CategoryItem category={category} />
+                                    // </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+            )
+        }
     </main>
 
     <Footer />

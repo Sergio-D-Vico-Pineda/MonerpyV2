@@ -14,143 +14,141 @@ if (!user) {
     <main class="min-h-screen bg-gray-900 text-white p-8">
         <Header currentPage="profile" user={user} />
 
-        <div class="max-w-4xl mx-auto">
-            <div class="mt-8 flex flex-wrap gap-6">
-                <div class="grow bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-                    <h2 class="text-2xl font-semibold mb-6 text-purple-400">
-                        Account Information
-                    </h2>
-                    <form id="profileForm" class="flex flex-col gap-y-6">
-                        <div>
-                            <label
-                                for="username"
-                                class="block text-sm font-medium text-purple-300"
-                            >
-                                Username
-                            </label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={user.username}
-                                required
-                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                for="email"
-                                class="block text-sm font-medium text-purple-300"
-                            >
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={user.email}
-                                required
-                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                            />
-                        </div>
-
-                        <p>
-                            <strong>Session Created:</strong>
-                            {new Date(parseInt(user.created)).toLocaleString()}
-                        </p>
-
-                        <button
-                            type="submit"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+        <div class="mt-8 flex flex-wrap gap-6 mx-auto max-w-7xl">
+            <div class="grow bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-6 text-purple-400">
+                    Account Information
+                </h2>
+                <form id="profileForm" class="flex flex-col gap-y-6">
+                    <div>
+                        <label
+                            for="username"
+                            class="block text-sm font-medium text-purple-300"
                         >
-                            Update Profile
-                        </button>
-                    </form>
-                </div>
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            value={user.username}
+                            required
+                            class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        />
+                    </div>
 
-                <div class="grow bg-gray-800 rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-semibold mb-6 text-purple-400">
-                        Change Password
-                    </h2>
-                    <form id="passwordForm" class="flex flex-col gap-y-6">
-                        <div>
-                            <label
-                                for="currentPassword"
-                                class="block text-sm font-medium text-purple-300"
-                            >
-                                Current Password
-                            </label>
-                            <input
-                                type="password"
-                                id="currentPassword"
-                                name="currentPassword"
-                                required
-                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                for="newPassword"
-                                class="block text-sm font-medium text-purple-300"
-                            >
-                                New Password
-                            </label>
-                            <input
-                                type="password"
-                                id="newPassword"
-                                name="newPassword"
-                                required
-                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                for="confirmPassword"
-                                class="block text-sm font-medium text-purple-300"
-                            >
-                                Confirm New Password
-                            </label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                required
-                                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    <div>
+                        <label
+                            for="email"
+                            class="block text-sm font-medium text-purple-300"
                         >
-                            Change Password
-                        </button>
-                    </form>
-                </div>
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={user.email}
+                            required
+                            class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        />
+                    </div>
 
-                <div class="w-full mx-auto bg-gray-800 p-6 rounded-lg mb-6">
-                    <h2 class="text-xl font-semibold mb-4">
-                        How This Page is Protected
-                    </h2>
-
-                    <p class="text-gray-300">
-                        The user information is available in <code
-                            >Astro.locals.user</code
-                        > which is set by the middleware.
+                    <p>
+                        <strong>Session Created:</strong>
+                        {new Date(parseInt(user.created)).toLocaleString()}
                     </p>
 
-                    <form method="POST" id="logoutForm" class="float-right">
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    <button
+                        type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                        Update Profile
+                    </button>
+                </form>
+            </div>
+
+            <div class="grow bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-6 text-purple-400">
+                    Change Password
+                </h2>
+                <form id="passwordForm" class="flex flex-col gap-y-6">
+                    <div>
+                        <label
+                            for="currentPassword"
+                            class="block text-sm font-medium text-purple-300"
                         >
-                            Logout
-                        </button>
-                    </form>
-                </div>
+                            Current Password
+                        </label>
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            name="currentPassword"
+                            required
+                            class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            for="newPassword"
+                            class="block text-sm font-medium text-purple-300"
+                        >
+                            New Password
+                        </label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            name="newPassword"
+                            required
+                            class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            for="confirmPassword"
+                            class="block text-sm font-medium text-purple-300"
+                        >
+                            Confirm New Password
+                        </label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            required
+                            class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                        Change Password
+                    </button>
+                </form>
+            </div>
+
+            <div class="w-full mx-auto bg-gray-800 p-6 rounded-lg mb-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    How This Page is Protected
+                </h2>
+
+                <p class="text-gray-300">
+                    The user information is available in <code
+                        >Astro.locals.user</code
+                    > which is set by the middleware.
+                </p>
+
+                <form method="POST" id="logoutForm" class="float-right">
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    >
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </main>
