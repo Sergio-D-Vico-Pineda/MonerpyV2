@@ -15,7 +15,7 @@ export const updateTransaction = defineAction({
         type: z.enum(['Income', 'Expense', 'InvestmentBuy', 'InvestmentSell', 'LoanPayment', 'LoanRepayment']),
         tags: z.string().nullable().optional().transform(val => val ? val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []),
         newCategory: z.string().nullable().optional().transform(val => val?.trim() || undefined),
-        newCategoryColor: z.string().optional().default("#6172F3")
+        newCategoryColor: z.string().optional().default("#6172f3")
     }),
     handler: async (input, context) => {
         try {

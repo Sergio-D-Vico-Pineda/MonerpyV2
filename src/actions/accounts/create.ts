@@ -9,7 +9,7 @@ export const createAccount = defineAction({
     input: z.object({
         name: z.string().trim().min(1, "Account name is required"),
         accountType: z.enum(['Cash', 'Checking', 'Savings', 'CreditCard', 'Investment', 'Loan']),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#6172F3"),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#6172f3"),
         initialBalance: z.string().transform(val => parseFloat(val)).refine(val => !isNaN(val), "Initial balance must be a valid number").default("0")
     }),
     handler: async (input, context) => {

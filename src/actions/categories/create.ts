@@ -7,7 +7,7 @@ export const createCategory = defineAction({
     accept: 'form',
     input: z.object({
         name: z.string().trim().min(1, "Category name is required"),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#6172F3"),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#6172f3"),
         parentId: z.string().nullable().transform(val => val && val !== "" ? parseInt(val) : null)
     }),
     handler: async (input, context) => {
