@@ -6,7 +6,7 @@ import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
 import CategoryItem from "@comps/categories/CategoryItem.astro";
 import DeleteConfirmModal from "@comps/categories/DeleteConfirmModal.astro";
-import ToastScript from "@comps/ToastScript.astro";
+import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Plus from "@svg/mono/Plus.astro";
@@ -115,7 +115,7 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                         <button
                             id="addCategoryButton"
                             type="button"
-                            class="add-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                            class="add-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
                         >
                             <Plus />
                         </button>

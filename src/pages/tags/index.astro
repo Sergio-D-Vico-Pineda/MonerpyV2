@@ -6,7 +6,7 @@ import TagModal from "@comps/tags/TagModal.astro";
 import TagItem from "@comps/tags/TagItem.astro";
 import DeleteTagConfirmModal from "@comps/tags/DeleteTagConfirmModal.astro";
 import Header from "@comps/layout/Header.astro";
-import ToastScript from "@comps/ToastScript.astro";
+import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
@@ -93,7 +93,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                         <div class="flex items-center gap-x-4">
                             <button
                                 type="button"
-                                class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                                class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
                             >
                                 <Plus />
                             </button>
