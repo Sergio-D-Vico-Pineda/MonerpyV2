@@ -1,16 +1,16 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/Footer.astro";
-import LogoutScript from "@comps/LogoutScript.astro";
-import Header from "@comps/Header.astro";
+import Footer from "@comps/layout/Footer.astro";
+import LogoutScript from "@comps/layout/LogoutScript.astro";
+import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
 import CategoryItem from "@comps/categories/CategoryItem.astro";
 import DeleteConfirmModal from "@comps/categories/DeleteConfirmModal.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
-import JoinFamily from "@/components/JoinFamily.astro";
+import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Plus from "@svg/mono/Plus.astro";
-import Folder from "@/components/svgs/mono/Folder.astro";
+import Folder from "@comps/svgs/mono/Folder.astro";
 
 const user = Astro.locals.user;
 

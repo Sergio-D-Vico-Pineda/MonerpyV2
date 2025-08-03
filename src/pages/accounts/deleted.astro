@@ -1,14 +1,14 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/Footer.astro";
-import LogoutScript from "@comps/LogoutScript.astro";
-import Header from "@comps/Header.astro";
+import Footer from "@comps/layout/Footer.astro";
+import LogoutScript from "@comps/layout/LogoutScript.astro";
+import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay } from "@lib/date-utils.ts";
-import Bin from "@/components/svgs/mono/Bin.astro";
-import ALeft from "@/components/svgs/mono/ALeft.astro";
-import CreditCard from "@/components/svgs/mono/CreditCard.astro";
+import Bin from "@comps/svgs/mono/Bin.astro";
+import ALeft from "@comps/svgs/mono/ALeft.astro";
+import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 
 const user = Astro.locals.user;
 
