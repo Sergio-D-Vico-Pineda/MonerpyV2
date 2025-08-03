@@ -9,7 +9,7 @@ export const updateCategory = defineAction({
         id: z.string().transform(val => parseInt(val)),
         name: z.string().trim().min(1, "Category name is required"),
         color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format"),
-        parentId: z.string().optional().transform(val => val && val !== "" ? parseInt(val) : null)
+        parentId: z.string().nullable().transform(val => val && val !== "" ? parseInt(val) : null)
     }),
     handler: async (input, context) => {
         try {
@@ -112,8 +112,8 @@ export const updateCategory = defineAction({
                 }
             });
 
-            return { 
-                ok: true, 
+            return {
+                ok: true,
                 category: {
                     id: category.id,
                     name: category.name,
