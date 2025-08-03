@@ -126,6 +126,6 @@
 
     // Initialize modal when DOM is ready
     document.addEventListener("DOMContentLoaded", () => {
-        window.deleteConfirmModal = new DeleteConfirmModal();
+        (window as any).deleteConfirmModal = new DeleteConfirmModal();
     });
 </script>

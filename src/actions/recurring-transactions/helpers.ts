@@ -122,7 +122,7 @@ export const getTags = defineAction({
 export const generateRecurringTransactions = defineAction({
     accept: 'form',
     input: z.object({
-        recurringTransactionIds: z.string().transform(val => 
+        recurringTransactionIds: z.string().transform(val =>
             val.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
         ),
         generateUpTo: z.string().optional().default('today') // 'today', 'nextWeek', 'nextMonth'
@@ -173,7 +173,7 @@ export const generateRecurringTransactions = defineAction({
                     // Calculate the target date based on generateUpTo
                     const now = new Date();
                     let targetDate: Date;
-                    
+
                     switch (input.generateUpTo) {
                         case 'nextWeek':
                             targetDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -202,7 +202,7 @@ export const generateRecurringTransactions = defineAction({
                         }
 
                         // Check if we've reached max occurrences
-                        if (recurringTransaction.maxOccurrences && 
+                        if (recurringTransaction.maxOccurrences &&
                             recurringTransaction.occurrencesCount >= recurringTransaction.maxOccurrences) {
                             break;
                         }
@@ -244,9 +244,9 @@ export const generateRecurringTransactions = defineAction({
                             }
 
                             // Update account balance
-                            const balanceChange = recurringTransaction.type === 'Income' ? 
+                            const balanceChange = recurringTransaction.type === 'Income' ?
                                 recurringTransaction.amount : -recurringTransaction.amount;
-                            
+
                             await prisma.account.update({
                                 where: { id: recurringTransaction.accountId },
                                 data: {
@@ -304,8 +304,8 @@ export const generateRecurringTransactions = defineAction({
                 }
             }
 
-            return { 
-                ok: true, 
+            return {
+                ok: true,
                 generated: generatedCount,
                 errors: errors.length > 0 ? errors : undefined
             };

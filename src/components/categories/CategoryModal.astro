@@ -265,7 +265,9 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
         }
 
         // Handle use custom color button
-        const useCustomColorBtn = document.querySelector(".use-custom-color-btn");
+        const useCustomColorBtn = document.querySelector(
+            ".use-custom-color-btn",
+        );
         if (useCustomColorBtn) {
             useCustomColorBtn.addEventListener("click", useCustomColor);
         }

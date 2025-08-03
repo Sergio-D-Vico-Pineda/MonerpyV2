@@ -16,29 +16,29 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
 
 // Days of week for weekly frequency
 const daysOfWeek = [
-    { value: 0, label: 'Sunday' },
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' }
+    { value: 0, label: "Sunday" },
+    { value: 1, label: "Monday" },
+    { value: 2, label: "Tuesday" },
+    { value: 3, label: "Wednesday" },
+    { value: 4, label: "Thursday" },
+    { value: 5, label: "Friday" },
+    { value: 6, label: "Saturday" },
 ];
 
 // Months for yearly frequency
 const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' }
+    { value: 1, label: "January" },
+    { value: 2, label: "February" },
+    { value: 3, label: "March" },
+    { value: 4, label: "April" },
+    { value: 5, label: "May" },
+    { value: 6, label: "June" },
+    { value: 7, label: "July" },
+    { value: 8, label: "August" },
+    { value: 9, label: "September" },
+    { value: 10, label: "October" },
+    { value: 11, label: "November" },
+    { value: 12, label: "December" },
 ];
 ---
 
@@ -65,7 +65,11 @@ const months = [
             </button>
         </div>
 
-        <form id="recurringTransactionForm" method="POST" class="flex flex-col gap-y-6">
+        <form
+            id="recurringTransactionForm"
+            method="POST"
+            class="flex flex-col gap-y-6"
+        >
             <input
                 type="hidden"
                 name="_action"
@@ -99,7 +103,8 @@ const months = [
                                             value={account.id}
                                             data-color={account.color}
                                         >
-                                            {account.name} ({account.accountType}) -
+                                            {account.name} (
+                                            {account.accountType}) -
                                             {new Intl.NumberFormat("es-ES", {
                                                 style: "currency",
                                                 currency: "EUR",
@@ -128,10 +133,14 @@ const months = [
                             <option value="">Select transaction type</option>
                             <option value="Income">Income</option>
                             <option value="Expense">Expense</option>
-                            <option value="InvestmentBuy">Investment Buy</option>
-                            <option value="InvestmentSell">Investment Sell</option>
+                            <option value="InvestmentBuy">Investment Buy</option
+                            >
+                            <option value="InvestmentSell"
+                                >Investment Sell</option
+                            >
                             <option value="LoanPayment">Loan Payment</option>
-                            <option value="LoanRepayment">Loan Repayment</option>
+                            <option value="LoanRepayment">Loan Repayment</option
+                            >
                         </select>
                     </div>
 
@@ -186,7 +195,9 @@ const months = [
                             name="categoryId"
                             class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
-                            <option value="">Select a category (optional)</option>
+                            <option value=""
+                                >Select a category (optional)</option
+                            >
                             {
                                 categories &&
                                     categories.map((category) => (
@@ -296,7 +307,8 @@ const months = [
                             class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                         <p class="text-xs text-gray-400 mt-1">
-                            For months with fewer days, the last day of the month will be used
+                            For months with fewer days, the last day of the
+                            month will be used
                         </p>
                     </div>
 
@@ -337,7 +349,9 @@ const months = [
 
                     <!-- End Condition -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <label
+                            class="block text-sm font-medium text-gray-300 mb-2"
+                        >
                             End Condition *
                         </label>
                         <div class="gap-y-2">
@@ -367,7 +381,9 @@ const months = [
                                     value="maxOccurrences"
                                     class="text-purple-600 focus:ring-purple-500"
                                 />
-                                <span class="text-white">End after X occurrences</span>
+                                <span class="text-white"
+                                    >End after X occurrences</span
+                                >
                             </label>
                         </div>
                     </div>
@@ -496,7 +512,9 @@ const months = [
         const form = document.getElementById(
             "recurringTransactionForm",
         ) as HTMLFormElement;
-        const startDateInput = document.getElementById("startDate") as HTMLInputElement;
+        const startDateInput = document.getElementById(
+            "startDate",
+        ) as HTMLInputElement;
 
         if (formTitle) formTitle.textContent = "Add Recurring Transaction";
         if (formAction) formAction.value = "create";
@@ -505,17 +523,21 @@ const months = [
         if (form) form.reset();
         if (startDateInput) {
             const today = new Date();
-            startDateInput.value = today.toISOString().split('T')[0];
+            startDateInput.value = today.toISOString().split("T")[0];
         }
-        
+
         // Reset time to default
-        const timeInput = document.getElementById("timeOfDay") as HTMLInputElement;
+        const timeInput = document.getElementById(
+            "timeOfDay",
+        ) as HTMLInputElement;
         if (timeInput) timeInput.value = "09:00";
-        
+
         // Reset end condition to never
-        const neverRadio = document.querySelector('input[name="endCondition"][value="never"]') as HTMLInputElement;
+        const neverRadio = document.querySelector(
+            'input[name="endCondition"][value="never"]',
+        ) as HTMLInputElement;
         if (neverRadio) neverRadio.checked = true;
-        
+
         // Hide frequency-specific fields
         hideAllFrequencyFields();
         hideAllEndConditionFields();
@@ -540,7 +562,9 @@ const months = [
     }
 
     // Frequency change handler
-    const frequencySelect = document.getElementById("frequency") as HTMLSelectElement;
+    const frequencySelect = document.getElementById(
+        "frequency",
+    ) as HTMLSelectElement;
     const dayOfWeekContainer = document.getElementById("dayOfWeekContainer");
     const dayOfMonthContainer = document.getElementById("dayOfMonthContainer");
 
@@ -550,49 +574,60 @@ const months = [
     }
 
     if (frequencySelect) {
-        frequencySelect.addEventListener("change", function() {
+        frequencySelect.addEventListener("change", function () {
             hideAllFrequencyFields();
-            
+
             const frequency = this.value;
-            
+
             if (frequency === "Weekly") {
-                if (dayOfWeekContainer) dayOfWeekContainer.classList.remove("hidden");
+                if (dayOfWeekContainer)
+                    dayOfWeekContainer.classList.remove("hidden");
             } else if (frequency === "Monthly" || frequency === "Yearly") {
-                if (dayOfMonthContainer) dayOfMonthContainer.classList.remove("hidden");
+                if (dayOfMonthContainer)
+                    dayOfMonthContainer.classList.remove("hidden");
             }
         });
     }
 
     // End condition change handler
-    const endConditionRadios = document.querySelectorAll('input[name="endCondition"]');
+    const endConditionRadios = document.querySelectorAll(
+        'input[name="endCondition"]',
+    );
     const endDateContainer = document.getElementById("endDateContainer");
-    const maxOccurrencesContainer = document.getElementById("maxOccurrencesContainer");
+    const maxOccurrencesContainer = document.getElementById(
+        "maxOccurrencesContainer",
+    );
 
     function hideAllEndConditionFields() {
         if (endDateContainer) endDateContainer.classList.add("hidden");
-        if (maxOccurrencesContainer) maxOccurrencesContainer.classList.add("hidden");
+        if (maxOccurrencesContainer)
+            maxOccurrencesContainer.classList.add("hidden");
     }
 
-    endConditionRadios.forEach(radio => {
-        radio.addEventListener("change", function(this: HTMLInputElement) {
+    endConditionRadios.forEach((radio) => {
+        radio.addEventListener("change", function (this: HTMLInputElement) {
             hideAllEndConditionFields();
-            
+
             const endCondition = this.value;
-            
+
             if (endCondition === "endDate") {
-                if (endDateContainer) endDateContainer.classList.remove("hidden");
+                if (endDateContainer)
+                    endDateContainer.classList.remove("hidden");
             } else if (endCondition === "maxOccurrences") {
-                if (maxOccurrencesContainer) maxOccurrencesContainer.classList.remove("hidden");
+                if (maxOccurrencesContainer)
+                    maxOccurrencesContainer.classList.remove("hidden");
             }
         });
     });
 
     // Set today's date as default
     (() => {
-        const startDateInput = document.getElementById("startDate") as HTMLInputElement;
+        const startDateInput = document.getElementById(
+            "startDate",
+        ) as HTMLInputElement;
         if (startDateInput) {
             const today = new Date();
-            startDateInput.value = today.toISOString().split('T')[0];
+            startDateInput.value = today.toISOString().split("T")[0];
         }
     })();
 
@@ -669,22 +704,41 @@ const months = [
 
         if (formTitle) formTitle.textContent = "Edit Recurring Transaction";
         if (formAction) formAction.value = "update";
-        if (recurringTransactionId) recurringTransactionId.value = recurringTransaction.id;
+        if (recurringTransactionId)
+            recurringTransactionId.value = recurringTransaction.id;
         if (submitText) submitText.textContent = "Update Recurring Transaction";
 
         // Fill form with recurring transaction data
-        const accountId = document.getElementById("accountId") as HTMLSelectElement;
+        const accountId = document.getElementById(
+            "accountId",
+        ) as HTMLSelectElement;
         const type = document.getElementById("type") as HTMLSelectElement;
-        const description = document.getElementById("description") as HTMLInputElement;
+        const description = document.getElementById(
+            "description",
+        ) as HTMLInputElement;
         const amount = document.getElementById("amount") as HTMLInputElement;
-        const frequency = document.getElementById("frequency") as HTMLSelectElement;
-        const dayOfWeek = document.getElementById("dayOfWeek") as HTMLSelectElement;
-        const dayOfMonth = document.getElementById("dayOfMonth") as HTMLInputElement;
-        const timeOfDay = document.getElementById("timeOfDay") as HTMLInputElement;
-        const startDate = document.getElementById("startDate") as HTMLInputElement;
+        const frequency = document.getElementById(
+            "frequency",
+        ) as HTMLSelectElement;
+        const dayOfWeek = document.getElementById(
+            "dayOfWeek",
+        ) as HTMLSelectElement;
+        const dayOfMonth = document.getElementById(
+            "dayOfMonth",
+        ) as HTMLInputElement;
+        const timeOfDay = document.getElementById(
+            "timeOfDay",
+        ) as HTMLInputElement;
+        const startDate = document.getElementById(
+            "startDate",
+        ) as HTMLInputElement;
         const endDate = document.getElementById("endDate") as HTMLInputElement;
-        const maxOccurrences = document.getElementById("maxOccurrences") as HTMLInputElement;
-        const categoryId = document.getElementById("categoryId") as HTMLSelectElement;
+        const maxOccurrences = document.getElementById(
+            "maxOccurrences",
+        ) as HTMLInputElement;
+        const categoryId = document.getElementById(
+            "categoryId",
+        ) as HTMLSelectElement;
         const tags = document.getElementById("tags") as HTMLInputElement;
 
         if (accountId) accountId.value = recurringTransaction.accountId;
@@ -694,41 +748,49 @@ const months = [
         if (frequency) {
             frequency.value = recurringTransaction.frequency;
             // Trigger change event to show appropriate fields
-            frequency.dispatchEvent(new Event('change'));
+            frequency.dispatchEvent(new Event("change"));
         }
-        if (dayOfWeek && recurringTransaction.dayOfWeek !== null) dayOfWeek.value = recurringTransaction.dayOfWeek;
-        if (dayOfMonth && recurringTransaction.dayOfMonth !== null) dayOfMonth.value = recurringTransaction.dayOfMonth;
+        if (dayOfWeek && recurringTransaction.dayOfWeek !== null)
+            dayOfWeek.value = recurringTransaction.dayOfWeek;
+        if (dayOfMonth && recurringTransaction.dayOfMonth !== null)
+            dayOfMonth.value = recurringTransaction.dayOfMonth;
         if (timeOfDay) timeOfDay.value = recurringTransaction.timeOfDay;
         if (startDate) {
             // Convert database date string to date input format
             const startDateObj = new Date(recurringTransaction.startDate);
-            startDate.value = startDateObj.toISOString().split('T')[0];
+            startDate.value = startDateObj.toISOString().split("T")[0];
         }
-        if (categoryId) categoryId.value = recurringTransaction.categoryId || "";
+        if (categoryId)
+            categoryId.value = recurringTransaction.categoryId || "";
 
         // Handle end condition
-        let endCondition = 'never';
+        let endCondition = "never";
         if (recurringTransaction.endDate) {
-            endCondition = 'endDate';
+            endCondition = "endDate";
             if (endDate) {
                 const endDateObj = new Date(recurringTransaction.endDate);
-                endDate.value = endDateObj.toISOString().split('T')[0];
+                endDate.value = endDateObj.toISOString().split("T")[0];
             }
         } else if (recurringTransaction.maxOccurrences) {
-            endCondition = 'maxOccurrences';
-            if (maxOccurrences) maxOccurrences.value = recurringTransaction.maxOccurrences;
+            endCondition = "maxOccurrences";
+            if (maxOccurrences)
+                maxOccurrences.value = recurringTransaction.maxOccurrences;
         }
 
         // Set end condition radio
-        const endConditionRadio = document.querySelector(`input[name="endCondition"][value="${endCondition}"]`) as HTMLInputElement;
+        const endConditionRadio = document.querySelector(
+            `input[name="endCondition"][value="${endCondition}"]`,
+        ) as HTMLInputElement;
         if (endConditionRadio) {
             endConditionRadio.checked = true;
-            endConditionRadio.dispatchEvent(new Event('change'));
+            endConditionRadio.dispatchEvent(new Event("change"));
         }
 
         // Fill tags
         if (tags) {
-            const tagNames = recurringTransaction.tags.map((tag: any) => tag.name);
+            const tagNames = recurringTransaction.tags.map(
+                (tag: any) => tag.name,
+            );
             tags.value = tagNames.join(", ");
         }
 

@@ -64,8 +64,8 @@ export const updateTag = defineAction({
                 }
             });
 
-            return { 
-                ok: true, 
+            return {
+                ok: true,
                 tag: {
                     id: tag.id,
                     name: tag.name,

@@ -94,19 +94,19 @@ export const getRecurringTransactions = defineAction({
                 const now = new Date();
                 const startDate = new Date(rt.startDate);
                 const endDate = rt.endDate ? new Date(rt.endDate) : null;
-                
+
                 let status = 'active';
-                
+
                 // Check if completed by end date
                 if (endDate && now > endDate) {
                     status = 'completed';
                 }
-                
+
                 // Check if completed by max occurrences
                 if (rt.maxOccurrences && rt.occurrencesCount >= rt.maxOccurrences) {
                     status = 'completed';
                 }
-                
+
                 // Check if not started yet
                 if (now < startDate) {
                     status = 'scheduled';
@@ -200,17 +200,17 @@ export const getRecurringTransaction = defineAction({
             const now = new Date();
             const startDate = new Date(recurringTransaction.startDate);
             const endDate = recurringTransaction.endDate ? new Date(recurringTransaction.endDate) : null;
-            
+
             let status = 'active';
-            
+
             if (endDate && now > endDate) {
                 status = 'completed';
             }
-            
+
             if (recurringTransaction.maxOccurrences && recurringTransaction.occurrencesCount >= recurringTransaction.maxOccurrences) {
                 status = 'completed';
             }
-            
+
             if (now < startDate) {
                 status = 'scheduled';
             }
