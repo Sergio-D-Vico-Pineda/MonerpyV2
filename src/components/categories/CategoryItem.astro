@@ -182,15 +182,433 @@ function isDescendantOf(
 </div>
 
 <script>
-    // Keep the visible swatch in sync
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll('input[type="color"]').forEach((input) => {
-            input.addEventListener("input", (e) => {
-                const target = e.target as HTMLInputElement;
-                const preview = target.nextElementSibling as HTMLDivElement;
+    import { actions } from "astro:actions";
+    import { ToastService } from "@lib/toast.ts";
 
-                preview.style.backgroundColor = target.value;
+    document.addEventListener("DOMContentLoaded", () => {
+        // Find all category items and attach listeners
+        document
+            .querySelectorAll("[data-category-id]")
+            .forEach((categoryItem) => {
+                const categoryId = parseInt(
+                    categoryItem.getAttribute("data-category-id") || "0",
+                );
+                if (!categoryId) return;
+
+                // Skip if already initialized
+                if (categoryItem.hasAttribute("data-initialized")) return;
+                categoryItem.setAttribute("data-initialized", "true");
+
+                // Emit custom events
+                function emitCategoryEvent(
+                    eventName: string,
+                    detail: any = {},
+                ) {
+                    const event = new CustomEvent(eventName, {
+                        detail: { categoryId, ...detail },
+                        bubbles: true,
+                    });
+                    categoryItem.dispatchEvent(event);
+                }
+
+                // Color picker sync
+                const colorInput = categoryItem.querySelector(
+                    'input[type="color"]',
+                ) as HTMLInputElement;
+                const colorPreview = categoryItem.querySelector(
+                    ".category-color-input + div",
+                ) as HTMLDivElement;
+
+                if (colorInput && colorPreview) {
+                    colorInput.addEventListener("input", (e) => {
+                        const target = e.target as HTMLInputElement;
+                        colorPreview.style.backgroundColor = target.value;
+                    });
+                }
+
+                // Event delegation for this category item
+                categoryItem.addEventListener("click", (event) => {
+                    const target = event.target as Element;
+
+                    // Handle edit button clicks
+                    if (target.closest(".edit-category-btn")) {
+                        event.preventDefault();
+                        enterEditMode();
+                        return;
+                    }
+
+                    // Handle save button clicks
+                    if (target.closest(".save-category-btn")) {
+                        event.preventDefault();
+                        saveCategoryChanges();
+                        return;
+                    }
+
+                    // Handle cancel button clicks
+                    if (target.closest(".cancel-category-btn")) {
+                        event.preventDefault();
+                        exitEditMode();
+                        return;
+                    }
+
+                    // Handle delete button clicks
+                    if (target.closest(".delete-category-btn")) {
+                        event.preventDefault();
+                        const categoryName =
+                            target
+                                .closest(".delete-category-btn")
+                                ?.getAttribute("data-category-name") || "";
+                        deleteCategory(categoryName);
+                        return;
+                    }
+
+                    // Handle direct clicks on name and color for editing
+                    if (
+                        target.closest(".category-name-display") ||
+                        target.closest(".category-color-display")
+                    ) {
+                        event.preventDefault();
+                        enterEditMode();
+                        return;
+                    }
+                });
+
+                // Handle keyboard events
+                categoryItem.addEventListener("keydown", (event) => {
+                    const keyboardEvent = event as KeyboardEvent;
+                    if (keyboardEvent.key === "Escape") {
+                        const editMode = categoryItem.querySelector(
+                            ".category-edit:not(.hidden)",
+                        );
+                        if (editMode) {
+                            exitEditMode();
+                        }
+                    } else if (
+                        keyboardEvent.key === "Enter" &&
+                        !keyboardEvent.shiftKey
+                    ) {
+                        const activeInput = document.activeElement;
+                        if (
+                            activeInput &&
+                            (activeInput.classList.contains(
+                                "category-name-input",
+                            ) ||
+                                activeInput.classList.contains("parent-select"))
+                        ) {
+                            keyboardEvent.preventDefault();
+                            saveCategoryChanges();
+                        }
+                    }
+                });
+
+                // Edit mode management
+                function enterEditMode() {
+                    // Hide display mode, show edit mode
+                    const displayMode =
+                        categoryItem.querySelector(".category-display");
+                    const editMode =
+                        categoryItem.querySelector(".category-edit");
+                    const displayActions =
+                        categoryItem.querySelector(".category-actions");
+                    const editActions = categoryItem.querySelector(
+                        ".category-edit-actions",
+                    );
+
+                    if (displayMode) displayMode.classList.add("hidden");
+                    if (editMode) editMode.classList.remove("hidden");
+                    if (displayActions) displayActions.classList.add("hidden");
+                    if (editActions) editActions.classList.remove("hidden");
+
+                    // Add highlight
+                    categoryItem.classList.add(
+                        "bg-purple-900/20",
+                        "ring-2",
+                        "ring-purple-500/50",
+                    );
+
+                    // Focus on name input
+                    const nameInput = categoryItem.querySelector(
+                        ".category-name-input",
+                    ) as HTMLInputElement;
+                    if (nameInput) {
+                        nameInput.focus();
+                        nameInput.select();
+                    }
+
+                    // Emit event
+                    emitCategoryEvent("category-edit-started");
+                }
+
+                function exitEditMode() {
+                    // Show display mode, hide edit mode
+                    const displayMode =
+                        categoryItem.querySelector(".category-display");
+                    const editMode =
+                        categoryItem.querySelector(".category-edit");
+                    const displayActions =
+                        categoryItem.querySelector(".category-actions");
+                    const editActions = categoryItem.querySelector(
+                        ".category-edit-actions",
+                    );
+
+                    if (displayMode) displayMode.classList.remove("hidden");
+                    if (editMode) editMode.classList.add("hidden");
+                    if (displayActions)
+                        displayActions.classList.remove("hidden");
+                    if (editActions) editActions.classList.add("hidden");
+
+                    // Remove highlight
+                    categoryItem.classList.remove(
+                        "bg-purple-900/20",
+                        "ring-2",
+                        "ring-purple-500/50",
+                    );
+
+                    // Reset form to original values
+                    const form = categoryItem.querySelector(
+                        ".edit-category-form",
+                    ) as HTMLFormElement;
+                    if (form) {
+                        const nameDisplay = categoryItem.querySelector(
+                            ".category-name-display",
+                        );
+                        const colorDisplay = categoryItem.querySelector(
+                            ".category-color-display",
+                        ) as HTMLDivElement;
+
+                        if (nameDisplay && colorDisplay) {
+                            const nameInput = form.querySelector(
+                                ".category-name-input",
+                            ) as HTMLInputElement;
+                            const colorInput = form.querySelector(
+                                ".category-color-input",
+                            ) as HTMLInputElement;
+
+                            if (nameInput)
+                                nameInput.value =
+                                    nameDisplay.textContent?.trim() || "";
+                            if (colorInput && colorPreview) {
+                                const originalColor =
+                                    colorDisplay.style.backgroundColor;
+                                colorInput.value = rgbToHex(originalColor);
+                                colorPreview.style.backgroundColor =
+                                    originalColor;
+                            }
+                        }
+                    }
+
+                    // Emit event
+                    emitCategoryEvent("category-edit-cancelled");
+                }
+
+                // Convert RGB to HEX
+                function rgbToHex(rgb: string): string {
+                    if (rgb.startsWith("#")) return rgb;
+
+                    const rgbValues = rgb
+                        .replace(/[^\d,]/g, "")
+                        .split(",")
+                        .map((val) => parseInt(val.trim()))
+                        .filter((val) => !isNaN(val));
+
+                    if (rgbValues.length === 3) {
+                        return (
+                            "#" +
+                            rgbValues
+                                .map((val) => val.toString(16).padStart(2, "0"))
+                                .join("")
+                        );
+                    }
+                    return "#000000";
+                }
+
+                // Save category changes
+                async function saveCategoryChanges() {
+                    const form = categoryItem.querySelector(
+                        ".edit-category-form",
+                    ) as HTMLFormElement;
+                    if (!form) return;
+
+                    const formData = new FormData(form);
+                    formData.set("_action", "update");
+                    formData.set("id", categoryId.toString());
+
+                    // Validate required fields
+                    const name = formData.get("name") as string;
+                    if (!name || name.trim() === "") {
+                        ToastService.showToast({
+                            message: "Category name is required",
+                            type: "error",
+                        });
+                        return;
+                    }
+
+                    try {
+                        // Show loading state
+                        const saveButton = categoryItem.querySelector(
+                            ".save-category-btn",
+                        ) as HTMLButtonElement;
+                        if (saveButton) {
+                            saveButton.disabled = true;
+                            saveButton.innerHTML =
+                                '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+                        }
+
+                        const result = await actions.updateCategory(formData);
+
+                        if (result.data?.ok) {
+                            // Update display elements with new values
+                            const nameDisplay = categoryItem.querySelector(
+                                ".category-name-display",
+                            );
+                            const colorDisplay = categoryItem.querySelector(
+                                ".category-color-display",
+                            );
+
+                            if (nameDisplay) nameDisplay.textContent = name;
+                            if (colorDisplay) {
+                                const color = formData.get("color") as string;
+                                colorDisplay.setAttribute(
+                                    "style",
+                                    `background-color: ${color}`,
+                                );
+                            }
+
+                            // Update delete button data
+                            const deleteButton = categoryItem.querySelector(
+                                ".delete-category-btn",
+                            );
+                            if (deleteButton) {
+                                deleteButton.setAttribute(
+                                    "data-category-name",
+                                    name,
+                                );
+                            }
+
+                            exitEditMode();
+
+                            // Emit success event (toast will be shown after page refresh)
+                            emitCategoryEvent("category-updated", {
+                                name,
+                                color: formData.get("color"),
+                                parentId: formData.get("parentId") || null,
+                            });
+                        } else {
+                            ToastService.showToast({
+                                message:
+                                    result.data?.error ||
+                                    "Failed to update category",
+                                type: "error",
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Error updating category:", err);
+                        ToastService.showToast({
+                            message: "An unexpected error occurred",
+                            type: "error",
+                        });
+                    } finally {
+                        // Reset save button
+                        const saveButton = categoryItem.querySelector(
+                            ".save-category-btn",
+                        ) as HTMLButtonElement;
+                        if (saveButton) {
+                            saveButton.disabled = false;
+                            saveButton.innerHTML =
+                                '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.2929 2.29289C16.6834 1.90237 17.3166 1.90237 17.7071 2.29289L21.7071 6.29289C22.0976 6.68342 22.0976 7.31658 21.7071 7.70711L8.70711 20.7071C8.51957 20.8946 8.26522 21 8 21H4C3.44772 21 3 20.5523 3 20V16C3 15.7348 3.10536 15.4804 3.29289 15.2929L13.2927 5.2931L16.2929 2.29289ZM14 7.41421L5 16.4142V19H7.58579L16.5858 10L14 7.41421ZM18 8.58579L19.5858 7L17 4.41421L15.4142 6L18 8.58579Z"/></svg>';
+                        }
+                    }
+                }
+
+                // Delete category
+                async function deleteCategory(categoryName: string) {
+                    // Use the modal if available, otherwise fallback to confirm
+                    if ((window as any).deleteConfirmModal) {
+                        (window as any).deleteConfirmModal.show(
+                            categoryName,
+                            () => {
+                                performCategoryDeletion(categoryName);
+                            },
+                        );
+                        return;
+                    }
+
+                    // Fallback to confirm dialog
+                    if (
+                        !confirm(
+                            `Are you sure you want to delete the category "${categoryName}"?`,
+                        )
+                    ) {
+                        return;
+                    }
+
+                    performCategoryDeletion(categoryName);
+                }
+
+                // Perform the actual deletion
+                async function performCategoryDeletion(categoryName: string) {
+                    try {
+                        // Show loading state
+                        const deleteButton = categoryItem.querySelector(
+                            ".delete-category-btn",
+                        ) as HTMLButtonElement;
+                        if (deleteButton) {
+                            deleteButton.disabled = true;
+                            deleteButton.innerHTML =
+                                '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+                        }
+
+                        const formData = new FormData();
+                        formData.append("id", categoryId.toString());
+                        const { data, error } =
+                            await actions.deleteCategory(formData);
+
+                        if (error) {
+                            console.error("Delete category error:", error);
+                            ToastService.showToast({
+                                message:
+                                    "Failed to delete category: " +
+                                    error.message,
+                                type: "error",
+                            });
+                        } else if (data?.ok) {
+                            // Emit deletion event before removing from DOM (toast will be shown after page refresh)
+                            emitCategoryEvent("category-deleted", {
+                                categoryName,
+                            });
+
+                            // Remove the category element from DOM
+                            const categoryContainer =
+                                categoryItem.closest(".bg-gray-700") ||
+                                categoryItem;
+                            if (categoryContainer) {
+                                categoryContainer.remove();
+                            }
+                        } else {
+                            ToastService.showToast({
+                                message:
+                                    data?.error || "Failed to delete category",
+                                type: "error",
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Unexpected error:", err);
+                        ToastService.showToast({
+                            message: "An unexpected error occurred",
+                            type: "error",
+                        });
+                    } finally {
+                        // Reset button state if still exists
+                        const deleteButton = categoryItem.querySelector(
+                            ".delete-category-btn",
+                        ) as HTMLButtonElement;
+                        if (deleteButton) {
+                            deleteButton.disabled = false;
+                            deleteButton.innerHTML =
+                                '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                        }
+                    }
+                }
             });
-        });
     });
 </script>
