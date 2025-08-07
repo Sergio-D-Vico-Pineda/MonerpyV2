@@ -1,0 +1,92 @@
+---
+/**
+ * Reusable Tailwind Button component
+ * Usage examples:
+ * <Button variant="primary" size="md" on:click={...}><Plus /> Add</Button>
+ * <Button type="submit" isLoading>Saving...</Button>
+ */
+
+export interface Props {
+  type?: 'button' | 'submit' | 'reset';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  leftIcon?: any; // Astro component or HTML string
+  rightIcon?: any; // Astro component or HTML string
+  isLoading?: boolean;
+  class?: string; // extra classes to merge
+  disabled?: boolean;
+}
+
+const {
+  type = 'button',
+  variant = 'primary',
+  size = 'md',
+  leftIcon,
+  rightIcon,
+  isLoading = false,
+  class: extra = '',
+  disabled = false,
+  ...rest
+} = Astro.props as Props;
+
+const base =
+  'inline-flex items-center justify-center rounded transition-colors font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-60 disabled:cursor-not-allowed';
+
+const variants: Record<string, string> = {
+  primary:
+    'bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500',
+  secondary:
+    'bg-gray-700 hover:bg-gray-600 text-gray-100 focus:ring-gray-400',
+  danger:
+    'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
+  ghost:
+    'bg-transparent hover:bg-gray-700/50 text-gray-200 focus:ring-gray-500',
+};
+
+const sizes: Record<string, string> = {
+  sm: 'text-sm px-3 py-1.5 gap-1',
+  md: 'text-sm px-4 py-2 gap-2',
+  lg: 'text-base px-5 py-2.5 gap-2',
+};
+
+const spinner = `
+  <svg class="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+  </svg>
+`;
+
+const cls = [base, variants[variant] || variants.primary, sizes[size] || sizes.md, extra]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<button type={type} class={cls} disabled={disabled || isLoading} {...rest}>
+  {isLoading && (
+    <Fragment set:html={spinner} />
+  )}
+
+  {!isLoading && leftIcon && (
+    typeof leftIcon === 'string' ? (
+      <Fragment set:html={leftIcon} />
+    ) : (
+      <Fragment>
+        {leftIcon}
+      </Fragment>
+    )
+  )}
+
+  <span class="inline-flex items-center">
+    <slot />
+  </span>
+
+  {!isLoading && rightIcon && (
+    typeof rightIcon === 'string' ? (
+      <Fragment set:html={rightIcon} />
+    ) : (
+      <Fragment>
+        {rightIcon}
+      </Fragment>
+    )
+  )}
+</button>
