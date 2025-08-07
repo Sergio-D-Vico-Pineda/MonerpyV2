@@ -2,6 +2,9 @@
 import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import TagsPicker from "@comps/tags/TagsPicker.astro";
+import Input from "../Input.astro";
+import { daysOfWeek, months, transactionTypes } from "../../types/arrays.ts";
+import TypePicker from "../TypePicker.astro";
 
 // Get data for the modal form
 const [accountsResult, categoriesResult] = await Promise.all([
@@ -13,33 +16,6 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 const categories = categoriesResult.data?.ok
     ? categoriesResult.data.categories
     : [];
-
-// Days of week for weekly frequency
-const daysOfWeek = [
-    { value: 0, label: "Sunday" },
-    { value: 1, label: "Monday" },
-    { value: 2, label: "Tuesday" },
-    { value: 3, label: "Wednesday" },
-    { value: 4, label: "Thursday" },
-    { value: 5, label: "Friday" },
-    { value: 6, label: "Saturday" },
-];
-
-// Months for yearly frequency
-const months = [
-    { value: 1, label: "January" },
-    { value: 2, label: "February" },
-    { value: 3, label: "March" },
-    { value: 4, label: "April" },
-    { value: 5, label: "May" },
-    { value: 6, label: "June" },
-    { value: 7, label: "July" },
-    { value: 8, label: "August" },
-    { value: 9, label: "September" },
-    { value: 10, label: "October" },
-    { value: 11, label: "November" },
-    { value: 12, label: "December" },
-];
 ---
 
 <div
@@ -47,9 +23,11 @@ const months = [
     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
 >
     <div
-        class="bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
+        class="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
     >
-        <div class="flex justify-between items-end mb-6">
+        <header
+            class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
+        >
             <h2
                 class="font-semibold text-purple-400 text-xl"
                 id="recurring-modal-form-title"
@@ -63,12 +41,12 @@ const months = [
             >
                 <X class="w-6 h-6" />
             </button>
-        </div>
+        </header>
 
         <form
             id="recurringTransactionForm"
             method="POST"
-            class="flex flex-col gap-y-6"
+            class="p-6 flex flex-col gap-y-6"
         >
             <input
                 type="hidden"
@@ -117,59 +95,24 @@ const months = [
                     </div>
 
                     <!-- Transaction Type -->
-                    <div>
-                        <label
-                            for="type"
-                            class="block text-sm font-medium text-gray-300 mb-2"
-                        >
-                            Type *
-                        </label>
-                        <select
-                            id="recurringType"
-                            name="type"
-                            required
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                            <option value="">Select transaction type</option>
-                            <option value="Income">Income</option>
-                            <option value="Expense">Expense</option>
-                            <option value="InvestmentBuy">Investment Buy</option
-                            >
-                            <option value="InvestmentSell"
-                                >Investment Sell</option
-                            >
-                            <option value="LoanPayment">Loan Payment</option>
-                            <option value="LoanRepayment">Loan Repayment</option
-                            >
-                        </select>
-                    </div>
+                    <TypePicker />
 
                     <!-- Description -->
-                    <div>
-                        <label
-                            for="description"
-                            class="block text-sm font-medium text-gray-300 mb-2"
-                        >
-                            Description *
-                        </label>
-                        <input
-                            type="text"
-                            id="description"
-                            name="description"
-                            required
-                            placeholder="Enter recurring transaction description"
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                    </div>
+                    <Input
+                        id="description"
+                        name="Recurring Transaction Name"
+                        formName="description"
+                        placeholder="Enter recurring transaction name"
+                        required
+                    />
 
                     <!-- Amount -->
-                    <div>
-                        <label
-                            for="amount"
+                    <label>
+                        <span
                             class="block text-sm font-medium text-gray-300 mb-2"
                         >
                             Amount (€) *
-                        </label>
+                        </span>
                         <input
                             type="number"
                             id="amount"
@@ -180,16 +123,15 @@ const months = [
                             placeholder="0.00"
                             class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
-                    </div>
+                    </label>
 
                     <!-- Category -->
-                    <div>
-                        <label
-                            for="categoryId"
+                    <label>
+                        <span
                             class="block text-sm font-medium text-gray-300 mb-2"
                         >
                             Category
-                        </label>
+                        </span>
                         <select
                             id="categoryId"
                             name="categoryId"
@@ -212,33 +154,7 @@ const months = [
                                     ))
                             }
                         </select>
-                    </div>
-
-                    <!-- New Category -->
-                    <div>
-                        <label
-                            for="newCategory"
-                            class="block text-sm font-medium text-gray-300 mb-2"
-                        >
-                            Or create new category
-                        </label>
-                        <div class="flex gap-2">
-                            <input
-                                type="text"
-                                id="newCategory"
-                                name="newCategory"
-                                placeholder="New category name"
-                                class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            />
-                            <input
-                                type="color"
-                                id="newCategoryColor"
-                                name="newCategoryColor"
-                                value="#6172f3"
-                                class="w-12 h-10 bg-gray-700 border border-gray-600 rounded-lg"
-                            />
-                        </div>
-                    </div>
+                    </label>
                 </div>
 
                 <!-- Right Column -->
@@ -480,20 +396,22 @@ const months = [
 <script>
     // Modal functionality
     const modal = document.getElementById("recurringTransactionModal");
-    const closeModal = document.getElementById("closeRecurringModal");
+    const closeButton = document.getElementById("closeRecurringModal");
     const cancelBtn = document.getElementById("recurring-modal-cancel-btn");
 
     function openModal() {
         if (modal) {
             modal.classList.remove("hidden");
             modal.classList.add("flex");
+            document.body.style.overflow = "hidden";
         }
     }
 
-    function closeModalHandler() {
+    function closeModal() {
         if (modal) {
             modal.classList.add("hidden");
             modal.classList.remove("flex");
+            document.body.style.overflow = "auto";
             resetForm();
         }
     }
@@ -548,19 +466,19 @@ const months = [
     }
 
     // Event listeners
-    if (closeModal) {
-        closeModal.addEventListener("click", closeModalHandler);
+    if (closeButton) {
+        closeButton.addEventListener("click", closeModal);
     }
 
     if (cancelBtn) {
-        cancelBtn.addEventListener("click", closeModalHandler);
+        cancelBtn.addEventListener("click", closeModal);
     }
 
     // Close modal when clicking outside
     if (modal) {
         modal.addEventListener("click", function (event) {
             if (event.target === modal) {
-                closeModalHandler();
+                closeModal();
             }
         });
     }

@@ -9,6 +9,7 @@ import { formatDateForDisplay } from "@lib/date-utils.ts";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import ALeft from "@comps/svgs/mono/ALeft.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
+import { accountTypes } from "@/types/arrays.ts";
 
 const user = Astro.locals.user;
 
@@ -49,16 +50,6 @@ const allAccounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 const deletedAccounts = allAccounts
     ? allAccounts.filter((account: any) => account.deletedAt !== null)
     : [];
-
-// Account type options
-const accountTypes = [
-    { value: "Cash", label: "Cash", icon: "💵" },
-    { value: "Checking", label: "Checking Account", icon: "🏦" },
-    { value: "Savings", label: "Savings Account", icon: "💰" },
-    { value: "CreditCard", label: "Credit Card", icon: "💳" },
-    { value: "Investment", label: "Investment Account", icon: "📈" },
-    { value: "Loan", label: "Loan Account", icon: "🏠" },
-];
 ---
 
 <Layout title="Deleted Accounts" description="Manage deleted accounts">

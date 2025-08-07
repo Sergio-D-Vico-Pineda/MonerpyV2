@@ -3,6 +3,9 @@ import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import Input from "../Input.astro";
 import TagsPicker from "@comps/tags/TagsPicker.astro";
+import { transactionTypes } from "@/types/arrays.ts";
+import TypePicker from "../TypePicker.astro";
+import TypeSelect from "../TypeSelect.astro";
 
 // Get data for the modal form
 const [accountsResult, categoriesResult] = await Promise.all([
@@ -91,34 +94,16 @@ const categories = categoriesResult.data?.ok
                     name="Transaction Name"
                     formName="name"
                     required={true}
-                    placeholder="Enter transaction description"
+                    placeholder="Enter transaction name"
                     classes="flex-1"
                 />
             </div>
 
             <!-- Transaction Type -->
-            <label>
-                <span class="block text-sm font-medium text-gray-300 mb-2">
-                    Type *
-                </span>
-                <select
-                    id="type"
-                    name="type"
-                    required
-                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                    <option value="">Select transaction type</option>
-                    <option value="Income">Income</option>
-                    <option value="Expense">Expense</option>
-                    <option value="InvestmentBuy">Investment Buy</option>
-                    <option value="InvestmentSell">Investment Sell</option>
-                    <option value="LoanPayment">Loan Payment</option>
-                    <option value="LoanRepayment">Loan Repayment</option>
-                </select>
-            </label>
 
-            <div class="flex items-center gap-x-4 justify-center *:flex-1">
-                <label>
+            <div class="flex items-center gap-x-4 justify-center">
+                <TypePicker />
+                <label class="flex-1">
                     <span class="block text-sm font-medium text-gray-300 mb-2">
                         Amount (€) *
                     </span>
@@ -133,20 +118,20 @@ const categories = categoriesResult.data?.ok
                         class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                 </label>
-
-                <label>
-                    <span class="block text-sm font-medium text-gray-300 mb-2">
-                        Date *
-                    </span>
-                    <input
-                        type="datetime-local"
-                        id="date"
-                        name="date"
-                        required
-                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                </label>
             </div>
+
+            <label>
+                <span class="block text-sm font-medium text-gray-300 mb-2">
+                    Date *
+                </span>
+                <input
+                    type="datetime-local"
+                    id="date"
+                    name="date"
+                    required
+                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+            </label>
 
             <label>
                 <span class="block text-sm font-medium text-gray-300 mb-2">

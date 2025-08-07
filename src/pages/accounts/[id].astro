@@ -53,32 +53,6 @@ if (!accountResult.data?.ok || !accountResult.data.account) {
 }
 
 const account = accountResult.data.account;
-
-// Account type options
-const accountTypes = [
-    { value: "Cash", label: "Cash", icon: "💵" },
-    { value: "Checking", label: "Checking Account", icon: "🏦" },
-    { value: "Savings", label: "Savings Account", icon: "💰" },
-    { value: "CreditCard", label: "Credit Card", icon: "💳" },
-    { value: "Investment", label: "Investment Account", icon: "📈" },
-    { value: "Loan", label: "Loan Account", icon: "🏠" },
-];
-
-// Predefined colors
-const colors = [
-    "#6172f3",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-    "#8b5cf6",
-    "#06b6d4",
-    "#84cc16",
-    "#f97316",
-    "#ec4899",
-    "#6b7280",
-    "#14b8a6",
-    "#f43f5e",
-];
 ---
 
 <Layout
