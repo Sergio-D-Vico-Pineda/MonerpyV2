@@ -5,7 +5,12 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from "@lib/date-utils.ts";
+import {
+    formatDateForDisplay,
+    formatDateOnlyForDisplay,
+    formatCurrency,
+} from "@lib/date-utils.ts";
+import { colors, accountTypes } from "../../types/arrays.ts";
 
 const user = Astro.locals.user;
 

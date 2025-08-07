@@ -10,6 +10,7 @@ import {
     formatDateForDisplay,
     getDatePart,
     getTimePartWithoutSeconds,
+    formatCurrency,
 } from "@lib/date-utils.ts";
 import Loop from "@comps/svgs/mono/Loop.astro";
 import Transaction from "@comps/svgs/mono/Transaction.astro";
@@ -242,14 +243,7 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                                                 ? "+"
                                                                 : "";
                                                         })()}
-                                                        {new Intl.NumberFormat(
-                                                            "es-ES",
-                                                            {
-                                                                style: "currency",
-                                                                currency: "EUR",
-                                                                minimumFractionDigits: 2,
-                                                            },
-                                                        ).format(
+                                                        {formatCurrency(
                                                             dateTransactions.reduce(
                                                                 (sum, t) => {
                                                                     return (
@@ -381,15 +375,7 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                                                     "Income"
                                                                         ? "+"
                                                                         : "-"}
-                                                                    {new Intl.NumberFormat(
-                                                                        "es-ES",
-                                                                        {
-                                                                            style: "currency",
-                                                                            currency:
-                                                                                "EUR",
-                                                                            minimumFractionDigits: 2,
-                                                                        },
-                                                                    ).format(
+                                                                    {formatCurrency(
                                                                         transaction.amount,
                                                                     )}
                                                                 </div>

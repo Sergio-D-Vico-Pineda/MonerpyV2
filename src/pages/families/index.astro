@@ -5,7 +5,7 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from "@lib/date-utils.ts";
+import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import Users from "@comps/svgs/mono/Users.astro";
 
 const user = Astro.locals.user;
@@ -332,11 +332,7 @@ const userRole = familyDetailsResult.data?.ok
                         account.balance >= 0 ? "text-green-400" : "text-red-400"
                       }`}
                     >
-                      {new Intl.NumberFormat("es-ES", {
-                        style: "currency",
-                        currency: "EUR",
-                        minimumFractionDigits: 2,
-                      }).format(account.balance)}
+                      {formatCurrency(account.balance)}
                     </p>
                   </div>
                 ))}

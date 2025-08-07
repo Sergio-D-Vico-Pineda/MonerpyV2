@@ -6,7 +6,7 @@ import Header from "@comps/layout/Header.astro";
 import RecurringTransactionModal from "@comps/modal/RecurringTransactionModal.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from "@lib/date-utils.ts";
+import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreateAccount from "@comps/layout/CreateAccount.astro";
 import Transaction from "@comps/svgs/mono/Transaction.astro";
@@ -376,14 +376,7 @@ function getStatusText(status: string): string {
                                                     "Income"
                                                         ? "+"
                                                         : "-"}
-                                                    {new Intl.NumberFormat(
-                                                        "es-ES",
-                                                        {
-                                                            style: "currency",
-                                                            currency: "EUR",
-                                                            minimumFractionDigits: 2,
-                                                        },
-                                                    ).format(
+                                                    {formatCurrency(
                                                         recurringTransaction.amount,
                                                     )}
                                                 </div>
@@ -399,8 +392,6 @@ function getStatusText(status: string): string {
                                                             recurringTransaction.startDate,
                                                             {
                                                                 includeTime: false,
-                                                                dateStyle:
-                                                                    "short",
                                                             },
                                                         )}
                                                     </div>
@@ -413,8 +404,6 @@ function getStatusText(status: string): string {
                                                                 recurringTransaction.endDate,
                                                                 {
                                                                     includeTime: false,
-                                                                    dateStyle:
-                                                                        "short",
                                                                 },
                                                             )}
                                                         </div>
@@ -471,8 +460,6 @@ function getStatusText(status: string): string {
                                                                     )[0],
                                                                 {
                                                                     includeTime: false,
-                                                                    dateStyle:
-                                                                        "medium",
                                                                 },
                                                             )}
                                                         </div>
@@ -581,22 +568,12 @@ function getStatusText(status: string): string {
                                                                         log.executionTime,
                                                                         {
                                                                             includeTime: false,
-                                                                            dateStyle:
-                                                                                "short",
                                                                         },
                                                                     )}
                                                                     {log.generatedTransaction && (
                                                                         <span class="text-green-400 ml-1">
                                                                             ✓{" "}
-                                                                            {new Intl.NumberFormat(
-                                                                                "es-ES",
-                                                                                {
-                                                                                    style: "currency",
-                                                                                    currency:
-                                                                                        "EUR",
-                                                                                    minimumFractionDigits: 2,
-                                                                                },
-                                                                            ).format(
+                                                                            {formatCurrency(
                                                                                 log
                                                                                     .generatedTransaction
                                                                                     .amount,

@@ -10,6 +10,7 @@ import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
+import { formatCurrency } from "@lib/date-utils.ts";
 
 const user = Astro.locals.user;
 
@@ -134,14 +135,9 @@ const accountTypes = [
                                                 <p
                                                     class={`font-semibold ${account.balance >= 0 ? "text-green-400" : "text-red-400"}`}
                                                 >
-                                                    {new Intl.NumberFormat(
-                                                        "es-ES",
-                                                        {
-                                                            style: "currency",
-                                                            currency: "EUR",
-                                                            minimumFractionDigits: 2,
-                                                        },
-                                                    ).format(account.balance)}
+                                                    {formatCurrency(
+                                                        account.balance,
+                                                    )}
                                                 </p>
                                             </div>
 

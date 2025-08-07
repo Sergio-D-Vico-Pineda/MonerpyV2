@@ -4,7 +4,8 @@ import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay } from "@lib/date-utils.ts";
+import { formatDateOnlyForDisplay, formatCurrency } from "@lib/date-utils.ts";
+import { timePeriods } from "../../../types/arrays.ts";
 
 const user = Astro.locals.user;
 
@@ -61,15 +62,6 @@ const balanceChangePercent =
     oldestBalance && oldestBalance.balance !== 0
         ? (balanceChange / Math.abs(oldestBalance.balance)) * 100
         : 0;
-
-// Time period options
-const timePeriods = [
-    { days: 7, label: "7 days" },
-    { days: 30, label: "30 days" },
-    { days: 90, label: "90 days" },
-    { days: 180, label: "6 months" },
-    { days: 365, label: "1 year" },
-];
 ---
 
 <Layout
@@ -173,11 +165,7 @@ const timePeriods = [
                             >
                                 {
                                     newestBalance
-                                        ? new Intl.NumberFormat("es-ES", {
-                                              style: "currency",
-                                              currency: "EUR",
-                                              minimumFractionDigits: 2,
-                                          }).format(newestBalance.balance)
+                                        ? formatCurrency(newestBalance.balance)
                                         : "N/A"
                                 }
                             </p>
@@ -192,13 +180,7 @@ const timePeriods = [
                                 class={`text-2xl font-bold ${balanceChange >= 0 ? "text-green-400" : "text-red-400"}`}
                             >
                                 {balanceChange >= 0 ? "+" : ""}
-                                {
-                                    new Intl.NumberFormat("es-ES", {
-                                        style: "currency",
-                                        currency: "EUR",
-                                        minimumFractionDigits: 2,
-                                    }).format(balanceChange)
-                                }
+                                {formatCurrency(balanceChange)}
                             </p>
                         </div>
 
@@ -273,13 +255,8 @@ const timePeriods = [
                                                         return (
                                                             <tr class="border-b border-gray-700 hover:bg-gray-700 transition-colors">
                                                                 <td class="py-3 px-4 text-white">
-                                                                    {formatDateForDisplay(
+                                                                    {formatDateOnlyForDisplay(
                                                                         record.date,
-                                                                        {
-                                                                            includeTime: false,
-                                                                            dateStyle:
-                                                                                "long",
-                                                                        },
                                                                     )}
                                                                 </td>
                                                                 <td
@@ -290,15 +267,7 @@ const timePeriods = [
                                                                             : "text-red-400"
                                                                     }`}
                                                                 >
-                                                                    {new Intl.NumberFormat(
-                                                                        "es-ES",
-                                                                        {
-                                                                            style: "currency",
-                                                                            currency:
-                                                                                "EUR",
-                                                                            minimumFractionDigits: 2,
-                                                                        },
-                                                                    ).format(
+                                                                    {formatCurrency(
                                                                         record.balance,
                                                                     )}
                                                                 </td>
@@ -310,15 +279,7 @@ const timePeriods = [
                                                                             : "text-red-300"
                                                                     }`}
                                                                 >
-                                                                    {new Intl.NumberFormat(
-                                                                        "es-ES",
-                                                                        {
-                                                                            style: "currency",
-                                                                            currency:
-                                                                                "EUR",
-                                                                            minimumFractionDigits: 2,
-                                                                        },
-                                                                    ).format(
+                                                                    {formatCurrency(
                                                                         record.cashBalance,
                                                                     )}
                                                                 </td>
@@ -339,15 +300,7 @@ const timePeriods = [
                                                                             0
                                                                                 ? "+"
                                                                                 : ""}
-                                                                            {new Intl.NumberFormat(
-                                                                                "es-ES",
-                                                                                {
-                                                                                    style: "currency",
-                                                                                    currency:
-                                                                                        "EUR",
-                                                                                    minimumFractionDigits: 2,
-                                                                                },
-                                                                            ).format(
+                                                                            {formatCurrency(
                                                                                 dailyChange,
                                                                             )}
                                                                         </>

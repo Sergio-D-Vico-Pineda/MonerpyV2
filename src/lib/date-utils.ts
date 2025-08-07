@@ -82,22 +82,32 @@ function getCurrentDateTimeLocal(): string {
  *   - includeTime: Whether to include the time part (default: true).
  *   - includeSeconds: Whether to include seconds in the time part (default: false).
  *   - dateStyle: The style of the date part. Options:
- *       - 'short': "MM/DD/YYYY" (e.g., "06/01/2024")
  *       - 'medium': "DD/MM/YYYY" (e.g., "01/06/2024")
  *       - 'long': "DD Month YYYY" (e.g., "01 June 2024")
+ *   - pm: Whether to format the time in 12-hour format with AM/PM (default: false).
  * @returns Formatted date string according to the specified options.
  *
  * @example
- * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'short' }); // "06/01/2024 14:30"
- * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'medium' }); // "01/06/2024 14:30"
+ * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'normal' }); // "01/06/2024 14:30"
  * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', includeTime: false }); // "01 June 2024"
+ * formatDateForDisplay("2024-06-01 14:30:00", { includeSeconds: true }); // "01/06/2024 14:30:00"
+ * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', pm: true }); // "01 June 2024 2:30:00 PM"
  */
-function formatDateForDisplay(dateTimeString: string, options: {
-    includeTime?: boolean;
-    includeSeconds?: boolean;
-    dateStyle?: 'short' | 'medium' | 'long';
-} = {}): string {
-    const { includeTime = true, includeSeconds = false, dateStyle = 'medium' } = options;
+function formatDateForDisplay(
+    dateTimeString: string,
+    options: {
+        includeTime?: boolean;
+        includeSeconds?: boolean;
+        dateStyle?: 'normal' | 'long';
+        pm?: boolean;
+    } = {}
+): string {
+    const {
+        includeTime = true,
+        includeSeconds = false,
+        dateStyle = 'normal',
+        pm = false,
+    } = options;
 
     const parts = dateTimeString.split(' ');
     if (parts.length !== 2) {
@@ -108,12 +118,8 @@ function formatDateForDisplay(dateTimeString: string, options: {
     const [year, month, day] = datePart.split('-');
 
     let formattedDate: string;
-
     switch (dateStyle) {
-        case 'short':
-            formattedDate = `${month}/${day}/${year}`;
-            break;
-        case 'medium':
+        case 'normal':
             formattedDate = `${day}/${month}/${year}`;
             break;
         case 'long':
@@ -123,12 +129,36 @@ function formatDateForDisplay(dateTimeString: string, options: {
             formattedDate = `${day}/${month}/${year}`;
     }
 
-    if (includeTime) {
-        const timeToShow = includeSeconds ? timePart : timePart.substring(0, 5);
-        return `${formattedDate} ${timeToShow}`;
+    if (!includeTime) {
+        return formattedDate;
     }
 
-    return formattedDate;
+    let hours = 0, minutes = 0, seconds = 0;
+    const timeParts = timePart.split(':');
+    if (timeParts.length >= 2) {
+        hours = Number(timeParts[0]);
+        minutes = Number(timeParts[1]);
+        seconds = Number(timeParts[2] || '0');
+    }
+
+    let formattedTime: string;
+    if (pm) {
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const adjustedHours = hours % 12 || 12;
+        if (includeSeconds) {
+            formattedTime = `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
+        } else {
+            formattedTime = `${adjustedHours}:${String(minutes).padStart(2, '0')} ${period}`;
+        }
+    } else {
+        if (includeSeconds) {
+            formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        } else {
+            formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+    }
+
+    return `${formattedDate} ${formattedTime}`;
 }
 
 /**
@@ -143,16 +173,31 @@ function getDatePart(dateTimeString: string): string {
 /**
  * Gets the time part only from a date-time string
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
- * @returns Time part "HH:mm:ss"
+ * @param pm - Optional parameter to indicate if the time should be in 12-hour format with AM/PM
+ *            (default: false, which returns 24-hour format)
+ * @returns Time part "HH:mm:ss" (24-hour) or "HH:mm:ss AM/PM" (12-hour)
+ *
+ * @example
+ * getTimePart("2024-06-01 14:30:45") // "14:30:45"
+ * getTimePart("2024-06-01 14:30:45", true) // "2:30:45 PM"
  */
-function getTimePart(dateTimeString: string): string {
-    const timePart = dateTimeString.split(' ')[1] || '00:00:00';
-    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+function getTimePart(dateTimeString: string, pm: boolean = false): string {
+    const timePart = dateTimeString.split(' ')[1];
+    if (!timePart) {
+        throw new Error('Invalid date-time format');
+    }
+    const [hoursStr, minutesStr, secondsStr] = timePart.split(':');
+    const hours = Number(hoursStr);
+    const minutes = Number(minutesStr);
+    const seconds = Number(secondsStr);
 
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
-
-    return `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
+    if (pm) {
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+        return `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
+    } else {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
 }
 
 /**
@@ -186,19 +231,30 @@ function getCurrentDate(): string {
  * @param dateStyle - Formatting style
  * @returns Formatted date string
  */
-function formatDateOnlyForDisplay(dateString: string, dateStyle: 'short' | 'medium' | 'long' = 'medium'): string {
+function formatDateOnlyForDisplay(dateString: string, dateStyle: 'normal' | 'long' = 'normal'): string {
     const [year, month, day] = dateString.split('-');
 
     switch (dateStyle) {
-        case 'short':
-            return `${month}/${day}/${year}`;
-        case 'medium':
+        case 'normal':
             return `${day}/${month}/${year}`;
         case 'long':
             return `${day} ${months[parseInt(month) - 1].label} ${year}`;
-        default:
-            return `${day}/${month}/${year}`;
     }
+}
+
+/**
+ * Formats a number as currency (EUR, es-ES locale by default)
+ * @param amount - The numeric value to format
+ * @param currency - The currency code (default: 'EUR')
+ * @param locale - The locale string (default: 'es-ES')
+ * @returns Formatted currency string
+ */
+function formatCurrency(amount: number, currency = 'EUR', locale = 'es-ES'): string {
+    return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 2,
+    }).format(amount);
 }
 
 export {
@@ -211,5 +267,6 @@ export {
     getTimePart,
     getTimePartWithoutSeconds,
     getCurrentDate,
-    formatDateOnlyForDisplay
+    formatDateOnlyForDisplay,
+    formatCurrency
 }
