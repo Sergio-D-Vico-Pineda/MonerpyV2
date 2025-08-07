@@ -44,11 +44,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const isPublicPath = publicPaths.includes(url.pathname);
     const isActionEndpoint = url.pathname.startsWith('/_actions/');
 
+    // Check if user is on login page with redirectTo parameter and is already logged in
     // If user is logged in and trying to access login page, redirect to dashboard
     // But skip this for action endpoints to avoid interfering with login/logout actions
     if (locals.user && url.pathname === '/login' && !isActionEndpoint) {
-        console.log(`[MIDDLEWARE] Redirecting authenticated user from login to dashboard`);
-        return redirect('/dashboard', 302);
+        const redirectTo = url.searchParams.get('redirectTo') || '/dashboard';
+        console.log(`[MIDDLEWARE] Redirecting authenticated user from login to ${redirectTo}`);
+        return redirect(redirectTo, 302);
     }
 
     // If user is not logged in and trying to access a protected page, redirect to login
