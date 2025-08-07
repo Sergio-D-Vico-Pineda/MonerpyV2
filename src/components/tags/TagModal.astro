@@ -1,5 +1,6 @@
 ---
 import X from "@svg/mono/X.astro";
+import ColorPicker from "../ColorPicker.astro";
 
 // Predefined colors for tags
 const colors = [
@@ -19,121 +20,64 @@ const colors = [
 ---
 
 <!-- Modal Background -->
-<div id="tagModal" class="fixed inset-0 bg-black/50 z-50 hidden">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div
-            class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+<div
+    id="tagModal"
+    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center min-h-screen p-4"
+>
+    <div
+        class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+    >
+        <!-- Modal Header -->
+        <header
+            class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
         >
-            <!-- Modal Header -->
-            <div
-                class="flex items-end justify-between p-6 border-b border-gray-700"
+            <h2 class="text-xl font-semibold text-purple-400">Create Tag</h2>
+            <button
+                type="button"
+                id="closeTagModal"
+                class="text-gray-400 hover:text-white transition-colors"
             >
-                <h2 class="text-xl font-semibold text-purple-400">
-                    Create Tag
-                </h2>
+                <X class="w-6 h-6" />
+            </button>
+        </header>
+
+        <!-- Modal Content -->
+        <form method="POST" class="p-6 flex flex-col gap-y-4">
+            <input type="hidden" name="_action" value="create" />
+
+            <label>
+                <span class="block text-sm font-medium text-gray-200 mb-2">
+                    Tag Name
+                </span>
+                <input
+                    type="text"
+                    id="tagName"
+                    name="name"
+                    required
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="Enter tag name"
+                />
+            </label>
+
+            <ColorPicker id="color" formName="Tag Color" />
+
+            <!-- Submit Buttons -->
+            <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button
                     type="button"
-                    id="closeTagModal"
-                    class="text-gray-400 hover:text-white transition-colors"
+                    id="cancelTagButton"
+                    class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
                 >
-                    <X class="w-6 h-6" />
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded transition-colors"
+                >
+                    Create Tag
                 </button>
             </div>
-
-            <!-- Modal Content -->
-            <div class="p-6">
-                <form method="POST" class="flex flex-col gap-y-4">
-                    <input type="hidden" name="_action" value="create" />
-
-                    <!-- Tag Name -->
-                    <div>
-                        <label
-                            for="tagName"
-                            class="block text-sm font-medium text-gray-200 mb-2"
-                        >
-                            Tag Name
-                        </label>
-                        <input
-                            type="text"
-                            id="tagName"
-                            name="name"
-                            required
-                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            placeholder="Enter tag name"
-                        />
-                    </div>
-
-                    <!-- Color Picker -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-200 mb-2"
-                        >
-                            Tag Color
-                        </label>
-                        <div class="grid grid-cols-6 gap-2">
-                            {
-                                colors.map((color, index) => (
-                                    <label class="relative cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="color"
-                                            value={color}
-                                            checked={index === 0}
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-8 h-8 rounded-full border-2 border-transparent peer-checked:border-white peer-checked:ring-2 peer-checked:ring-purple-500 hover:scale-110 transition-transform"
-                                            style={`background-color: ${color}`}
-                                        />
-                                    </label>
-                                ))
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Custom Color Input -->
-                    <div>
-                        <label
-                            for="customTagColor"
-                            class="block text-sm font-medium text-gray-200 mb-2"
-                        >
-                            Or Choose Custom Color
-                        </label>
-                        <div class="flex items-center gap-x-2">
-                            <input
-                                type="color"
-                                id="customTagColor"
-                                class="w-12 h-10 bg-gray-700 border border-gray-600 rounded cursor-pointer"
-                                value="#e99537"
-                            />
-                            <button
-                                type="button"
-                                class="use-custom-tag-color-btn px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded-lg transition-colors"
-                            >
-                                Use Custom
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Submit Buttons -->
-                    <div class="flex items-center justify-end gap-x-3 pt-4">
-                        <button
-                            type="button"
-                            id="cancelTagButton"
-                            class="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
-                        >
-                            Create Tag
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -142,14 +86,12 @@ const colors = [
         const modal = document.getElementById("tagModal");
         const closeModalBtn = document.getElementById("closeTagModal");
         const cancelBtn = document.getElementById("cancelTagButton");
-        const customColorInput = document.getElementById(
-            "customTagColor",
-        ) as HTMLInputElement;
 
         // Modal controls
         function showModal() {
             if (modal) {
                 modal.classList.remove("hidden");
+                modal.classList.add("flex");
                 document.body.style.overflow = "hidden";
 
                 // Focus on name input
@@ -204,45 +146,6 @@ const colors = [
                 }
             });
         }
-
-        // Handle use custom color button
-        const useCustomColorBtn = document.querySelector(
-            ".use-custom-tag-color-btn",
-        );
-        if (useCustomColorBtn) {
-            useCustomColorBtn.addEventListener("click", useCustomTagColor);
-        }
-
-        // Custom color functionality
-        function useCustomTagColor() {
-            if (customColorInput) {
-                const customColor = customColorInput.value;
-                const colorRadios = document.querySelectorAll(
-                    'input[name="color"]',
-                ) as NodeListOf<HTMLInputElement>;
-
-                // Uncheck all radio buttons
-                colorRadios.forEach((radio) => (radio.checked = false));
-
-                // Create or update a hidden input for custom color
-                let customColorHidden = document.getElementById(
-                    "customTagColorHidden",
-                ) as HTMLInputElement;
-                if (!customColorHidden) {
-                    customColorHidden = document.createElement("input");
-                    customColorHidden.type = "hidden";
-                    customColorHidden.name = "color";
-                    customColorHidden.id = "customTagColorHidden";
-                    customColorInput.parentElement?.appendChild(
-                        customColorHidden,
-                    );
-                }
-                customColorHidden.value = customColor;
-            }
-        }
-
-        // Make useCustomTagColor available globally for the onclick handler
-        (window as any).useCustomTagColor = useCustomTagColor;
 
         // Expose showModal function globally
         (window as any).openTagModal = showModal;

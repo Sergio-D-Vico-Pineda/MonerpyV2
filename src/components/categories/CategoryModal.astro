@@ -111,9 +111,6 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
         const modal = document.getElementById("categoryModal");
         const closeModalBtn = document.getElementById("closeCategoryModal");
         const cancelBtn = document.getElementById("cancelCategoryButton");
-        const customColorInput = document.getElementById(
-            "customColor",
-        ) as HTMLInputElement;
 
         // Modal controls
         function openModal() {
@@ -174,45 +171,6 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                 }
             });
         }
-
-        // Handle use custom color button
-        const useCustomColorBtn = document.querySelector(
-            ".use-custom-color-btn",
-        );
-        if (useCustomColorBtn) {
-            useCustomColorBtn.addEventListener("click", useCustomColor);
-        }
-
-        // Custom color functionality
-        function useCustomColor() {
-            if (customColorInput) {
-                const customColor = customColorInput.value;
-                const colorRadios = document.querySelectorAll(
-                    'input[name="color"]',
-                ) as NodeListOf<HTMLInputElement>;
-
-                // Uncheck all radio buttons
-                colorRadios.forEach((radio) => (radio.checked = false));
-
-                // Create or update a hidden input for custom color
-                let customColorHidden = document.getElementById(
-                    "customColorHidden",
-                ) as HTMLInputElement;
-                if (!customColorHidden) {
-                    customColorHidden = document.createElement("input");
-                    customColorHidden.type = "hidden";
-                    customColorHidden.name = "color";
-                    customColorHidden.id = "customColorHidden";
-                    customColorInput.parentElement?.appendChild(
-                        customColorHidden,
-                    );
-                }
-                customColorHidden.value = customColor;
-            }
-        }
-
-        // Make useCustomColor available globally for the onclick handler
-        (window as any).useCustomColor = useCustomColor;
 
         // Expose showModal function globally
         (window as any).openCategoryModal = openModal;
