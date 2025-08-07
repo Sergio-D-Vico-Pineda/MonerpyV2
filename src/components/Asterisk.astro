@@ -1,0 +1,8 @@
+---
+interface Props {
+    id: string;
+}
+const { id } = Astro.props;
+---
+
+<b id={`${id}Asterisk`} class="text-red-500">*</b>

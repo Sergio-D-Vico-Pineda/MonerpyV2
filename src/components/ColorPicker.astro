@@ -1,4 +1,5 @@
 ---
+import { colors } from "../types/arrays.ts";
 interface Props {
     id: string;
     formName: string;
@@ -6,21 +7,6 @@ interface Props {
 }
 
 const { id, formName, checkedColor = "#6172f3" } = Astro.props;
-
-const colors = [
-    "#6172f3",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-    "#8b5cf6",
-    "#06b6d4",
-    "#84cc16",
-    "#f97316",
-    "#ec4899",
-    "#6b7280",
-    "#14b8a6",
-    "#f43f5e",
-];
 ---
 
 <label for="colorPicker">

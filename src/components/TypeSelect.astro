@@ -1,0 +1,22 @@
+---
+import { transactionTypes } from "../types/arrays.ts";
+---
+
+<label>
+    <span class="block text-sm font-medium text-gray-300 mb-2"> Type * </span>
+    <select
+        id="type"
+        name="type"
+        required
+        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+    >
+        <option value="">Select transaction type</option>
+        {
+            transactionTypes.map((type) => (
+                <option value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                </option>
+            ))
+        }
+    </select>
+</label>

@@ -1,0 +1,60 @@
+---
+import { transactionTypes } from "../types/arrays.ts";
+import Asterisk from "@comps/Asterisk.astro";
+---
+
+<div>
+    <span class="block text-sm font-medium text-gray-200 mb-2 cursor-default">
+        Type <Asterisk id="type" /></span
+    >
+    <div class="w-full h-[42px] flex items-center justify-center gap-x-4 ps-3">
+        {
+            transactionTypes.map((type) => (
+                <label class="inline-flex items-center">
+                    <input
+                        type="radio"
+                        name="type"
+                        value={type}
+                        class={
+                            `form-radio peer ` +
+                            (type === "income"
+                                ? "accent-green-500"
+                                : "accent-red-500")
+                        }
+                        required
+                    />
+                    <span
+                        class={
+                            `ml-2 ` +
+                            (type === "income"
+                                ? "peer-checked:text-green-500"
+                                : "peer-checked:text-red-500")
+                        }
+                    >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </span>
+                </label>
+            ))
+        }
+    </div>
+</div>
+
+<!-- <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const radioInputs = document.querySelectorAll(
+            'input[name="type"]',
+        ) as NodeListOf<HTMLInputElement>;
+        const asterisk = document.getElementById("typeAsterisk");
+
+        if (!asterisk) return;
+
+        radioInputs.forEach((input) => {
+            input.addEventListener("change", () => {
+                if (input.checked) {
+                    asterisk.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+ -->
