@@ -4,7 +4,6 @@ import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 
-
 // Categories for parent selection
 interface Category {
     id: number;
@@ -129,7 +128,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
         ) as HTMLInputElement;
 
         // Modal controls
-        function showModal() {
+        function openModal() {
             if (modal) {
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
@@ -143,11 +142,10 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
             }
         }
 
-        function hideModal() {
+        function closeModal() {
             if (modal) {
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
-
                 document.body.style.overflow = "auto";
 
                 // Reset form
@@ -173,18 +171,18 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
 
         // Close modal events
         if (closeModalBtn) {
-            closeModalBtn.addEventListener("click", hideModal);
+            closeModalBtn.addEventListener("click", closeModal);
         }
 
         if (cancelBtn) {
-            cancelBtn.addEventListener("click", hideModal);
+            cancelBtn.addEventListener("click", closeModal);
         }
 
         // Close modal when clicking outside
         if (modal) {
             modal.addEventListener("click", function (e) {
                 if (e.target === modal) {
-                    hideModal();
+                    closeModal();
                 }
             });
         }
@@ -229,6 +227,6 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
         (window as any).useCustomColor = useCustomColor;
 
         // Expose showModal function globally
-        (window as any).showCategoryModal = showModal;
+        (window as any).openCategoryModal = openModal;
     });
 </script>

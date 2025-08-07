@@ -293,8 +293,8 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
 
         if (addCategoryButton) {
             addCategoryButton.addEventListener("click", (event) => {
-                if ((window as any).showCategoryModal) {
-                    (window as any).showCategoryModal();
+                if ((window as any).openCategoryModal) {
+                    (window as any).openCategoryModal();
                 }
             });
         }

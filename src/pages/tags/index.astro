@@ -175,8 +175,8 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
             );
             if (addTagButton) {
                 event.preventDefault();
-                if ((window as any).showTagModal) {
-                    (window as any).showTagModal();
+                if ((window as any).openTagModal) {
+                    (window as any).openTagModal();
                 }
                 return;
             }
