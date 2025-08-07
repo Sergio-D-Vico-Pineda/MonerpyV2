@@ -133,7 +133,7 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
                             </p>
                             <button
                                 type="button"
-                                id="createCategoryButton"
+                                id="addFirstCategoryButton"
                                 class="create-first-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                             >
                                 Create Your First Category
@@ -292,7 +292,18 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
         ) as HTMLButtonElement;
 
         if (addCategoryButton) {
-            addCategoryButton.addEventListener("click", (event) => {
+            addCategoryButton.addEventListener("click", () => {
+                if ((window as any).openCategoryModal) {
+                    (window as any).openCategoryModal();
+                }
+            });
+        }
+
+        const createCategoryButton = document.getElementById(
+            "addFirstCategoryButton",
+        ) as HTMLButtonElement;
+        if (createCategoryButton) {
+            createCategoryButton.addEventListener("click", () => {
                 if ((window as any).openCategoryModal) {
                     (window as any).openCategoryModal();
                 }

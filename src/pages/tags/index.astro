@@ -93,7 +93,8 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                         <div class="flex items-center gap-x-4">
                             <button
                                 type="button"
-                                class="add-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+                                id="addTagButton"
+                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
                             >
                                 <Plus />
                             </button>
@@ -111,6 +112,7 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                                 transactions better.
                             </p>
                             <button
+                                id="addFirstTagButton"
                                 type="button"
                                 class="create-first-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                             >
@@ -166,20 +168,28 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
             // Optionally handle any page-level state changes
         });
 
-        // Handle add tag button clicks
-        document.addEventListener("click", (event) => {
-            const clickedElement = event.target as Element;
-
-            const addTagButton = clickedElement?.closest(
-                ".add-tag-btn, .create-first-tag-btn",
-            );
-            if (addTagButton) {
-                event.preventDefault();
+        const addTagButton = document.getElementById(
+            "addTagButton",
+        ) as HTMLButtonElement;
+        if (addTagButton) {
+            addTagButton.addEventListener("click", () => {
                 if ((window as any).openTagModal) {
                     (window as any).openTagModal();
                 }
-                return;
-            }
-        });
+            });
+        }
+
+        const addFirstTagButton = document.getElementById(
+            "addFirstTagButton",
+        ) as HTMLButtonElement;
+        if (addFirstTagButton) {
+            addFirstTagButton.addEventListener("click", () => {
+                if ((window as any).openTagModal) {
+                    (window as any).openTagModal();
+                }
+            });
+        }
+
+        addTagButton.click();
     });
 </script>
