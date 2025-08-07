@@ -1,6 +1,6 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
+
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ALeft from "@comps/svgs/mono/ALeft.astro";
@@ -42,7 +42,7 @@ if (!user) {
 ---
 
 <Layout title="Dashboard" description="Your financial dashboard overview">
-  <main class="bg-gray-900 p-8 min-h-screen text-white">
+  <main class="bg-gray-900 p-8 text-white">
     <Header currentPage="dashboard" user={user} />
 
     <section class="flex flex-wrap justify-between gap-6 mx-auto max-w-7xl">
@@ -196,8 +196,6 @@ if (!user) {
     </section>
   </main>
 
-  <Footer />
-
   <script is:inline>
     // Helper function to open transaction modal with pre-filled type
     function openTransactionModalWithType(type) {
@@ -273,9 +271,9 @@ if (!user) {
         }
       });
     }
-    document.addEventListener("DOMContentLoaded", () => {
-      if (addIncomeBtn) addIncomeBtn.click();
-    });
+    // document.addEventListener("DOMContentLoaded", () => {
+    //   if (addIncomeBtn) addIncomeBtn.click();
+    // });
   </script>
 </Layout>
 

@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import TransactionModal from "@comps/modal/TransactionModal.astro";
@@ -137,7 +136,7 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
 ---
 
 <Layout title="Transactions" description="Manage your transactions">
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="transactions" user={user} />
         {
             !userInFamily ? (
@@ -486,12 +485,13 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
 <TransactionModal />
 {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
-<Footer />
 <LogoutScript />
 
 <script>
     // Add Transaction button functionality
-    const addTransactionBtn = document.getElementById("addTransactionBtn");
+    const addTransactionBtn = document.getElementById(
+        "addTransactionBtn",
+    ) as HTMLButtonElement;
     if (addTransactionBtn) {
         addTransactionBtn.addEventListener("click", function () {
             const openModal = (window as any).openTransactionModal;
@@ -514,4 +514,6 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
             }
         });
     });
+
+    addTransactionBtn.click();
 </script>

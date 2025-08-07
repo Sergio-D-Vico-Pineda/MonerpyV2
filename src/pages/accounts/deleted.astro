@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
@@ -52,7 +51,7 @@ const deletedAccounts = allAccounts
 ---
 
 <Layout title="Deleted Accounts" description="Manage deleted accounts">
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="accounts" user={user} />
         <!-- Deleted Accounts List -->
         <div
@@ -206,7 +205,6 @@ const deletedAccounts = allAccounts
         </div>
     </main>
 
-    <Footer />
     <LogoutScript />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>

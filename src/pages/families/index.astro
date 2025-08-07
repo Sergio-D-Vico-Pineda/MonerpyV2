@@ -1,6 +1,6 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
+
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
@@ -74,7 +74,7 @@ const userRole = familyDetailsResult.data?.ok
 ---
 
 <Layout title="Family Management" description="Manage your family and members">
-  <main class="bg-gray-900 p-8 min-h-screen text-white">
+  <main class="bg-gray-900 p-8 text-white">
     <Header currentPage="families" user={user} />
 
     {
@@ -344,7 +344,7 @@ const userRole = familyDetailsResult.data?.ok
     }
   </main>
 
-  <Footer />
+  
   <LogoutScript />
   {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>

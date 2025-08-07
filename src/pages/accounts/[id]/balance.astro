@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
@@ -68,7 +67,7 @@ const balanceChangePercent =
     title={`Balance History: ${account.name}`}
     description={`Balance history for ${account.name}`}
 >
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="accounts" user={user} />
 
         <div class="mx-auto max-w-7xl">
@@ -323,6 +322,5 @@ const balanceChangePercent =
         </div>
     </main>
 
-    <Footer />
     <LogoutScript />
 </Layout>

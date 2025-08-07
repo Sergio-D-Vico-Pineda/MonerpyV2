@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import AccountModal from "@comps/modal/AccountModal.astro";
@@ -63,7 +62,7 @@ const accountTypes = [
 ---
 
 <Layout title="Accounts" description="Manage your accounts">
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="accounts" user={user} />
 
         {
@@ -88,7 +87,7 @@ const accountTypes = [
                         <div class="flex items-center gap-x-4">
                             <button
                                 type="button"
-                                onclick="openAccountModal()"
+                                id="addAccountButton"
                                 class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
                                 title="Create a new account"
                             >
@@ -184,7 +183,21 @@ const accountTypes = [
         <AccountModal />
     </main>
 
-    <Footer />
     <LogoutScript />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const addAccountButton = document.getElementById(
+                "addAccountButton",
+            ) as HTMLButtonElement;
+
+            if (addAccountButton) {
+                addAccountButton.addEventListener("click", function () {
+                    (window as any).openAccountModal();
+                });
+            }
+
+            // addAccountButton.click();
+        });
+    </script>
 </Layout>

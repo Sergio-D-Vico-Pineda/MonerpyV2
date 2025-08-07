@@ -9,41 +9,44 @@ import Home from "@comps/svgs/mono/Home.astro";
 const user = Astro.locals.user;
 ---
 
-<Layout title="Welcome" description="Your personal finance management tool">
-	<div class="min-h-screen bg-gray-900 p-8 mx-auto">
-		<h1 class="text-3xl text-gray-100 font-bold text-center mb-6">
-			Welcome to Monerpy
-		</h1>
-		<p class="text-center text-gray-400 mb-4">
-			Your personal finance management tool.
-		</p>
-		<div class="flex justify-center gap-6">
-			<a
-				href="/dashboard"
-				class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
-			>
-				<Home /> Dashboard
-			</a>
-			{
-				!user ? (
-					<a
-						href="/login"
-						class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
+<Layout
+	title="Welcome"
+	description="Your personal finance management tool"
+	classes="h-screen bg-gray-900 p-8 mx-auto flex flex-col justify-center"
+	showFooter={false}
+>
+	<h1 class="text-3xl text-gray-100 font-bold text-center mb-6">
+		Welcome to Monerpy
+	</h1>
+	<p class="text-center text-gray-400 mb-4">
+		Your personal finance management tool.
+	</p>
+	<div class="flex justify-center gap-6">
+		<a
+			href="/dashboard"
+			class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
+		>
+			<Home /> Dashboard
+		</a>
+		{
+			!user ? (
+				<a
+					href="/login"
+					class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 transition duration-200 font-bold flex items-center gap-2"
+				>
+					Login <Login />
+				</a>
+			) : (
+				<form id="logoutForm" class="inline">
+					<button
+						type="submit"
+						class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold flex items-center gap-2 "
 					>
-						Login <Login />
-					</a>
-				) : (
-					<form id="logoutForm" class="inline">
-						<button
-							type="submit"
-							class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold flex items-center gap-2 "
-						>
-							Logout <Logout />
-						</button>
-					</form>
-				)
-			}
-		</div>
+						Logout <Logout />
+					</button>
+				</form>
+			)
+		}
 	</div>
 </Layout>
 

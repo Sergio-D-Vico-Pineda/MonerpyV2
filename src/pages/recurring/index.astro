@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import RecurringTransactionModal from "@comps/modal/RecurringTransactionModal.astro";
@@ -240,7 +239,7 @@ function getStatusText(status: string): string {
     title="Recurring Transactions"
     description="Manage your recurring transactions"
 >
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="recurring" user={user} />
 
         {
@@ -630,14 +629,13 @@ function getStatusText(status: string): string {
     <RecurringTransactionModal />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
-    <Footer />
     <LogoutScript />
 
     <script>
         // Add Recurring Transaction button functionality
         const addRecurringTransactionBtn = document.getElementById(
             "addRecurringTransactionBtn",
-        );
+        ) as HTMLButtonElement;
         if (addRecurringTransactionBtn) {
             addRecurringTransactionBtn.addEventListener("click", function () {
                 const openModal = (window as any).openRecurringTransactionModal;
@@ -721,5 +719,7 @@ function getStatusText(status: string): string {
                 }
             });
         }
+
+        addRecurringTransactionBtn.click();
     </script>
 </Layout>

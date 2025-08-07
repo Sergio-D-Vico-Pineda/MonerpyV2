@@ -1,6 +1,6 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
+
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
@@ -98,7 +98,7 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
 ---
 
 <Layout title="Categories" description="Manage your transaction categories">
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="categories" user={user} />
 
         {
@@ -193,7 +193,7 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
         }
     </main>
 
-    <Footer />
+    
     <CategoryModal />
     <DeleteConfirmModal />
     <LogoutScript />
@@ -310,6 +310,6 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
             });
         }
 
-        addCategoryButton.click();
+        // addCategoryButton.click();
     });
 </script>

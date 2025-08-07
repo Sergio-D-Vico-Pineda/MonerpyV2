@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Footer from "@comps/layout/Footer.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
@@ -64,7 +63,7 @@ const account = accountResult.data.account;
     title={`Account: ${account.name}`}
     description={`Manage ${account.name} account`}
 >
-    <main class="bg-gray-900 p-8 min-h-screen text-white">
+    <main class="bg-gray-900 p-8 text-white">
         <Header currentPage="accounts" user={user} />
 
         <div class="mx-auto max-w-7xl">
@@ -122,13 +121,7 @@ const account = accountResult.data.account;
                                 <p
                                     class={`text-2xl font-bold ${account.balance >= 0 ? "text-green-400" : "text-red-400"}`}
                                 >
-                                    {
-                                        new Intl.NumberFormat("es-ES", {
-                                            style: "currency",
-                                            currency: "EUR",
-                                            minimumFractionDigits: 2,
-                                        }).format(account.balance)
-                                    }
+                                    {formatCurrency(account.balance)}
                                 </p>
                             </div>
                         </div>
@@ -270,8 +263,6 @@ const account = accountResult.data.account;
                                                             transaction.date,
                                                             {
                                                                 includeTime: false,
-                                                                dateStyle:
-                                                                    "short",
                                                             },
                                                         )}
                                                     </p>
@@ -289,14 +280,7 @@ const account = accountResult.data.account;
                                                         "Income"
                                                             ? "+"
                                                             : "-"}
-                                                        {new Intl.NumberFormat(
-                                                            "es-ES",
-                                                            {
-                                                                style: "currency",
-                                                                currency: "EUR",
-                                                                minimumFractionDigits: 2,
-                                                            },
-                                                        ).format(
+                                                        {formatCurrency(
                                                             transaction.amount,
                                                         )}
                                                     </p>
@@ -342,25 +326,17 @@ const account = accountResult.data.account;
                                         .map((balance: any) => (
                                             <div class="flex items-center justify-between py-2">
                                                 <p class="text-gray-400">
-                                                    {formatDateForDisplay(
+                                                    {formatDateOnlyForDisplay(
                                                         balance.date,
-                                                        {
-                                                            includeTime: false,
-                                                            dateStyle: "short",
-                                                        },
+                                                        "normal",
                                                     )}
                                                 </p>
                                                 <p
                                                     class={`font-semibold ${balance.balance >= 0 ? "text-green-400" : "text-red-400"}`}
                                                 >
-                                                    {new Intl.NumberFormat(
-                                                        "es-ES",
-                                                        {
-                                                            style: "currency",
-                                                            currency: "EUR",
-                                                            minimumFractionDigits: 2,
-                                                        },
-                                                    ).format(balance.balance)}
+                                                    {formatCurrency(
+                                                        balance.balance,
+                                                    )}
                                                 </p>
                                             </div>
                                         ))}
@@ -385,7 +361,6 @@ const account = accountResult.data.account;
         </div>
     </main>
 
-    <Footer />
     <LogoutScript />
 
     <!-- Color picker synchronization script -->
