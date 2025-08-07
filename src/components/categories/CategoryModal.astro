@@ -39,8 +39,8 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
         class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
     >
         <!-- Modal Header -->
-        <div
-            class="flex items-end justify-between p-6 border-b border-gray-700"
+        <header
+            class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
         >
             <h2 class="text-xl font-semibold text-purple-400">
                 Create Category
@@ -52,69 +52,57 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
             >
                 <X class="w-6 h-6" />
             </button>
-        </div>
+        </header>
 
         <!-- Modal Content -->
-        <div class="p-6">
-            <form method="POST" class="flex flex-col gap-y-4">
-                <input type="hidden" name="_action" value="create" />
+        <form method="POST" class="p-6 flex flex-col gap-y-4">
+            <input type="hidden" name="_action" value="create" />
 
-                <div>
-                    <Input
-                        id="categoryName"
-                        name="Category Name"
-                        formName="name"
-                        required={false}
-                        placeholder="Enter category name"
-                    />
-                </div>
+            <Input
+                id="categoryName"
+                name="Category Name"
+                formName="name"
+                required={false}
+                placeholder="Enter category name"
+            />
 
-                <!-- Parent Category -->
-                <div>
-                    <label
-                        for="parentCategory"
-                        class="block text-sm font-medium text-gray-200 mb-2"
-                    >
-                        Parent Category (Optional)
-                    </label>
-                    <select
-                        id="parentCategory"
-                        name="parentId"
-                        class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                        <option value="" selected></option>
-                        {
-                            parentCategories.map((category) => (
-                                <option value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))
-                        }
-                    </select>
-                </div>
+            <label>
+                <span class="block text-sm font-medium text-gray-200 mb-2">
+                    Parent Category (Optional)
+                </span>
+                <select
+                    id="parentCategory"
+                    name="parentId"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                    <option value="" selected></option>
+                    {
+                        parentCategories.map((category) => (
+                            <option value={category.id}>{category.name}</option>
+                        ))
+                    }
+                </select>
+            </label>
 
-                <div>
-                    <ColorPicker id="color" formName="Category Color" />
-                </div>
+            <ColorPicker id="color" formName="Category Color" />
 
-                <!-- Submit Buttons -->
-                <div class="flex items-center justify-end gap-x-3 pt-4">
-                    <button
-                        type="button"
-                        id="cancelCategoryButton"
-                        class="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
-                    >
-                        Create Category
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Submit Buttons -->
+            <div class="flex items-center justify-end gap-x-3 pt-4">
+                <button
+                    type="button"
+                    id="cancelCategoryButton"
+                    class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded transition-colors"
+                >
+                    Create Category
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
