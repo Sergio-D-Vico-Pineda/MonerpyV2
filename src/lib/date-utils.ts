@@ -1,13 +1,14 @@
 /**
  * Date utilities for consistent date handling without timezone issues
  */
+import { months } from "@/types/arrays";
 
 /**
  * Formats a datetime-local input value to "YYYY-MM-DD HH:mm:ss" format
  * @param datetimeLocal - The value from a datetime-local input (e.g., "2024-01-15T14:30")
  * @returns Formatted string "YYYY-MM-DD HH:mm:ss"
  */
-export function formatDateTimeLocal(datetimeLocal: string): string {
+function formatDateTimeLocal(datetimeLocal: string): string {
     // datetime-local format: "YYYY-MM-DDTHH:mm" or "YYYY-MM-DDTHH:mm:ss"
     const parts = datetimeLocal.split('T');
     if (parts.length !== 2) {
@@ -27,7 +28,7 @@ export function formatDateTimeLocal(datetimeLocal: string): string {
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
  * @returns datetime-local format "YYYY-MM-DDTHH:mm"
  */
-export function formatToDateTimeLocal(dateTimeString: string): string {
+function formatToDateTimeLocal(dateTimeString: string): string {
     const parts = dateTimeString.split(' ');
     if (parts.length !== 2) {
         throw new Error('Invalid date-time format');
@@ -43,7 +44,7 @@ export function formatToDateTimeLocal(dateTimeString: string): string {
  * Gets current date-time in "YYYY-MM-DD HH:mm:ss" format
  * @returns Current local date-time string
  */
-export function getCurrentDateTime(): string {
+function getCurrentDateTime(): string {
     const now = new Date();
 
     const year = now.getFullYear();
@@ -60,7 +61,7 @@ export function getCurrentDateTime(): string {
  * Gets current date-time in datetime-local input format
  * @returns Current local date-time for datetime-local input
  */
-export function getCurrentDateTimeLocal(): string {
+function getCurrentDateTimeLocal(): string {
     const now = new Date();
 
     const year = now.getFullYear();
@@ -91,7 +92,7 @@ export function getCurrentDateTimeLocal(): string {
  * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'medium' }); // "01/06/2024 14:30"
  * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', includeTime: false }); // "01 June 2024"
  */
-export function formatDateForDisplay(dateTimeString: string, options: {
+function formatDateForDisplay(dateTimeString: string, options: {
     includeTime?: boolean;
     includeSeconds?: boolean;
     dateStyle?: 'short' | 'medium' | 'long';
@@ -116,11 +117,7 @@ export function formatDateForDisplay(dateTimeString: string, options: {
             formattedDate = `${day}/${month}/${year}`;
             break;
         case 'long':
-            const monthNames = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ];
-            formattedDate = `${day} ${monthNames[parseInt(month) - 1]} ${year}`;
+            formattedDate = `${day} ${months[parseInt(month) - 1].label} ${year}`;
             break;
         default:
             formattedDate = `${day}/${month}/${year}`;
@@ -139,7 +136,7 @@ export function formatDateForDisplay(dateTimeString: string, options: {
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
  * @returns Date part "YYYY-MM-DD"
  */
-export function getDatePart(dateTimeString: string): string {
+function getDatePart(dateTimeString: string): string {
     return dateTimeString.split(' ')[0];
 }
 
@@ -148,7 +145,7 @@ export function getDatePart(dateTimeString: string): string {
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
  * @returns Time part "HH:mm:ss"
  */
-export function getTimePart(dateTimeString: string): string {
+function getTimePart(dateTimeString: string): string {
     const timePart = dateTimeString.split(' ')[1] || '00:00:00';
     const [hours, minutes, seconds] = timePart.split(':').map(Number);
 
@@ -163,7 +160,7 @@ export function getTimePart(dateTimeString: string): string {
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
  * @returns Time part "HH:mm AM/PM"
  */
-export function getTimePartWithoutSeconds(dateTimeString: string): string {
+function getTimePartWithoutSeconds(dateTimeString: string): string {
     const timePart = dateTimeString.split(' ')[1] || '00:00:00';
     const [hours, minutes] = timePart.split(':').map(Number);
 
@@ -173,7 +170,7 @@ export function getTimePartWithoutSeconds(dateTimeString: string): string {
     return `${adjustedHours}:${String(minutes).padStart(2, '0')} ${period}`;
 }
 
-export function getCurrentDate(): string {
+function getCurrentDate(): string {
     const now = new Date();
 
     const year = now.getFullYear();
@@ -189,7 +186,7 @@ export function getCurrentDate(): string {
  * @param dateStyle - Formatting style
  * @returns Formatted date string
  */
-export function formatDateOnlyForDisplay(dateString: string, dateStyle: 'short' | 'medium' | 'long' = 'medium'): string {
+function formatDateOnlyForDisplay(dateString: string, dateStyle: 'short' | 'medium' | 'long' = 'medium'): string {
     const [year, month, day] = dateString.split('-');
 
     switch (dateStyle) {
@@ -198,12 +195,21 @@ export function formatDateOnlyForDisplay(dateString: string, dateStyle: 'short' 
         case 'medium':
             return `${day}/${month}/${year}`;
         case 'long':
-            const monthNames = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ];
-            return `${day} ${monthNames[parseInt(month) - 1]} ${year}`;
+            return `${day} ${months[parseInt(month) - 1].label} ${year}`;
         default:
             return `${day}/${month}/${year}`;
     }
+}
+
+export {
+    formatDateTimeLocal,
+    formatToDateTimeLocal,
+    getCurrentDateTime,
+    getCurrentDateTimeLocal,
+    formatDateForDisplay,
+    getDatePart,
+    getTimePart,
+    getTimePartWithoutSeconds,
+    getCurrentDate,
+    formatDateOnlyForDisplay
 }
