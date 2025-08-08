@@ -168,12 +168,24 @@ import Category from "../transaction/Category.astro";
         cancelBtn.addEventListener("click", closeModal);
     }
 
-    // Close modal when clicking and releasing left mouse button outside modal content
+    // Close modal only if the *entire* left-click starts and finishes outside the modal content
     if (modal) {
-        modal.addEventListener("mouseup", function (e) {
+        let downOutside = false;
+
+        modal.addEventListener("mousedown", function (e) {
+            // button 0 = left mouse button
             if (e.target === modal && e.button === 0) {
+                downOutside = true;
+            } else {
+                downOutside = false;
+            }
+        });
+
+        modal.addEventListener("mouseup", function (e) {
+            if (downOutside && e.target === modal && e.button === 0) {
                 closeModal();
             }
+            downOutside = false;
         });
     }
 
