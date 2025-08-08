@@ -1,5 +1,4 @@
 ---
-import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import TagsPicker from "@comps/tags/TagsPicker.astro";
 import Input from "@comps/Input.astro";
@@ -7,13 +6,7 @@ import { daysOfWeek, months } from "../../types/arrays.ts";
 import TypePicker from "@comps/TypePicker.astro";
 import Amount from "@comps/transaction/Amount.astro";
 import Account from "@comps/transaction/Account.astro";
-
-// Get data for the modal form
-const categoriesResult = await Astro.callAction(actions.getCategories, {});
-
-const categories = categoriesResult.data?.ok
-    ? categoriesResult.data.categories
-    : [];
+import Category from "../transaction/Category.astro";
 ---
 
 <div
@@ -54,56 +47,27 @@ const categories = categoriesResult.data?.ok
             />
             <input type="hidden" name="id" id="recurring-transaction-id" />
 
+            <!-- Account and Name -->
+            <div class="flex items-center gap-x-4 justify-center">
+                <Account />
+                <Input
+                    id="description"
+                    name="Recurring Transaction Name"
+                    formName="description"
+                    required
+                    placeholder="Enter recurring transaction name"
+                    classes="flex-1"
+                />
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Left Column -->
                 <div class="flex flex-col gap-y-4">
-                    <!-- Account Selection -->
-                    <Account />
-                    <!-- Transaction Type -->
                     <TypePicker />
 
-                    <!-- Description -->
-                    <Input
-                        id="description"
-                        name="Recurring Transaction Name"
-                        formName="description"
-                        placeholder="Enter recurring transaction name"
-                        required
-                    />
-
-                    <!-- Amount -->
                     <Amount />
 
-                    <!-- Category -->
-                    <label>
-                        <span
-                            class="block text-sm font-medium text-gray-300 mb-2"
-                        >
-                            Category
-                        </span>
-                        <select
-                            id="categoryId"
-                            name="categoryId"
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                            <option value=""
-                                >Select a category (optional)</option
-                            >
-                            {
-                                categories &&
-                                    categories.map((category) => (
-                                        <option
-                                            value={category.id}
-                                            data-color={category.color}
-                                        >
-                                            {category.parent
-                                                ? `${category.parent.name} > ${category.name}`
-                                                : category.name}
-                                        </option>
-                                    ))
-                            }
-                        </select>
-                    </label>
+                    <Category />
                 </div>
 
                 <!-- Right Column -->
@@ -515,47 +479,6 @@ const categories = categoriesResult.data?.ok
             startDateInput.value = today.toISOString().split("T")[0];
         }
     })();
-
-    // Tag button functionality now handled inside TagsPicker component
-
-    // New category input handling
-    const newCategoryInput = document.getElementById(
-        "newCategory",
-    ) as HTMLInputElement;
-    if (newCategoryInput) {
-        newCategoryInput.addEventListener("input", function () {
-            const categorySelect = document.getElementById(
-                "categoryId",
-            ) as HTMLSelectElement;
-            if (categorySelect) {
-                if (this.value.trim()) {
-                    categorySelect.disabled = true;
-                    categorySelect.value = "";
-                } else {
-                    categorySelect.disabled = false;
-                }
-            }
-        });
-    }
-
-    const categorySelect = document.getElementById(
-        "categoryId",
-    ) as HTMLSelectElement;
-    if (categorySelect) {
-        categorySelect.addEventListener("change", function () {
-            const newCategoryInput = document.getElementById(
-                "newCategory",
-            ) as HTMLInputElement;
-            if (newCategoryInput) {
-                if (this.value) {
-                    newCategoryInput.disabled = true;
-                    newCategoryInput.value = "";
-                } else {
-                    newCategoryInput.disabled = false;
-                }
-            }
-        });
-    }
 
     // Function to fill form for editing (will be called from parent page)
     async function fillFormForEdit(recurringTransaction: any) {

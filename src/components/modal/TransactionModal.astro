@@ -1,5 +1,4 @@
 ---
-import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
 import TagsPicker from "@comps/tags/TagsPicker.astro";
@@ -7,13 +6,7 @@ import TypePicker from "@comps/TypePicker.astro";
 import Amount from "../transaction/Amount.astro";
 import Account from "../transaction/Account.astro";
 import Date from "../transaction/Date.astro";
-
-// Get data for the modal form
-const categoriesResult = await Astro.callAction(actions.getCategories, {});
-
-const categories = categoriesResult.data?.ok
-    ? categoriesResult.data.categories
-    : [];
+import Category from "../transaction/Category.astro";
 ---
 
 <div
@@ -62,7 +55,7 @@ const categories = categoriesResult.data?.ok
                     id="name"
                     name="Transaction Name"
                     formName="name"
-                    required={true}
+                    required
                     placeholder="Enter transaction name"
                     classes="flex-1/3"
                 />
@@ -74,32 +67,8 @@ const categories = categoriesResult.data?.ok
                 <Amount classes="flex-1/3" />
             </div>
 
-            <div class="flex items-center gap-x-4 justify-center *:flex-1">
-                <label>
-                    <span class="block text-sm font-medium text-gray-300 mb-2">
-                        Category
-                    </span>
-                    <select
-                        id="categoryId"
-                        name="categoryId"
-                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                        <option value="">Select a category (optional)</option>
-                        {
-                            categories &&
-                                categories.map((category) => (
-                                    <option
-                                        value={category.id}
-                                        data-color={category.color}
-                                    >
-                                        {category.parent
-                                            ? `${category.parent.name} > ${category.name}`
-                                            : category.name}
-                                    </option>
-                                ))
-                        }
-                    </select>
-                </label>
+            <div class="flex items-center gap-x-4 justify-center">
+                <Category classes="flex-1" />
                 <Date id="date" name="date" formText="Date" />
             </div>
 
@@ -133,6 +102,21 @@ const categories = categoriesResult.data?.ok
         getCurrentDateTimeLocal,
         formatToDateTimeLocal,
     } from "@lib/date-utils.ts";
+
+    // Define a TypeScript interface for transaction
+    interface TransactionTag {
+        name: string;
+    }
+    interface Transaction {
+        id: string;
+        accountId: string;
+        type: string;
+        name: string;
+        amount: string;
+        date: string;
+        categoryId?: string;
+        tags?: TransactionTag[];
+    }
 
     // Modal functionality
     const modal = document.getElementById("transactionModal");
@@ -203,40 +187,6 @@ const categories = categoriesResult.data?.ok
         }
     })();
 
-    // New category input handling
-    const newCategoryInput = document.getElementById(
-        "newCategory",
-    ) as HTMLInputElement;
-    const categorySelect = document.getElementById(
-        "categoryId",
-    ) as HTMLSelectElement;
-
-    if (newCategoryInput) {
-        newCategoryInput.addEventListener("input", function () {
-            if (categorySelect) {
-                if (this.value.trim()) {
-                    categorySelect.disabled = true;
-                    categorySelect.value = "";
-                } else {
-                    categorySelect.disabled = false;
-                }
-            }
-        });
-    }
-
-    if (categorySelect) {
-        categorySelect.addEventListener("change", function () {
-            if (newCategoryInput) {
-                if (this.value) {
-                    newCategoryInput.disabled = true;
-                    newCategoryInput.value = "";
-                } else {
-                    newCategoryInput.disabled = false;
-                }
-            }
-        });
-    }
-
     const accountId = document.getElementById("accountId") as HTMLSelectElement;
     const type = document.getElementById("type") as HTMLSelectElement;
     const name = document.getElementById("name") as HTMLInputElement;
@@ -246,21 +196,6 @@ const categories = categoriesResult.data?.ok
         "categoryId",
     ) as HTMLSelectElement;
     const tags = document.getElementById("tags") as HTMLInputElement;
-
-    // Define a TypeScript interface for transaction
-    interface TransactionTag {
-        name: string;
-    }
-    interface Transaction {
-        id: string;
-        accountId: string;
-        type: string;
-        name: string;
-        amount: string;
-        date: string;
-        categoryId?: string;
-        tags?: TransactionTag[];
-    }
 
     // Function to fill form for editing (will be called from parent page)
     async function fillFormForEdit(transaction: Transaction) {
