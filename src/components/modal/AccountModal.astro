@@ -42,9 +42,9 @@ import { accountTypes } from "../../types/arrays.ts";
             />
 
             <label>
-                <span class="block text-sm font-medium text-gray-200 mb-2">
+                <p class="text-sm font-medium text-gray-200 mb-2">
                     Account Type *
-                </span>
+                </p>
                 <select
                     id="accountType"
                     name="accountType"
@@ -63,9 +63,9 @@ import { accountTypes } from "../../types/arrays.ts";
             </label>
 
             <label>
-                <span class="block text-sm font-medium text-gray-200 mb-2">
+                <p class="text-sm font-medium text-gray-200 mb-2">
                     Initial Balance
-                </span>
+                </p>
                 <input
                     type="number"
                     id="initialBalance"
@@ -77,7 +77,7 @@ import { accountTypes } from "../../types/arrays.ts";
                 />
             </label>
 
-            <ColorPicker id="color" formText="Account Color" />
+            <ColorPicker id="color" label="Account Color" />
 
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button

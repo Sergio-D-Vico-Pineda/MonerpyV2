@@ -4,17 +4,18 @@ import Asterisk from "../Asterisk.astro";
 interface Props {
     id: string;
     name: string;
-    formText: string;
+    label: string;
     classes?: string;
 }
 
-const { id, name, formText, classes } = Astro.props;
+const { id, name, label, classes } = Astro.props;
 ---
 
 <label for={id} class={classes}>
-    <span class="block text-sm font-medium text-gray-200 mb-2">
-        {formText} <Asterisk id={id} /></span
-    >
+    <p class="text-sm font-medium text-gray-200 mb-2">
+        {label}
+        <Asterisk id={id} />
+    </p>
     <input
         type="datetime-local"
         id={id}

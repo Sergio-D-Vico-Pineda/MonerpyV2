@@ -13,10 +13,10 @@ const { id, name, formName, required, placeholder, classes = "" } = Astro.props;
 ---
 
 <label for={id} class={classes}>
-    <span class="block text-sm font-medium text-gray-200 mb-2">
+    <p class="text-sm font-medium text-gray-200 mb-2">
         {name}
-        {required ? <Asterisk id={id} /> : ""}
-    </span>
+        {required && <Asterisk id={id} />}
+    </p>
     <input
         type="text"
         id={id}

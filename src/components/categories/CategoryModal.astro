@@ -67,9 +67,9 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
             />
 
             <label>
-                <span class="block text-sm font-medium text-gray-200 mb-2">
+                <p class="text-sm font-medium text-gray-200 mb-2">
                     Parent Category (Optional)
-                </span>
+                </p>
                 <select
                     id="parentCategory"
                     name="parentId"
@@ -84,7 +84,7 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                 </select>
             </label>
 
-            <ColorPicker id="color" formText="Category Color" />
+            <ColorPicker id="color" label="Category Color" />
 
             <!-- Submit Buttons -->
             <div class="flex items-center justify-end gap-x-3 pt-4">

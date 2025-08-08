@@ -30,9 +30,7 @@ import ColorPicker from "../ColorPicker.astro";
             <input type="hidden" name="_action" value="create" />
 
             <label>
-                <span class="block text-sm font-medium text-gray-200 mb-2">
-                    Tag Name
-                </span>
+                <p class="text-sm font-medium text-gray-200 mb-2">Tag Name</p>
                 <input
                     type="text"
                     id="tagName"
@@ -43,7 +41,7 @@ import ColorPicker from "../ColorPicker.astro";
                 />
             </label>
 
-            <ColorPicker id="color" formText="Tag Color" />
+            <ColorPicker id="color" label="Tag Color" />
 
             <!-- Submit Buttons -->
             <div class="flex items-center justify-end gap-x-3 pt-4">
