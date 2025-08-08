@@ -62,11 +62,19 @@ const colors = [
     "#f43f5e", // Rose
 ];
 
+const frequency = [
+    "daily",
+    "weekly",
+    "monthly",
+    "yearly",
+]
+
 export {
     transactionTypes,
     accountTypes,
     daysOfWeek,
     months,
     timePeriods,
-    colors
+    colors,
+    frequency,
 }
