@@ -159,6 +159,11 @@ The following folder structure is designed to support Monerpy’s modular and sc
 └───types # TypeScript types and interfaces  
 ```
 
+## Writing format
+- HTML Ids in camelCase
+- CSS classes in kebab-case
+- JavaScript/TypeScript variables in camelCase
+
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
