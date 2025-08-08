@@ -1,0 +1,226 @@
+---
+import { actions } from "astro:actions";
+import SimpleDown from "@svg/mono/SimpleDown.astro";
+import SimpleUp from "@svg/mono/SimpleUp.astro";
+import Check from "@svg/mono/Check.astro";
+
+interface Props {
+    id?: string;
+    name?: string;
+    label?: string;
+    value?: string; // comma separated
+}
+
+const {
+    id = "tagsDropdown",
+    name = "tags",
+    label = "Tags (custom dropdown)",
+    value = "",
+} = Astro.props as Props;
+
+const tagsResult = await Astro.callAction(actions.getTags, {});
+const existingTags = tagsResult.data?.ok ? tagsResult.data.tags : [];
+
+const selectedTags = value
+    .split(",")
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0);
+---
+
+<div class="flex flex-col gap-2" data-tags-dropdown-root data-target-id={id}>
+    {
+        label && (
+            <label
+                for={id + "DropdownBtn"}
+                class="block text-sm font-medium text-gray-300 mb-2 cursor-default"
+            >
+                {label}
+            </label>
+        )
+    }
+    <div class="relative">
+        <button
+            type="button"
+            id={id + "DropdownBtn"}
+            class="w-full max-h-[41px] px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 flex justify-between items-center"
+        >
+            <span id={id + "DropdownLabel"} class="truncate">
+                {
+                    selectedTags.length > 0
+                        ? selectedTags.join(", ")
+                        : "Select tags"
+                }
+            </span>
+            <SimpleDown />
+            <SimpleUp class="w-5 h-5 hidden" />
+        </button>
+        <div
+            id={id + "DropdownList"}
+            class="fixed z-50 bg-gray-800 border border-gray-600 rounded-lg shadow-lg"
+            style="max-height: 200px; overflow-y: auto;"
+        >
+            {
+                existingTags ? (
+                    existingTags.map((tag) => (
+                        <div
+                            class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-700"
+                            data-tag-name={tag.name}
+                            data-tag-color={tag.color}
+                        >
+                            <span
+                                class="inline-block w-3 h-3 rounded-full mr-2"
+                                style={`background-color: ${tag.color};`}
+                            />
+                            <span>{tag.name}</span>
+                            <span class="check-tag ml-auto text-xs hidden">
+                                <Check class="w-4 h-4 text-purple-500" />
+                            </span>
+                        </div>
+                    ))
+                ) : (
+                    <div class="px-3 py-2 text-gray-400">No tags available</div>
+                )
+            }
+        </div>
+    </div>
+    <input type="hidden" id={id + "Hidden"} name={name} value={value} />
+</div>
+
+<script>
+    // Custom dropdown logic
+    function wire(root: HTMLDivElement) {
+        if (root.hasAttribute("data-tags-dropdown-wired")) return;
+        root.setAttribute("data-tags-dropdown-wired", "true");
+
+        const btn = root.querySelector(
+            "button[id$='DropdownBtn']",
+        ) as HTMLButtonElement;
+        const labelSpan = root.querySelector(
+            `span[id$='DropdownLabel']`,
+        ) as HTMLSpanElement;
+        const list = root.querySelector(
+            "div[id$='DropdownList']",
+        ) as HTMLDivElement;
+        const hidden = root.querySelector(
+            "input[type=hidden]",
+        ) as HTMLInputElement;
+        const iconDown = root.querySelector("#icon-down") as HTMLElement;
+        const iconUp = root.querySelector("#icon-up") as HTMLElement;
+
+        if (!btn || !list || !hidden || !labelSpan || !iconDown || !iconUp)
+            return;
+
+        function updateLabel() {
+            if (!hidden || !labelSpan) return;
+            const selected = hidden.value
+                .split(",")
+                .map((t: string) => t.trim())
+                .filter((t: string) => t.length > 0);
+            labelSpan.textContent =
+                selected.length > 0 ? selected.join(", ") : "Select tags";
+        }
+
+        function closeDropdown() {
+            if (!list.classList.contains("hidden")) {
+                list.classList.add("hidden");
+                iconDown.classList.remove("hidden");
+                iconUp.classList.add("hidden");
+            }
+        }
+
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation(); // Prevent click from propagating to document
+            const rect = btn.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.top;
+            let width = rect.width;
+
+            if (list) {
+                list.classList.toggle("hidden"); // Temporarily show the dropdown to calculate height
+                const dropdownHeight = list.clientHeight;
+                list.classList.toggle("hidden");
+                top -= dropdownHeight + 12; // Position above button with 12px gap
+
+                list.style.left = left + "px";
+                list.style.top = top + "px";
+                list.style.width = width + "px";
+                list.classList.toggle("hidden"); // Toggle visibility back
+
+                // Toggle icons
+                iconDown.classList.toggle("hidden");
+                iconUp.classList.toggle("hidden");
+            }
+        });
+
+        document.addEventListener("click", closeDropdown); // Close dropdown on outside click
+
+        list.querySelectorAll("[data-tag-name]").forEach((item) => {
+            const el = item as HTMLDivElement;
+
+            el.addEventListener("click", function (e) {
+                e.stopPropagation(); // Prevent closing the dropdown when clicking a tag
+
+                const tagName = el.getAttribute("data-tag-name");
+
+                if (!tagName || !hidden) return;
+
+                let current = hidden.value
+                    .split(",")
+                    .map((t: string) => t.trim())
+                    .filter((t: string) => t.length > 0);
+
+                if (!current.includes(tagName)) {
+                    current.push(tagName);
+                } else {
+                    current = current.filter((t: string) => t !== tagName);
+                }
+
+                hidden.value = current.join(", ");
+
+                updateLabel();
+                // Update UI
+                if (el) {
+                    const checkSpan = el.querySelector(
+                        "span.check-tag",
+                    ) as HTMLSpanElement;
+
+                    if (checkSpan) {
+                        checkSpan.classList.toggle(
+                            "hidden",
+                            !current.includes(tagName),
+                        );
+                    }
+                }
+            });
+        });
+        // Initial label update
+        updateLabel();
+
+        function resetTags() {
+            if (!hidden || !labelSpan || !list) return;
+
+            // Clear the hidden input value
+            hidden.value = "";
+
+            // Update the label
+            labelSpan.textContent = "Select tags";
+
+            // Reset the UI for all tags
+            list.querySelectorAll("[data-tag-name]").forEach((item) => {
+                const el = item as HTMLDivElement;
+                const checkSpan = el.querySelector(
+                    "span.check-tag",
+                ) as HTMLSpanElement;
+                if (checkSpan) {
+                    checkSpan.classList.add("hidden");
+                }
+            });
+        }
+
+        (root as any).resetTags = resetTags; // Attach resetTags to the root for external access
+    }
+
+    document
+        .querySelectorAll("[data-tags-dropdown-root]")
+        .forEach((el) => wire(el as HTMLDivElement));
+</script>
