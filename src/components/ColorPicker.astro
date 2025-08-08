@@ -2,11 +2,11 @@
 import { colors } from "../types/arrays.ts";
 interface Props {
     id: string;
-    formName: string;
+    formText: string;
     checkedColor?: string;
 }
 
-const { id, formName, checkedColor = "#6172f3" } = Astro.props;
+const { id, formText: formName, checkedColor = "#6172f3" } = Astro.props;
 ---
 
 <label for="colorPicker">

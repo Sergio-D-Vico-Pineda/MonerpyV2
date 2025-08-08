@@ -1,7 +1,7 @@
 ---
 import X from "@svg/mono/X.astro";
 import ColorPicker from "../ColorPicker.astro";
-import Input from "../Input.astro";
+import Input from "@comps/Input.astro";
 import { accountTypes } from "../../types/arrays.ts";
 ---
 
@@ -77,7 +77,7 @@ import { accountTypes } from "../../types/arrays.ts";
                 />
             </label>
 
-            <ColorPicker id="color" formName="Account Color" />
+            <ColorPicker id="color" formText="Account Color" />
 
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button

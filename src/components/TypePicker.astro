@@ -1,13 +1,19 @@
 ---
+interface Props {
+    classes?: string;
+}
+
+const { classes }: Props = Astro.props;
+
 import { transactionTypes } from "../types/arrays.ts";
 import Asterisk from "@comps/Asterisk.astro";
 ---
 
-<div>
+<div class={classes}>
     <span class="block text-sm font-medium text-gray-200 mb-2 cursor-default">
         Type <Asterisk id="type" /></span
     >
-    <div class="w-full h-[42px] flex items-center justify-center gap-x-4 ps-3">
+    <div class="w-full h-[42px] flex items-center justify-center gap-x-4">
         {
             transactionTypes.map((type) => (
                 <label class="inline-flex items-center">

@@ -1,19 +1,16 @@
 ---
 import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
-import Input from "../Input.astro";
+import Input from "@comps/Input.astro";
 import TagsPicker from "@comps/tags/TagsPicker.astro";
-import { transactionTypes } from "@/types/arrays.ts";
-import TypePicker from "../TypePicker.astro";
-import TypeSelect from "../TypeSelect.astro";
+import TypePicker from "@comps/TypePicker.astro";
+import Amount from "../transaction/Amount.astro";
+import Account from "../transaction/Account.astro";
+import Date from "../transaction/Date.astro";
 
 // Get data for the modal form
-const [accountsResult, categoriesResult] = await Promise.all([
-    Astro.callAction(actions.getAccounts, {}),
-    Astro.callAction(actions.getCategories, {}),
-]);
+const categoriesResult = await Astro.callAction(actions.getCategories, {});
 
-const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 const categories = categoriesResult.data?.ok
     ? categoriesResult.data.categories
     : [];
@@ -57,37 +54,9 @@ const categories = categoriesResult.data?.ok
             />
             <input type="hidden" name="id" id="transaction-id" />
 
-            <!-- Account Selection -->
+            <!-- Account and Name -->
             <div class="flex items-center gap-x-4 justify-center">
-                <label>
-                    <span class="block text-sm font-medium text-gray-300 mb-2">
-                        Account *
-                    </span>
-                    <select
-                        id="accountId"
-                        name="accountId"
-                        required
-                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                        <option value="">Select an account</option>
-                        {
-                            accounts &&
-                                accounts.map((account) => (
-                                    <option
-                                        value={account.id}
-                                        data-color={account.color}
-                                    >
-                                        {account.name} ({account.accountType}) -
-                                        {new Intl.NumberFormat("es-ES", {
-                                            style: "currency",
-                                            currency: "EUR",
-                                            minimumFractionDigits: 2,
-                                        }).format(account.balance)}
-                                    </option>
-                                ))
-                        }
-                    </select>
-                </label>
+                <Account classes="flex-1" />
 
                 <Input
                     id="name"
@@ -95,99 +64,47 @@ const categories = categoriesResult.data?.ok
                     formName="name"
                     required={true}
                     placeholder="Enter transaction name"
-                    classes="flex-1"
+                    classes="flex-1/3"
                 />
             </div>
 
-            <!-- Transaction Type -->
-
+            <!-- Transaction Type and Amount -->
             <div class="flex items-center gap-x-4 justify-center">
-                <TypePicker />
-                <label class="flex-1">
-                    <span class="block text-sm font-medium text-gray-300 mb-2">
-                        Amount (€) *
-                    </span>
-                    <input
-                        type="number"
-                        id="amount"
-                        name="amount"
-                        required
-                        min="0.01"
-                        step="0.01"
-                        placeholder="0.00"
-                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                </label>
+                <TypePicker classes="flex-1" />
+                <Amount classes="flex-1/3" />
             </div>
 
-            <label>
-                <span class="block text-sm font-medium text-gray-300 mb-2">
-                    Date *
-                </span>
-                <input
-                    type="datetime-local"
-                    id="date"
-                    name="date"
-                    required
-                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-            </label>
-
-            <label>
-                <span class="block text-sm font-medium text-gray-300 mb-2">
-                    Category
-                </span>
-                <select
-                    id="categoryId"
-                    name="categoryId"
-                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                    <option value="">Select a category (optional)</option>
-                    {
-                        categories &&
-                            categories.map((category) => (
-                                <option
-                                    value={category.id}
-                                    data-color={category.color}
-                                >
-                                    {category.parent
-                                        ? `${category.parent.name} > ${category.name}`
-                                        : category.name}
-                                </option>
-                            ))
-                    }
-                </select>
-            </label>
-
-            <!-- New Category -->
-            <!-- <div>
-                <label
-                    for="newCategory"
-                    class="block text-sm font-medium text-gray-300 mb-2"
-                >
-                    Or create new category
+            <div class="flex items-center gap-x-4 justify-center *:flex-1">
+                <label>
+                    <span class="block text-sm font-medium text-gray-300 mb-2">
+                        Category
+                    </span>
+                    <select
+                        id="categoryId"
+                        name="categoryId"
+                        class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        <option value="">Select a category (optional)</option>
+                        {
+                            categories &&
+                                categories.map((category) => (
+                                    <option
+                                        value={category.id}
+                                        data-color={category.color}
+                                    >
+                                        {category.parent
+                                            ? `${category.parent.name} > ${category.name}`
+                                            : category.name}
+                                    </option>
+                                ))
+                        }
+                    </select>
                 </label>
-                <div class="flex gap-2">
-                    <input
-                        type="text"
-                        id="newCategory"
-                        name="newCategory"
-                        placeholder="New category name"
-                        class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                    <input
-                        type="color"
-                        id="newCategoryColor"
-                        name="newCategoryColor"
-                        value="#6172f3"
-                        class="w-12 h-10 bg-gray-700 border border-gray-600 rounded-lg"
-                    />
-                </div>
-            </div> -->
+                <Date id="date" name="date" formText="Date" />
+            </div>
 
             <!-- Tags -->
             <TagsPicker id="tags" name="tags" />
-
             <!-- Form Buttons -->
             <div class="flex gap-3 pt-4">
                 <div class="flex-3 text-right">
