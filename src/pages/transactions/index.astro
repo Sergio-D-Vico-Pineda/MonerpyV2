@@ -12,7 +12,7 @@ import {
     formatCurrency,
 } from "@lib/date-utils.ts";
 import Loop from "@comps/svgs/mono/Loop.astro";
-import Transaction from "@comps/svgs/mono/Transaction.astro";
+import TransactionIcon from "@comps/svgs/mono/TransactionIcon.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
 import CreateAccount from "@comps/layout/CreateAccount.astro";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
@@ -148,7 +148,7 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                     <div class="flex justify-between items-center mb-6">
                         <div class="flex items-baseline-last gap-x-4">
                             <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
-                                <Transaction /> Transactions
+                                <TransactionIcon /> Transactions
                             </h2>
                             <a
                                 href="/recurring"

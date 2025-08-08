@@ -8,7 +8,7 @@ import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreateAccount from "@comps/layout/CreateAccount.astro";
-import Transaction from "@comps/svgs/mono/Transaction.astro";
+import TransactionIcon from "@comps/svgs/mono/TransactionIcon.astro";
 import Loop from "@comps/svgs/mono/Loop.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
 
@@ -259,7 +259,7 @@ function getStatusText(status: string): string {
                                 href="/transactions"
                                 class="text-purple-400 hover:text-purple-300 flex items-center gap-2"
                             >
-                                <Transaction class="w-4 h-4" />
+                                <TransactionIcon class="w-4 h-4" />
                                 <span>Transactions</span>
                             </a>
                         </div>
