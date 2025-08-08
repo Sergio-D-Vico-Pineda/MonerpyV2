@@ -3,27 +3,37 @@ import Asterisk from "@comps/Asterisk.astro";
 interface Props {
     id: string;
     name: string;
-    formName: string;
+    label: string;
+    value?: string;
     required?: boolean;
     placeholder?: string;
     classes?: string;
 }
 
-const { id, name, formName, required, placeholder, classes = "" } = Astro.props;
+const {
+    id,
+    name,
+    label,
+    value,
+    required,
+    placeholder,
+    classes = "",
+} = Astro.props;
 ---
 
 <label for={id} class={classes}>
     <p class="text-sm font-medium text-gray-200 mb-2">
-        {name}
+        {label}
         {required && <Asterisk id={id} />}
     </p>
     <input
         type="text"
         id={id}
-        name={formName}
+        name={name}
         required={required}
         class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         placeholder={placeholder}
+        value={value}
         autocomplete="off"
     />
 </label>

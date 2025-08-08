@@ -10,6 +10,7 @@ import {
     formatCurrency,
 } from "@lib/date-utils.ts";
 import { colors, accountTypes } from "../../types/arrays.ts";
+import Input from "@comps/Input.astro";
 
 const user = Astro.locals.user;
 
@@ -142,22 +143,14 @@ const account = accountResult.data.account;
                             <input type="hidden" name="id" value={account.id} />
 
                             <!-- Account Name -->
-                            <div>
-                                <label
-                                    for="name"
-                                    class="block text-sm font-medium text-gray-300 mb-2"
-                                >
-                                    Account Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={account.name}
-                                    required
-                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                />
-                            </div>
+                            <Input
+                                id="accountName"
+                                label="Account Name"
+                                name="name"
+                                required
+                                value={account.name}
+                                placeholder="Enter account name"
+                            />
 
                             <!-- Account Type -->
                             <div>

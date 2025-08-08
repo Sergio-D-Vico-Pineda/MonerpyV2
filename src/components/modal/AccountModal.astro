@@ -35,13 +35,13 @@ import { accountTypes } from "../../types/arrays.ts";
 
             <Input
                 id="accountName"
-                name="Account Name"
-                formName="name"
+                label="Account Name"
+                name="name"
                 required
                 placeholder="Enter account name"
             />
 
-            <label>
+            <label for="accountType">
                 <p class="text-sm font-medium text-gray-200 mb-2">
                     Account Type *
                 </p>
@@ -62,7 +62,7 @@ import { accountTypes } from "../../types/arrays.ts";
                 </select>
             </label>
 
-            <label>
+            <label for="initialBalance">
                 <p class="text-sm font-medium text-gray-200 mb-2">
                     Initial Balance
                 </p>

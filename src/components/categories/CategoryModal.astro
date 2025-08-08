@@ -60,13 +60,13 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
 
             <Input
                 id="categoryName"
-                name="Category Name"
-                formName="name"
+                label="Category Name"
+                name="name"
                 required={false}
                 placeholder="Enter category name"
             />
 
-            <label>
+            <label for="parentCategory">
                 <p class="text-sm font-medium text-gray-200 mb-2">
                     Parent Category (Optional)
                 </p>
