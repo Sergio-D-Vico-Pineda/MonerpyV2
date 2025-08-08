@@ -1,12 +1,12 @@
 ---
 import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
-import TagsPicker from "@comps/tags/TagsPicker.astro";
 import TypePicker from "@comps/TypePicker.astro";
 import Amount from "../transaction/Amount.astro";
 import Account from "../transaction/Account.astro";
 import Date from "../transaction/Date.astro";
 import Category from "../transaction/Category.astro";
+import TagsDropdownSelect from "../tags/TagsDropdownSelect.astro";
 ---
 
 <div
@@ -70,7 +70,12 @@ import Category from "../transaction/Category.astro";
             </div>
 
             <!-- Tags -->
-            <TagsPicker id="tags" name="tags" />
+            <TagsDropdownSelect
+                id="tags"
+                name="tags"
+                label="Tags (custom dropdown)"
+            />
+            <!-- <TagsPicker id="tags" name="tags" /> -->
             <!-- Form Buttons -->
             <div class="flex gap-3 pt-4">
                 <div class="flex-3 text-right">
@@ -147,6 +152,9 @@ import Category from "../transaction/Category.astro";
     ) as HTMLInputElement;
     const submitText = document.getElementById("submitBtnText");
     const form = document.getElementById("transactionForm") as HTMLFormElement;
+    const tagsDropdownRoots = document.querySelectorAll(
+        "[data-tags-dropdown-root]",
+    ) as NodeListOf<HTMLDivElement>;
 
     async function resetForm() {
         if (formTitle) formTitle.textContent = "Add Transaction";
@@ -156,6 +164,16 @@ import Category from "../transaction/Category.astro";
         if (form) form.reset();
         if (dateInput) {
             dateInput.value = getCurrentDateTimeLocal();
+        }
+
+        // Reset tags dropdown
+        if (tagsDropdownRoots) {
+            tagsDropdownRoots.forEach((tagsDropdownRoot) => {
+                const resetTags = (tagsDropdownRoot as any).resetTags;
+                if (typeof resetTags === "function") {
+                    resetTags();
+                }
+            });
         }
     }
 
