@@ -70,8 +70,9 @@ const { tag } = Astro.props;
     >
         <input type="hidden" name="tagId" value={tag.id} />
 
-        <label class="relative cursor-pointer">
+        <label for="tagColor" class="relative cursor-pointer">
             <input
+                id="tagColor"
                 type="color"
                 name="color"
                 value={tag.color}

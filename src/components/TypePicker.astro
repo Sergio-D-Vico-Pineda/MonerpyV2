@@ -16,8 +16,9 @@ import Asterisk from "@comps/Asterisk.astro";
     <div class="w-full h-[42px] flex items-center justify-center gap-x-4">
         {
             transactionTypes.map((type) => (
-                <label class="inline-flex items-center">
+                <label for={`${type}Type`} class="inline-flex items-center">
                     <input
+                        id={`${type}Type`}
                         type="radio"
                         name="type"
                         value={type}

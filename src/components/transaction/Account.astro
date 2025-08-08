@@ -14,7 +14,7 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 const { classes }: Props = Astro.props;
 ---
 
-<label class={classes}>
+<label for="accountId" class={classes}>
     <span class="block text-sm font-medium text-gray-200 mb-2">
         Account <Asterisk id="account" />
     </span>

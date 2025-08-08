@@ -11,7 +11,7 @@ interface Props {
 const { id, name, formText, classes } = Astro.props;
 ---
 
-<label class={classes}>
+<label for={id} class={classes}>
     <span class="block text-sm font-medium text-gray-200 mb-2">
         {formText} <Asterisk id={id} /></span
     >

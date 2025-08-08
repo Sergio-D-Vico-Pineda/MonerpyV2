@@ -12,7 +12,7 @@ interface Props {
 const { id, name, formName, required, placeholder, classes = "" } = Astro.props;
 ---
 
-<label class={classes}>
+<label for={id} class={classes}>
     <span class="block text-sm font-medium text-gray-200 mb-2">
         {name}
         {required ? <Asterisk id={id} /> : ""}

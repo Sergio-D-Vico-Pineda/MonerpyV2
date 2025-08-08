@@ -10,7 +10,11 @@ if (Astro.locals.user) {
 }
 ---
 
-<Layout title="Login" description="Login to your Monerpy account" showFooter={false}>
+<Layout
+  title="Login"
+  description="Login to your Monerpy account"
+  showFooter={false}
+>
   <main class="min-h-screen flex items-center justify-center bg-gray-900">
     <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
       <h1 class="text-3xl font-bold text-purple-500 mb-6 text-center">
@@ -40,8 +44,9 @@ if (Astro.locals.user) {
           />
         </div>
         <div class="flex items-center justify-between mb-4">
-          <label class="flex items-center text-purple-300">
+          <label for="remember" class="flex items-center text-purple-300">
             <input
+              id="remember"
               type="checkbox"
               name="remember"
               class="form-checkbox h-4 w-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"

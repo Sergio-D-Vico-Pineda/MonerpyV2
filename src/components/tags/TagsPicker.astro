@@ -22,7 +22,7 @@ const existingTags = tagsResult.data?.ok ? tagsResult.data.tags : [];
 ---
 
 <div class="flex gap-x-2" data-tags-input-root data-target-id={id}>
-  <label class="flex-1">
+  <label for={id} class="flex-1">
     {
       label && (
         <span class="block text-sm font-medium text-gray-300 mb-2">
