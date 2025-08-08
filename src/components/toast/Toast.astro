@@ -3,7 +3,7 @@
 ---
 
 <div
-    id="toast-container"
+    id="toastContainer"
     class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-y-3 max-w-md w-full px-4"
 >
 </div>
@@ -21,7 +21,7 @@
         private toasts: Map<string, NodeJS.Timeout> = new Map();
 
         constructor() {
-            this.container = document.getElementById("toast-container")!;
+            this.container = document.getElementById("toastContainer")!;
             this.loadFromSessionStorage();
             this.setupStorageListener();
         }
@@ -92,12 +92,12 @@
 
         private displayToast(toast: Toast) {
             // Check if toast already exists
-            if (document.getElementById(`toast-${toast.id}`)) {
+            if (document.getElementById(`${toast.id}Toast`)) {
                 return;
             }
 
             const toastElement = document.createElement("div");
-            toastElement.id = `toast-${toast.id}`;
+            toastElement.id = `${toast.id}Toast`;
             toastElement.className = this.getToastStyles(toast.type);
             toastElement.style.transform = "translateY(100px)";
             toastElement.style.opacity = "0";
@@ -132,7 +132,7 @@
         }
 
         public removeToast(id: string) {
-            const toastElement = document.getElementById(`toast-${id}`);
+            const toastElement = document.getElementById(`${id}Toast`);
             if (toastElement) {
                 // Animate out
                 toastElement.style.transform = "translateY(100px)";

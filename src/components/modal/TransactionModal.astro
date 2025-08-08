@@ -19,10 +19,7 @@ import Category from "../transaction/Category.astro";
         <header
             class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
         >
-            <h2
-                class="font-semibold text-purple-400 text-xl"
-                id="modal-form-title"
-            >
+            <h2 class="font-semibold text-purple-400 text-xl" id="modalTitle">
                 Add Transaction
             </h2>
             <button
@@ -42,10 +39,10 @@ import Category from "../transaction/Category.astro";
             <input
                 type="hidden"
                 name="_action"
-                id="form-action"
+                id="formAction"
                 value="create"
             />
-            <input type="hidden" name="id" id="transaction-id" />
+            <input type="hidden" name="id" id="transactionId" />
 
             <!-- Account and Name -->
             <div class="flex items-center gap-x-4 justify-center">
@@ -79,7 +76,7 @@ import Category from "../transaction/Category.astro";
                 <div class="flex-3 text-right">
                     <button
                         type="button"
-                        id="modal-cancel-btn"
+                        id="cancelBtn"
                         class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
                     >
                         Cancel
@@ -89,7 +86,7 @@ import Category from "../transaction/Category.astro";
                     type="submit"
                     class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
                 >
-                    <span id="submit-text">Save Transaction</span>
+                    <span id="submitBtnText">Save Transaction</span>
                 </button>
             </div>
         </form>
@@ -121,7 +118,7 @@ import Category from "../transaction/Category.astro";
     // Modal functionality
     const modal = document.getElementById("transactionModal");
     const closeModalButton = document.getElementById("closeModalButton");
-    const cancelBtn = document.getElementById("modal-cancel-btn");
+    const cancelBtn = document.getElementById("cancelBtn");
 
     function openModal() {
         if (modal) {
@@ -141,14 +138,14 @@ import Category from "../transaction/Category.astro";
     }
 
     const dateInput = document.getElementById("date") as HTMLInputElement;
-    const formTitle = document.getElementById("modal-form-title");
+    const formTitle = document.getElementById("modalTitle");
     const formAction = document.getElementById(
-        "form-action",
+        "formAction",
     ) as HTMLInputElement;
     const transactionId = document.getElementById(
-        "transaction-id",
+        "transactionId",
     ) as HTMLInputElement;
-    const submitText = document.getElementById("submit-text");
+    const submitText = document.getElementById("submitBtnText");
     const form = document.getElementById("transactionForm") as HTMLFormElement;
 
     async function resetForm() {
