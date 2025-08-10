@@ -5,6 +5,12 @@ interface Session {
     created: string; // unix timestamp
 }
 
+interface Tag {
+    id: number;
+    name: string;
+    color: string;
+}
+
 // Extend Astro's App.Locals to include user information
 declare global {
     namespace App {
@@ -19,4 +25,4 @@ declare global {
     }
 }
 
-export type { Session };
+export type { Session, Tag };
