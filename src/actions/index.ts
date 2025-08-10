@@ -17,9 +17,6 @@ import {
     getRecurringTransaction,
     updateRecurringTransaction,
     deleteRecurringTransaction,
-    getAccounts as getAccountsForRecurring,
-    getCategories as getCategoriesForRecurring,
-    getTags as getTagsForRecurring,
     generateRecurringTransactions
 } from "./recurring-transactions/index.ts";
 import {
@@ -76,9 +73,6 @@ export const server = {
     getRecurringTransaction,
     updateRecurringTransaction,
     deleteRecurringTransaction,
-    getAccountsForRecurring,
-    getCategoriesForRecurring,
-    getTagsForRecurring,
     generateRecurringTransactions,
     createFamily,
     joinFamily,

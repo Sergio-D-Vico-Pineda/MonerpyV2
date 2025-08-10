@@ -2,6 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime, formatDateTimeLocal } from '@lib/date-utils.ts';
+import type { Tag } from '../../types/types.ts';
 
 // Generate transactions from recurring rules
 export const generateRecurringTransactions = defineAction({
@@ -122,7 +123,7 @@ export const generateRecurringTransactions = defineAction({
                                     where: { id: transaction.id },
                                     data: {
                                         tags: {
-                                            connect: recurringTransaction.tags.map(tag => ({ id: tag.id }))
+                                            connect: recurringTransaction.tags.map((tag: Tag) => ({ id: tag.id }))
                                         }
                                     }
                                 });
