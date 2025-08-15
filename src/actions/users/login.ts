@@ -3,6 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { createSession } from '@lib/session-manager.ts';
 import { verifyPassword } from '@lib/password.ts';
+import { getCurrentDateTime } from "@/lib/date-utils";
 
 export const login = defineAction({
     accept: 'form',
@@ -31,6 +32,10 @@ export const login = defineAction({
 
             // Create session
             const sessionId = createSession(user.id, user.username, user.email);
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { lastLogin: getCurrentDateTime() }
+            });
 
             // Set cookie with appropriate duration
             const maxAge = remember ? 2592000 : 86400; // 30 days or 24 hours in seconds
