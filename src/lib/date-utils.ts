@@ -84,14 +84,14 @@ function getCurrentDateTimeLocal(): string {
  *   - dateStyle: The style of the date part. Options:
  *       - 'medium': "DD/MM/YYYY" (e.g., "01/06/2024")
  *       - 'long': "DD Month YYYY" (e.g., "01 June 2024")
- *   - pm: Whether to format the time in 12-hour format with AM/PM (default: false).
+ *   - pm: Whether to format the time in 12-hour format with am/pm (default: false).
  * @returns Formatted date string according to the specified options.
  *
  * @example
  * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'normal' }); // "01/06/2024 14:30"
  * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', includeTime: false }); // "01 June 2024"
  * formatDateForDisplay("2024-06-01 14:30:00", { includeSeconds: true }); // "01/06/2024 14:30:00"
- * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', pm: true }); // "01 June 2024 2:30:00 PM"
+ * formatDateForDisplay("2024-06-01 14:30:00", { dateStyle: 'long', pm: true }); // "01 June 2024 2:30:00 pm"
  */
 function formatDateForDisplay(
     dateTimeString: string,
@@ -109,12 +109,11 @@ function formatDateForDisplay(
         pm = false,
     } = options;
 
+    // Accept either "YYYY-MM-DD HH:mm[:ss]" or "YYYY-MM-DD" (date-only).
     const parts = dateTimeString.split(' ');
-    if (parts.length !== 2) {
-        throw new Error('Invalid date-time format');
-    }
+    const datePart = parts[0];
+    const timePart = parts.length >= 2 ? parts.slice(1).join(' ') : undefined;
 
-    const [datePart, timePart] = parts;
     const [year, month, day] = datePart.split('-');
 
     let formattedDate: string;
@@ -127,6 +126,11 @@ function formatDateForDisplay(
             break;
         default:
             formattedDate = `${day}/${month}/${year}`;
+    }
+
+    // If the input is date-only, ignore includeTime and return date only.
+    if (!timePart) {
+        return formattedDate;
     }
 
     if (!includeTime) {
@@ -143,7 +147,7 @@ function formatDateForDisplay(
 
     let formattedTime: string;
     if (pm) {
-        const period = hours >= 12 ? 'PM' : 'AM';
+        const period = hours >= 12 ? 'pm' : 'am';
         const adjustedHours = hours % 12 || 12;
         if (includeSeconds) {
             formattedTime = `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
@@ -173,13 +177,13 @@ function getDatePart(dateTimeString: string): string {
 /**
  * Gets the time part only from a date-time string
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
- * @param pm - Optional parameter to indicate if the time should be in 12-hour format with AM/PM
+ * @param pm - Optional parameter to indicate if the time should be in 12-hour format with am/pm
  *            (default: false, which returns 24-hour format)
- * @returns Time part "HH:mm:ss" (24-hour) or "HH:mm:ss AM/PM" (12-hour)
+ * @returns Time part "HH:mm:ss" (24-hour) or "HH:mm:ss am/pm" (12-hour)
  *
  * @example
  * getTimePart("2024-06-01 14:30:45") // "14:30:45"
- * getTimePart("2024-06-01 14:30:45", true) // "2:30:45 PM"
+ * getTimePart("2024-06-01 14:30:45", true) // "2:30:45 pm"
  */
 function getTimePart(dateTimeString: string, pm: boolean = false): string {
     const timePart = dateTimeString.split(' ')[1];
@@ -192,7 +196,7 @@ function getTimePart(dateTimeString: string, pm: boolean = false): string {
     const seconds = Number(secondsStr);
 
     if (pm) {
-        const period = hours >= 12 ? 'PM' : 'AM';
+        const period = hours >= 12 ? 'pm' : 'am';
         const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
         return `${adjustedHours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} ${period}`;
     } else {
@@ -203,13 +207,13 @@ function getTimePart(dateTimeString: string, pm: boolean = false): string {
 /**
  * Gets the time part only from a date-time string without seconds
  * @param dateTimeString - Database date string "YYYY-MM-DD HH:mm:ss"
- * @returns Time part "HH:mm AM/PM"
+ * @returns Time part "HH:mm am/pm"
  */
 function getTimePartWithoutSeconds(dateTimeString: string): string {
     const timePart = dateTimeString.split(' ')[1] || '00:00:00';
     const [hours, minutes] = timePart.split(':').map(Number);
 
-    const period = hours >= 12 ? 'PM' : 'AM';
+    const period = hours >= 12 ? 'pm' : 'am';
     const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
 
     return `${adjustedHours}:${String(minutes).padStart(2, '0')} ${period}`;
@@ -225,22 +229,9 @@ function getCurrentDate(): string {
     return `${year}-${month}-${day}`;
 }
 
-/**
- * Formats a date-only string for display
- * @param dateString - Database date string "YYYY-MM-DD"
- * @param dateStyle - Formatting style
- * @returns Formatted date string
- */
-function formatDateOnlyForDisplay(dateString: string, dateStyle: 'normal' | 'long' = 'normal'): string {
-    const [year, month, day] = dateString.split('-');
-
-    switch (dateStyle) {
-        case 'normal':
-            return `${day}/${month}/${year}`;
-        case 'long':
-            return `${day} ${months[parseInt(month) - 1].label} ${year}`;
-    }
-}
+// Note: formatDateForDisplay now accepts date-only strings ("YYYY-MM-DD") and
+// will return only the date part when a time component is not present. The
+// previous helper `formatDateOnlyForDisplay` was removed to keep the API small.
 
 /**
  * Formats a number as currency (EUR, es-ES locale by default)
@@ -257,6 +248,26 @@ function formatCurrency(amount: number, currency = 'EUR', locale = 'es-ES'): str
     }).format(amount);
 }
 
+/**
+ * Formats a JS timestamp (milliseconds) to "D/M/YYYY, h:mm:ss am/pm"
+ * Example: 15/8/2025, 10:29:43 pm
+ */
+function formatTimestampToDisplay(timestamp: number): string {
+    const d = new Date(timestamp);
+    const day = d.getDate(); // no leading zero
+    const month = d.getMonth() + 1; // no leading zero
+    const year = d.getFullYear();
+
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+
+    const period = hours >= 12 ? 'pm' : 'am'; // lowercase as requested
+    hours = hours % 12 || 12; // convert to 12-hour clock, 0 -> 12
+
+    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds} ${period}`;
+}
+
 export {
     formatDateTimeLocal,
     formatToDateTimeLocal,
@@ -267,6 +278,6 @@ export {
     getTimePart,
     getTimePartWithoutSeconds,
     getCurrentDate,
-    formatDateOnlyForDisplay,
-    formatCurrency
+    formatCurrency,
+    formatTimestampToDisplay
 }
