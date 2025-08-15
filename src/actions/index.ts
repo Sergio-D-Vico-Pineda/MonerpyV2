@@ -1,6 +1,9 @@
-import { login } from "./users/login.ts";
-import { create } from "./users/create.ts";
-import { logout } from "./users/logout.ts";
+import {
+    login,
+    create,
+    logout,
+    getUser
+} from "./users/index.ts";
 import {
     createTransaction,
     getTransactions,
@@ -60,6 +63,7 @@ export const server = {
     login: login,
     create: create,
     logout: logout,
+    getUser: getUser,
     createTransaction,
     getTransactions,
     getTransaction,
