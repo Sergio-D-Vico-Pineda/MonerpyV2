@@ -10,6 +10,7 @@ import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
 import { formatCurrency } from "@lib/date-utils.ts";
+import { accountTypes } from "../../types/arrays.ts";
 
 const user = Astro.locals.user;
 
@@ -49,16 +50,6 @@ const accountsResult = userInFamily
     ? await Astro.callAction(actions.getAccountsList, { includeDeleted: false })
     : { data: { ok: false, accounts: [] } };
 const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
-
-// Account type options for display
-const accountTypes = [
-    { value: "Cash", label: "Cash", icon: "💵" },
-    { value: "Checking", label: "Checking Account", icon: "🏦" },
-    { value: "Savings", label: "Savings Account", icon: "💰" },
-    { value: "CreditCard", label: "Credit Card", icon: "💳" },
-    { value: "Investment", label: "Investment Account", icon: "📈" },
-    { value: "Loan", label: "Loan Account", icon: "🏠" },
-];
 ---
 
 <Layout title="Accounts" description="Manage your accounts">
@@ -85,6 +76,18 @@ const accountTypes = [
                             </a>
                         </div>
                         <div class="flex items-center gap-x-4">
+                            {accounts && accounts.length !== 0 && (
+                                <select class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">
+                                        Select transaction type
+                                    </option>
+                                    {accounts.map((account) => (
+                                        <option value={account.id}>
+                                            {account.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                             <button
                                 type="button"
                                 id="addAccountButton"
