@@ -31,6 +31,10 @@ category._count.children = category._count.children || 0;
 
 const thereIsSubcategories = category._count.children > 0;
 
+// Added explicit counts for clear conditional rendering
+const txnCount = category._count?.transactions || 0;
+const subCount = category._count?.children || 0;
+
 // Get parent categories for dropdown (exclude current category and its children)
 const parentCategories = allCategories.filter(
     (cat) =>
@@ -60,7 +64,7 @@ function isDescendantOf(
 >
     <!-- Display Mode -->
     <div class="category-display flex items-center gap-x-3 flex-1">
-        {isChild && <i class="text-gray-400">└─</i>}
+        {isChild && <i class="text-gray-400 cursor-default">└─</i>}
         <div
             class={`category-color-display rounded-full cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all ${isChild ? "w-3 h-3" : "w-4 h-4"}`}
             style={`background-color: ${category.color}`}
@@ -74,14 +78,26 @@ function isDescendantOf(
             >
                 {category.name}
             </h3>
-            <p class="text-sm text-gray-400">
-                {category._count?.transactions || 0} transactions
-                {
-                    thereIsSubcategories && (
-                        <span>• {category._count.children} subcategories</span>
-                    )
-                }
-            </p>
+            {/* Conditional: render only when there's something to show */}
+            {
+                (txnCount > 0 || subCount > 0) && (
+                    <p class="text-sm text-gray-400">
+                        {txnCount > 0 && (
+                            <>
+                                {txnCount} transactions
+                                {subCount > 0 && (
+                                    <span class="mx-1">
+                                        • {subCount} subcategories
+                                    </span>
+                                )}
+                            </>
+                        )}
+                        {txnCount === 0 && subCount > 0 && (
+                            <>{subCount} subcategories</>
+                        )}
+                    </p>
+                )
+            }
         </div>
     </div>
 
@@ -91,7 +107,7 @@ function isDescendantOf(
             <input type="hidden" name="categoryId" value={category.id} />
 
             <div class="flex items-center gap-x-2">
-                {isChild && <i class="text-gray-400">└─</i>}
+                {isChild && <i class="text-gray-400 cursor-default">└─</i>}
                 <select
                     name="parentId"
                     class="parent-select text-xs bg-gray-600 text-white border border-gray-500 rounded px-2 py-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -127,6 +143,7 @@ function isDescendantOf(
             </label>
 
             <input
+                autocomplete="off"
                 type="text"
                 name="name"
                 value={category.name}
@@ -200,7 +217,7 @@ function isDescendantOf(
                 if (categoryItem.hasAttribute("data-initialized")) return;
                 categoryItem.setAttribute("data-initialized", "true");
 
-                // Emit custom events
+                // Emit custom events (dispatch on document so other category items can listen)
                 function emitCategoryEvent(
                     eventName: string,
                     detail: any = {},
@@ -209,8 +226,27 @@ function isDescendantOf(
                         detail: { categoryId, ...detail },
                         bubbles: true,
                     });
-                    categoryItem.dispatchEvent(event);
+                    // Dispatch globally so sibling category items can react
+                    document.dispatchEvent(event);
                 }
+
+                // Ensure only one category is in edit mode at a time.
+                // When another category starts editing, exit edit mode for this item.
+                document.addEventListener("category-edit-started", (e) => {
+                    try {
+                        const otherId = (e as CustomEvent).detail?.categoryId;
+                        if (!otherId) return;
+                        if (otherId !== categoryId) {
+                            // If this item is in edit mode, exit it
+                            const editMode = categoryItem.querySelector(
+                                ".category-edit:not(.hidden)",
+                            );
+                            if (editMode) exitEditMode();
+                        }
+                    } catch (err) {
+                        // ignore malformed events
+                    }
+                });
 
                 // Color picker sync
                 const colorInput = categoryItem.querySelector(
@@ -266,7 +302,8 @@ function isDescendantOf(
                     // Handle direct clicks on name and color for editing
                     if (
                         target.closest(".category-name-display") ||
-                        target.closest(".category-color-display")
+                        target.closest(".category-color-display") ||
+                        target.closest("i")
                     ) {
                         event.preventDefault();
                         enterEditMode();
