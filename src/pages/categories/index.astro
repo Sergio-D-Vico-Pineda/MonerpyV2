@@ -88,13 +88,33 @@ const categoriesResult = userInFamily
           includeDeleted: false,
       })
     : { data: { ok: false, categories: [] } };
-const categories = categoriesResult.data?.ok
+
+// Normalize categories into a flat array with the exact fields the UI expects
+const rawCategories = categoriesResult.data?.ok
     ? categoriesResult.data.categories
     : [];
+// Ensure we have a flat array of category objects regardless of how the action returned them
+let normalizedCategories: any[] = [];
+if (Array.isArray(rawCategories)) {
+    normalizedCategories = rawCategories;
+} else if (rawCategories && typeof rawCategories === "object") {
+    const vals = Object.values(rawCategories) as any[];
+    normalizedCategories = vals.flatMap((v) => (Array.isArray(v) ? v : [v]));
+} else {
+    normalizedCategories = [];
+}
+
+const categories = normalizedCategories.map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    color: c.color,
+    parentId: c.parentId ?? null,
+    _count: c._count ?? undefined,
+}));
 
 // Organize categories into parent-child hierarchy
-const parentCategories = categories?.filter((cat) => !cat.parentId) || [];
-const childCategories = categories?.filter((cat) => cat.parentId) || [];
+const parentCategories = categories.filter((cat) => !cat.parentId) || [];
+const childCategories = categories.filter((cat) => cat.parentId) || [];
 ---
 
 <Layout title="Categories" description="Manage your transaction categories">
@@ -193,7 +213,6 @@ const childCategories = categories?.filter((cat) => cat.parentId) || [];
         }
     </main>
 
-    
     <CategoryModal />
     <DeleteConfirmModal />
     <LogoutScript />
