@@ -12,3 +12,5 @@ pnpm prisma migrate dev --name NAME
 wsl turso db shell monerpyv2 < ./prisma/migrations/...
 
 scrypt
+
+here use a proper sematic html tags
