@@ -2,11 +2,68 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
+// Helper to build the `select` object for category queries.
+function buildCategorySelect(opts?: { includeUpdated?: boolean; includeChildrenRelation?: boolean; includeChildrenRelationIncludeDeleted?: boolean; includeParentRelation?: boolean; childrenCountIncludeDeleted?: boolean }) {
+    const {
+        includeUpdated = false,
+        includeChildrenRelation = false,
+        includeChildrenRelationIncludeDeleted = false,
+        includeParentRelation = false,
+        childrenCountIncludeDeleted = false
+    } = opts ?? {};
+
+    const select: any = {
+        id: true,
+        name: true,
+        color: true,
+        parentId: true,
+        createdAt: true,
+        deletedAt: true,
+        _count: {
+            select: {
+                transactions: {
+                    where: { deletedAt: null }
+                },
+                children: {
+                    where: childrenCountIncludeDeleted ? {} : { deletedAt: null }
+                }
+            }
+        }
+    };
+
+    if (includeUpdated) select.updatedAt = true;
+
+    if (includeChildrenRelation) {
+        select.children = {
+            where: includeChildrenRelationIncludeDeleted ? {} : { deletedAt: null },
+            select: {
+                id: true,
+                name: true,
+                color: true,
+                parentId: true
+            }
+        };
+    }
+
+    if (includeParentRelation) {
+        select.parent = {
+            select: {
+                id: true,
+                name: true,
+                color: true
+            }
+        };
+    }
+
+    return select;
+}
+
 export const getCategories = defineAction({
     accept: 'json',
     input: z.object({
         includeDeleted: z.boolean().optional().default(false),
-        parentId: z.number().optional().nullable()
+        parentId: z.number().optional().nullable(),
+        compact: z.boolean().optional().default(false)
     }).optional(),
     handler: async (input, context) => {
         try {
@@ -31,43 +88,17 @@ export const getCategories = defineAction({
                 ...(input?.parentId !== undefined ? { parentId: input.parentId } : {})
             };
 
+            const compact = input?.compact ?? false;
+
             const categories = await prisma.category.findMany({
                 where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    color: true,
-                    parentId: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    deletedAt: true,
-                    _count: {
-                        select: {
-                            transactions: {
-                                where: { deletedAt: null }
-                            },
-                            children: {
-                                where: { deletedAt: null }
-                            }
-                        }
-                    },
-                    children: {
-                        where: input?.includeDeleted ? {} : { deletedAt: null },
-                        select: {
-                            id: true,
-                            name: true,
-                            color: true,
-                            parentId: true
-                        }
-                    },
-                    parent: {
-                        select: {
-                            id: true,
-                            name: true,
-                            color: true
-                        }
-                    }
-                },
+                select: buildCategorySelect({
+                    includeUpdated: !compact,
+                    includeChildrenRelation: !compact,
+                    includeChildrenRelationIncludeDeleted: !!input?.includeDeleted,
+                    includeParentRelation: !compact,
+                    childrenCountIncludeDeleted: !!input?.includeDeleted
+                }),
                 orderBy: [
                     { name: 'asc' }
                 ]
@@ -152,64 +183,3 @@ export const getCategory = defineAction({
     }
 });
 
-export const getCategoriesList = defineAction({
-    accept: 'json',
-    input: z.object({
-        includeDeleted: z.boolean().optional().default(false)
-    }).optional(),
-    handler: async (input, context) => {
-        try {
-            const user = context.locals.user;
-            if (!user) {
-                return { ok: false, error: "Authentication required" };
-            }
-
-            // Get user with family info
-            const userWithFamily = await prisma.user.findUnique({
-                where: { id: user.id },
-                include: { family: true }
-            });
-
-            if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family" };
-            }
-
-            const whereClause = {
-                familyId: userWithFamily.familyId,
-                ...(input?.includeDeleted ? {} : { deletedAt: null })
-            };
-
-            const categories = await prisma.category.findMany({
-                where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    color: true,
-                    parentId: true,
-                    createdAt: true,
-                    deletedAt: true,
-                    _count: {
-                        select: {
-                            transactions: {
-                                where: { deletedAt: null }
-                            },
-                            children: {
-                                where: input?.includeDeleted ? {} : { deletedAt: null }
-                            }
-                        }
-                    }
-                },
-                orderBy: [
-                    { parentId: 'asc' },
-                    { name: 'asc' }
-                ]
-            });
-
-            return { ok: true, categories };
-
-        } catch (error) {
-            console.error('Error fetching categories list:', error);
-            return { ok: false, error: "Failed to fetch categories" };
-        }
-    }
-});

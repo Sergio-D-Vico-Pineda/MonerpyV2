@@ -2,10 +2,39 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
+// Helper to build the `select` object for tag queries.
+function buildTagSelect(opts?: { includeUpdated?: boolean; includeRecurringCount?: boolean }) {
+    const { includeUpdated = false, includeRecurringCount = false } = opts ?? {};
+
+    const select: any = {
+        id: true,
+        name: true,
+        color: true,
+        createdAt: true,
+        deletedAt: true,
+        _count: {
+            select: {
+                transactions: {
+                    where: { deletedAt: null }
+                }
+            }
+        }
+    };
+
+    if (includeUpdated) select.updatedAt = true;
+
+    if (includeRecurringCount) {
+        select._count.select.recurringTransactions = { where: { deletedAt: null } };
+    }
+
+    return select;
+}
+
 export const getTags = defineAction({
     accept: 'json',
     input: z.object({
-        includeDeleted: z.boolean().optional().default(false)
+        includeDeleted: z.boolean().optional().default(false),
+        compact: z.boolean().optional().default(false)
     }).optional(),
     handler: async (input, context) => {
         try {
@@ -29,26 +58,10 @@ export const getTags = defineAction({
                 ...(input?.includeDeleted ? {} : { deletedAt: null })
             };
 
+            const compact = input?.compact ?? false;
             const tags = await prisma.tag.findMany({
                 where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    color: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    deletedAt: true,
-                    _count: {
-                        select: {
-                            transactions: {
-                                where: { deletedAt: null }
-                            },
-                            recurringTransactions: {
-                                where: { deletedAt: null }
-                            }
-                        }
-                    }
-                },
+                select: buildTagSelect({ includeUpdated: !compact, includeRecurringCount: !compact }),
                 orderBy: [
                     { name: 'asc' }
                 ]
@@ -118,59 +131,3 @@ export const getTag = defineAction({
     }
 });
 
-export const getTagsList = defineAction({
-    accept: 'json',
-    input: z.object({
-        includeDeleted: z.boolean().optional().default(false)
-    }).optional(),
-    handler: async (input, context) => {
-        try {
-            const user = context.locals.user;
-            if (!user) {
-                return { ok: false, error: "Authentication required" };
-            }
-
-            // Get user with family info
-            const userWithFamily = await prisma.user.findUnique({
-                where: { id: user.id },
-                include: { family: true }
-            });
-
-            if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family" };
-            }
-
-            const whereClause = {
-                familyId: userWithFamily.familyId,
-                ...(input?.includeDeleted ? {} : { deletedAt: null })
-            };
-
-            const tags = await prisma.tag.findMany({
-                where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    color: true,
-                    createdAt: true,
-                    deletedAt: true,
-                    _count: {
-                        select: {
-                            transactions: {
-                                where: { deletedAt: null }
-                            }
-                        }
-                    }
-                },
-                orderBy: [
-                    { name: 'asc' }
-                ]
-            });
-
-            return { ok: true, tags };
-
-        } catch (error) {
-            console.error('Error fetching tags list:', error);
-            return { ok: false, error: "Failed to fetch tags" };
-        }
-    }
-});
