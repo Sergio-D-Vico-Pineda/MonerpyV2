@@ -4,11 +4,7 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
-import {
-    formatDateForDisplay,
-    formatDateOnlyForDisplay,
-    formatCurrency,
-} from "@lib/date-utils.ts";
+import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import { colors, accountTypes } from "../../types/arrays.ts";
 import Input from "@comps/Input.astro";
 
@@ -319,9 +315,12 @@ const account = accountResult.data.account;
                                         .map((balance: any) => (
                                             <div class="flex items-center justify-between py-2">
                                                 <p class="text-gray-400">
-                                                    {formatDateOnlyForDisplay(
+                                                    {formatDateForDisplay(
                                                         balance.date,
-                                                        "normal",
+                                                        {
+                                                            includeTime: false,
+                                                            dateStyle: "normal",
+                                                        },
                                                     )}
                                                 </p>
                                                 <p

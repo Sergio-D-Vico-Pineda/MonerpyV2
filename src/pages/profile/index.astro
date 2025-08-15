@@ -2,6 +2,11 @@
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 import Header from "@comps/layout/Header.astro";
+import { actions } from "astro:actions";
+import {
+    formatDateForDisplay,
+    formatTimestampToDisplay,
+} from "@/lib/date-utils";
 
 const user = Astro.locals.user;
 
@@ -56,7 +61,19 @@ if (!user) {
 
                     <p>
                         <strong>Session Created:</strong>
-                        {new Date(parseInt(user.created)).toLocaleString()}
+                        {formatTimestampToDisplay(parseInt(user.created))}
+                    </p>
+
+                    <p>
+                        <strong>Last Login:</strong>
+                        {
+                            userInfo && userInfo.lastLogin
+                                ? formatDateForDisplay(userInfo.lastLogin, {
+                                      includeTime: true,
+                                      pm: true,
+                                  })
+                                : "Never logged in"
+                        }
                     </p>
 
                     <button

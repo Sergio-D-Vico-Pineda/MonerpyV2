@@ -3,7 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
-import { formatDateOnlyForDisplay, formatCurrency } from "@lib/date-utils.ts";
+import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import { timePeriods } from "../../../types/arrays.ts";
 
 const user = Astro.locals.user;
@@ -254,8 +254,11 @@ const balanceChangePercent =
                                                         return (
                                                             <tr class="border-b border-gray-700 hover:bg-gray-700 transition-colors">
                                                                 <td class="py-3 px-4 text-white">
-                                                                    {formatDateOnlyForDisplay(
+                                                                    {formatDateForDisplay(
                                                                         record.date,
+                                                                        {
+                                                                            includeTime: false,
+                                                                        },
                                                                     )}
                                                                 </td>
                                                                 <td
