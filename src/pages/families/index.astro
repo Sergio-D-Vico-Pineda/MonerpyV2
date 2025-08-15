@@ -192,30 +192,45 @@ const userRole = familyDetailsResult.data?.ok
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="text-center">
-                <div class="text-2xl font-bold text-purple-400">
-                  {familyDetails.users.length}
+            <section aria-labelledby="family-stats">
+              <h3 id="family-stats" class="sr-only">
+                Family statistics
+              </h3>
+
+              <dl class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div>
+                  <dt class="text-gray-300 text-lg">Members</dt>
+                  <dd class="text-2xl font-bold text-purple-400">
+                    {familyDetails.users.length}
+                  </dd>
                 </div>
-                <div class="text-gray-300">Members</div>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-green-400">
-                  {familyDetails._count.accounts}
+
+                <div>
+                  <dt class="text-gray-300 text-lg">Accounts</dt>
+                  <dd class="text-2xl font-bold text-green-400">
+                    {familyDetails._count.accounts}
+                  </dd>
                 </div>
-                <div class="text-gray-300">Accounts</div>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-blue-400">
-                  {familyDetails._count.categories}
+
+                <div>
+                  <dt class="text-gray-300 text-lg">Categories</dt>
+                  <dd class="text-2xl font-bold text-blue-400">
+                    {familyDetails._count.categories}
+                  </dd>
                 </div>
-                <div class="text-gray-300">Categories</div>
-              </div>
-            </div>
+
+                <div>
+                  <dt class="text-gray-300 text-lg">Tags</dt>
+                  <dd class="text-2xl font-bold text-blue-400">
+                    {familyDetails._count.tags}
+                  </dd>
+                </div>
+              </dl>
+            </section>
           </div>
 
           <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
-            <h3 class="mb-6 font-semibold text-purple-400 text-xl">
+            <h3 class="font-semibold text-purple-400 text-xl mb-6">
               Family Members
             </h3>
 
@@ -310,33 +325,48 @@ const userRole = familyDetailsResult.data?.ok
 
           {familyDetails.accounts.length > 0 && (
             <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg">
-              <h3 class="mb-6 font-semibold text-purple-400 text-xl">
+              <h3 class="font-semibold text-purple-400 text-xl mb-6">
                 Family Accounts
               </h3>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Replace non-semantic divs with semantic list/article structure */}
+              <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
                 {familyDetails.accounts.map((account) => (
-                  <div class="bg-gray-700 rounded-lg p-4">
-                    <div class="flex items-center gap-3 mb-2">
-                      <div
-                        class="w-4 h-4 rounded-full"
-                        style={`background-color: ${account.color}`}
-                      />
-                      <h4 class="font-medium text-white">{account.name}</h4>
-                    </div>
-                    <p class="text-sm text-gray-300 mb-1">
-                      {account.accountType}
-                    </p>
-                    <p
-                      class={`text-lg font-semibold ${
-                        account.balance >= 0 ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {formatCurrency(account.balance)}
-                    </p>
-                  </div>
+                  <li>
+                    <article class="bg-gray-700 rounded-lg p-4">
+                      <header class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <span
+                            class="w-4 h-4 rounded-full inline-block"
+                            style={`background-color: ${account.color}`}
+                            aria-hidden="true"
+                          />
+                          <div>
+                            <h4 class="font-medium text-white">
+                              {account.name}
+                            </h4>
+                            <p class="text-sm text-gray-300">
+                              {account.accountType}
+                            </p>
+                          </div>
+                        </div>
+
+                        <footer class="text-right">
+                          <p
+                            class={`text-lg font-semibold ${
+                              account.balance >= 0
+                                ? "text-green-400"
+                                : "text-red-400"
+                            }`}
+                          >
+                            {formatCurrency(account.balance)}
+                          </p>
+                        </footer>
+                      </header>
+                    </article>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </div>
@@ -344,7 +374,6 @@ const userRole = familyDetailsResult.data?.ok
     }
   </main>
 
-  
   <LogoutScript />
   {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>
