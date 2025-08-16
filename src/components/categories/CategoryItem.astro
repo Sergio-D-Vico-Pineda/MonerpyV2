@@ -64,7 +64,7 @@ function isDescendantOf(
     data-category-id={category.id}
 >
     <!-- Display Mode -->
-    <div class="category-display flex items-center gap-x-3 flex-1">
+    <div class="category-display flex items-center gap-x-3 flex-1 py-[5px]">
         {isChild && <i class="text-gray-400 cursor-default">└─</i>}
         <div
             class={`category-color-display rounded-full cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all ${isChild ? "w-3 h-3" : "w-4 h-4"}`}
@@ -103,7 +103,7 @@ function isDescendantOf(
     </div>
 
     <!-- Edit Mode -->
-    <div class="category-edit hidden py-1">
+    <div class="category-edit hidden">
         <form class="edit-category-form flex items-center gap-x-3 w-full">
             <input type="hidden" name="categoryId" value={category.id} />
 
