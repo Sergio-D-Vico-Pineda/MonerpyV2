@@ -6,7 +6,7 @@
     "name": "Scarpy19",
     "url": "https://github.com/Scarpy19"
   },
-  "packageManager": "pnpm@10.5.1",
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "init": "pnpm install && prisma generate",
