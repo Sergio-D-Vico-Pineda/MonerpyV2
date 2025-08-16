@@ -53,7 +53,6 @@ const { tag } = Astro.props;
             <button
                 type="button"
                 class="edit-tag-btn group text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-900/20"
-                data-tag-id={tag.id}
                 title="Edit Tag"
             >
                 <Edit />
@@ -61,7 +60,6 @@ const { tag } = Astro.props;
             <button
                 type="button"
                 class="delete-tag-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
-                data-tag-id={tag.id}
                 data-tag-name={tag.name}
                 title="Delete Tag"
             >
@@ -76,9 +74,9 @@ const { tag } = Astro.props;
     >
         <input type="hidden" name="tagId" value={tag.id} />
 
-        <label for="tagColor" class="relative cursor-pointer">
+        <label for={`tagColor-${tag.id}`} class="relative cursor-pointer">
             <input
-                id="tagColor"
+                id={`tagColor-${tag.id}`}
                 type="color"
                 name="color"
                 value={tag.color}
@@ -105,7 +103,6 @@ const { tag } = Astro.props;
             <button
                 type="button"
                 class="save-tag-btn group text-green-400 hover:text-green-300 transition-colors p-1 rounded hover:bg-green-900/20"
-                data-tag-id={tag.id}
                 title="Save Changes"
             >
                 <Save />
@@ -113,7 +110,6 @@ const { tag } = Astro.props;
             <button
                 type="button"
                 class="cancel-tag-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-gray-900/20"
-                data-tag-id={tag.id}
                 title="Cancel Editing"
             >
                 <X />
@@ -136,14 +132,33 @@ const { tag } = Astro.props;
             if (tagItem.hasAttribute("data-initialized")) return;
             tagItem.setAttribute("data-initialized", "true");
 
-            // Emit custom events
+            // Emit custom events — dispatch on document so sibling tag items can react
             function emitTagEvent(eventName: string, detail: any = {}) {
                 const event = new CustomEvent(eventName, {
                     detail: { tagId, ...detail },
                     bubbles: true,
                 });
-                tagItem.dispatchEvent(event);
+                // Dispatch globally so other tag items can listen and react
+                document.dispatchEvent(event);
             }
+
+            // Ensure only one tag is in edit mode at a time.
+            // When another tag starts editing, exit edit mode for this item.
+            document.addEventListener("tag-edit-started", (e) => {
+                try {
+                    const otherId = (e as CustomEvent).detail?.tagId;
+                    if (!otherId) return;
+                    if (otherId !== tagId) {
+                        // If this item is in edit mode, exit it
+                        const editMode = tagItem.querySelector(
+                            ".tag-edit:not(.hidden)",
+                        );
+                        if (editMode) exitEditMode();
+                    }
+                } catch (err) {
+                    // ignore malformed events
+                }
+            });
 
             // Color picker sync
             const colorInput = tagItem.querySelector(

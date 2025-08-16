@@ -127,9 +127,12 @@ function isDescendantOf(
                 </select>
             </div>
 
-            <label for="categoryColor" class="relative cursor-pointer">
+            <label
+                for={`categoryColor-${category.id}`}
+                class="relative cursor-pointer"
+            >
                 <input
-                    id="categoryColor"
+                    id={`categoryColor-${category.id}`}
                     type="color"
                     name="color"
                     value={category.color}
@@ -160,16 +163,14 @@ function isDescendantOf(
         <div class="category-actions">
             <button
                 type="button"
-                class="edit-category-btn group text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-900/20"
-                data-category-id={category.id}
+                class="edit-category-btn group text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-900/20 focus:outline-none"
                 title="Edit Category"
             >
                 <Edit />
             </button>
             <button
                 type="button"
-                class="delete-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20"
-                data-category-id={category.id}
+                class="delete-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/20 focus:outline-none"
                 data-category-name={category.name}
                 title={`Delete ${isChild ? "Subcategory" : "Category"}`}
             >
@@ -181,16 +182,14 @@ function isDescendantOf(
         <div class="category-edit-actions hidden">
             <button
                 type="button"
-                class="save-category-btn group text-green-400 hover:text-green-300 transition-colors p-1 rounded hover:bg-green-900/20"
-                data-category-id={category.id}
+                class="save-category-btn group text-green-400 hover:text-green-300 transition-colors p-1 rounded hover:bg-green-900/20 focus:outline-none"
                 title="Save Changes"
             >
                 <Save />
             </button>
             <button
                 type="button"
-                class="cancel-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-gray-900/20"
-                data-category-id={category.id}
+                class="cancel-category-btn group text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-gray-900/20 focus:outline-none"
                 title="Cancel Editing"
             >
                 <X />
