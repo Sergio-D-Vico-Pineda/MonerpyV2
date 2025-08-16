@@ -3,6 +3,7 @@ import Bin from "@svg/mono/Bin.astro";
 import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
+import CompactColorPicker from "@comps/CompactColorPicker.astro";
 
 interface Props {
     category: {
@@ -127,23 +128,11 @@ function isDescendantOf(
                 </select>
             </div>
 
-            <label
-                for={`categoryColor-${category.id}`}
-                class="relative cursor-pointer"
-            >
-                <input
-                    id={`categoryColor-${category.id}`}
-                    type="color"
-                    name="color"
-                    value={category.color}
-                    class="category-color-input absolute bottom-0 right-0 w-0 h-0 opacity-0"
-                />
-                <div
-                    class="w-4 h-4 rounded-full shadow-md border-2 border-white flex items-center justify-center"
-                    style={`background-color: ${category.color}`}
-                >
-                </div>
-            </label>
+            <CompactColorPicker
+                id={`categoryColor-${category.id}`}
+                label="Edit Category Color"
+                checkedColor={category.color}
+            />
 
             <input
                 autocomplete="off"

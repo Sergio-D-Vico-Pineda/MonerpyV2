@@ -1,0 +1,26 @@
+---
+import { colors } from "@arrays.d.ts";
+interface Props {
+    id: string;
+    label?: string;
+    checkedColor?: string;
+}
+
+const { id, label, checkedColor = "#6172f3" } = Astro.props;
+---
+
+<label for={`categoryColor-${id}`} class="relative cursor-pointer">
+    <input
+        id={`categoryColor-${id}`}
+        type="color"
+        name="color"
+        value={checkedColor}
+        class="category-color-input absolute bottom-0 right-0 w-0 h-0 opacity-0"
+    />
+    <div
+        title={label}
+        class="w-4 h-4 rounded-full shadow-md border-2 border-white flex items-center justify-center"
+        style={`background-color: ${checkedColor}`}
+    >
+    </div>
+</label>

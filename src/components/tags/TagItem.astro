@@ -3,6 +3,7 @@ import Bin from "@svg/mono/Bin.astro";
 import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
+import CompactColorPicker from "@comps/CompactColorPicker.astro";
 
 interface Props {
     tag: {
@@ -74,20 +75,11 @@ const { tag } = Astro.props;
     >
         <input type="hidden" name="tagId" value={tag.id} />
 
-        <label for={`tagColor-${tag.id}`} class="relative cursor-pointer">
-            <input
-                id={`tagColor-${tag.id}`}
-                type="color"
-                name="color"
-                value={tag.color}
-                class="tag-color-input absolute bottom-0 right-0 w-0 h-0 opacity-0"
-            />
-            <div
-                class="w-4 h-4 rounded-full shadow-md border-2 border-white flex items-center justify-center"
-                style={`background-color: ${tag.color}`}
-            >
-            </div>
-        </label>
+        <CompactColorPicker
+            id={`categoryColor-${tag.id}`}
+            label="Edit Tag Color"
+            checkedColor={tag.color}
+        />
 
         <input
             autocomplete="off"
