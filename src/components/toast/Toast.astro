@@ -4,7 +4,7 @@
 
 <div
     id="toastContainer"
-    class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-y-3 max-w-md w-full px-4"
+    class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-y-3 max-w-lg w-full px-4"
 >
 </div>
 
@@ -99,17 +99,23 @@
 
             toastElement.innerHTML = `
             <div class="flex items-center gap-x-3">
-                <span class="text-lg">${this.getToastIcon(toast.type)}</span>
-                <span>${toast.message}</span>
+                <span>${this.getToastIcon(toast.type)}</span>
+                <span class="text-[15px] text-balance">${toast.message}</span>
             </div>
-            <button type="button" class="ml-4 text-white hover:text-gray-200 focus:outline-none" onclick="toastManager.removeToast('${toast.id}')">
+            <button type="button" class="ml-4 text-white hover:text-gray-200">
                 <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
-            </button>
-        `;
+            </button>`;
 
             this.container.appendChild(toastElement);
+
+            const button = toastElement.querySelector("button");
+            if (button) {
+                button.addEventListener("click", () => {
+                    this.removeToast(toast.id);
+                });
+            }
 
             // Animate in
             requestAnimationFrame(() => {
