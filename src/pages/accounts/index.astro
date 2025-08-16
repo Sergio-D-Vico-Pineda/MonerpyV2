@@ -100,12 +100,21 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
                     </div>
 
                     {accounts && accounts.length === 0 ? (
-                        <div class="text-center py-12 text-gray-400">
-                            <div class="mb-4">
-                                <CreditCard class="w-20 h-20 mx-auto text-purple-400" />
-                            </div>
-                            <p class="text-xl mb-2">No accounts yet</p>
-                            <p>Create your first account to get started!</p>
+                        <div class="text-center py-10 text-gray-400">
+                            <CreditCard class="w-20 h-20 mx-auto text-purple-400 mb-4" />
+                            <h3 class="text-xl font-semibold text-gray-300 mb-2">
+                                No Accounts yet
+                            </h3>
+                            <p class="text-gray-400 mb-6">
+                                Create your first account to get started!
+                            </p>
+                            <button
+                                type="button"
+                                id="addFirstAccountButton"
+                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                            >
+                                Create Your First Account
+                            </button>
                         </div>
                     ) : (
                         <div class="flex flex-col gap-y-4">
@@ -193,6 +202,18 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
             const addAccountButton = document.getElementById(
                 "addAccountButton",
             ) as HTMLButtonElement;
+
+            const createAccountButton = document.getElementById(
+                "addFirstAccountButton",
+            ) as HTMLButtonElement;
+
+            if (createAccountButton) {
+                createAccountButton.addEventListener("click", () => {
+                    if ((window as any).openAccountModal) {
+                        (window as any).openAccountModal();
+                    }
+                });
+            }
 
             if (addAccountButton) {
                 addAccountButton.addEventListener("click", function () {
