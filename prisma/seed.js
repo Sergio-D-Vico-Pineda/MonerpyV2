@@ -264,6 +264,21 @@ async function main()
                 familyId: family.id,
             },
         }),
+        prisma.tag.upsert(
+        {
+            where:
+            {
+                id: 4
+            },
+            update:
+            {},
+            create:
+            {
+                name: 'personal',
+                color: '#F97316',
+                familyId: family.id,
+            },
+        }),
     ]);
 
     console.log('✅ Created tags:', tags.length);
