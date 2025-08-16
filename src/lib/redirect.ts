@@ -31,7 +31,7 @@ export function createRedirectWithToast(
     const script = `
         <script>
             sessionStorage.setItem('toasts', JSON.stringify([{
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
                 message: ${JSON.stringify(message)},
                 type: ${JSON.stringify(type)},
                 duration: ${duration || 10000}

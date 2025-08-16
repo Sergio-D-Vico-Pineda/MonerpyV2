@@ -16,10 +16,10 @@ export class ToastService {
         try {
             const existingToasts = this.getToasts();
             const newToast = {
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
                 ...toast
             };
-            
+
             existingToasts.push(newToast);
             sessionStorage.setItem('toasts', JSON.stringify(existingToasts));
         } catch (error) {
