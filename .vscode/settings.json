@@ -1,5 +1,13 @@
 {
     "css.customData": [
         ".vscode/tailwind.json"
-    ]
+    ],
+    "chat.mcp.serverSampling": {
+        "MonerpyV2/.vscode/mcp.json: browsermcp": {
+            "allowedModels": [
+                "copilot/gpt-4.1",
+                "copilot/gpt-5-mini"
+            ]
+        }
+    }
 }

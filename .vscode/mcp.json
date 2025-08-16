@@ -1,0 +1,17 @@
+{
+    "inputs": [
+        {
+            "id": "browsermcp",
+            "type": "promptString",
+            "description": "I think nothing is needed."
+        }
+    ],
+    "servers": {
+        "browsermcp": {
+            "command": "npx",
+            "args": [
+                "@browsermcp/mcp@latest"
+            ]
+        }
+    }
+}
