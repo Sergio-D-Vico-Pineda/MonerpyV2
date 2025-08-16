@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
@@ -16,8 +15,8 @@ if (!user) {
 }
 
 // Handle form submissions
-let toastMessage = "";
-let toastType = "success";
+let toastMessage;
+let toastType;
 
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
@@ -27,25 +26,28 @@ if (Astro.request.method === "POST") {
     const result = await Astro.callAction(actions.createFamily, formData);
     if (result.data?.ok) {
       toastMessage = "Family created successfully!";
-      toastType = "success";
+      toastType = TOAST_TYPES.SUCCESS;
     }
   } else if (action === "joinFamily") {
     const result = await Astro.callAction(actions.joinFamily, formData);
     if (result.data?.ok) {
       toastMessage = "Successfully joined the family!";
-      toastType = "success";
+      toastType = TOAST_TYPES.SUCCESS;
     }
   } else if (action === "leaveFamily") {
     const result = await Astro.callAction(actions.leaveFamily, formData);
     if (result.data?.ok) {
       toastMessage = "Successfully left the family!";
-      toastType = "success";
+      toastType = TOAST_TYPES.SUCCESS;
+    } else {
+      toastMessage = result.data?.error || "Failed to leave family.";
+      toastType = TOAST_TYPES.ERROR;
     }
   } else if (action === "updateRole") {
     const result = await Astro.callAction(actions.updateUserRole, formData);
     if (result.data?.ok) {
       toastMessage = "User role updated successfully!";
-      toastType = "success";
+      toastType = TOAST_TYPES.SUCCESS;
     }
   } else if (action === "removeUser") {
     const result = await Astro.callAction(
@@ -54,7 +56,7 @@ if (Astro.request.method === "POST") {
     );
     if (result.data?.ok) {
       toastMessage = "User removed from family successfully!";
-      toastType = "success";
+      toastType = TOAST_TYPES.SUCCESS;
     }
   }
 }
