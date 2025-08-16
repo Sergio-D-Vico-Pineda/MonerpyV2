@@ -73,7 +73,28 @@ const userInFamily = userResult.data?.ok && userResult.data.family;
 const tagsResult = userInFamily
     ? await Astro.callAction(actions.getTagsList, { includeDeleted: false })
     : { data: { ok: false, tags: [] } };
-const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
+
+// Normalize tags to a predictable shape for the TagItem component
+const rawTagsSource = tagsResult.data?.ok ? tagsResult.data.tags : [];
+// Ensure we always have an array. If the API returned an object (e.g. keyed by id or grouped),
+// convert to an array using Object.values. If it's already an array, use it. Otherwise fallback to empty array.
+const rawTags: any[] = Array.isArray(rawTagsSource)
+    ? rawTagsSource
+    : rawTagsSource
+      ? Object.values(rawTagsSource)
+      : [];
+type TagShape = {
+    id: number;
+    name: string;
+    color: string;
+    _count?: { transactions?: number };
+};
+const tags: TagShape[] = (rawTags ?? []).map((t: TagShape) => ({
+    id: t.id,
+    name: t.name,
+    color: t.color,
+    _count: t._count,
+}));
 ---
 
 <Layout title="Tags" description="Manage your transaction tags">
@@ -102,10 +123,10 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
                     </div>
 
                     {tags && tags.length === 0 ? (
-                        <div class="text-center py-12">
-                            <div class="text-6xl mb-4">🏷️</div>
+                        <div class="text-center py-10">
+                            <Tag class="w-20 h-20 mx-auto text-purple-400 mb-4" />
                             <h3 class="text-xl font-semibold text-gray-300 mb-2">
-                                No Tags Yet
+                                No Tags yet
                             </h3>
                             <p class="text-gray-400 mb-6">
                                 Create tags to label and organize your
@@ -129,7 +150,6 @@ const tags = tagsResult.data?.ok ? tagsResult.data.tags : [];
         }
     </main>
 
-    
     <TagModal />
     <DeleteTagConfirmModal />
     <LogoutScript />
