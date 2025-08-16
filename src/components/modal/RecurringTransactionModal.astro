@@ -1,13 +1,13 @@
 ---
 import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
-import { daysOfWeek, months, frequency } from "../../types/arrays.ts";
+import { daysOfWeek, months, frequency } from "@arrays.d.ts";
 import TypePicker from "@comps/TypePicker.astro";
 import Amount from "@comps/transaction/Amount.astro";
 import Account from "@comps/transaction/Account.astro";
-import Category from "../transaction/Category.astro";
-import { getCurrentDate } from "@/lib/date-utils";
-import TagsDropdownSelect from "../tags/TagsDropdownSelect.astro";
+import Category from "@comps/transaction/Category.astro";
+import { getCurrentDate } from "@lib/date-utils";
+import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 ---
 
 <div

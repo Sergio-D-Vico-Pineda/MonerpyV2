@@ -69,7 +69,15 @@ const frequency = [
     "yearly",
 ]
 
+const TOAST_TYPES = {
+    SUCCESS: "success",
+    ERROR: "error",
+    INFO: "info",
+    WARNING: "warning",
+};
+
 export {
+    TOAST_TYPES,
     transactionTypes,
     accountTypes,
     daysOfWeek,

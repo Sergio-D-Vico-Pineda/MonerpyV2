@@ -28,9 +28,6 @@
       "@styles/*": [
         "src/styles/*"
       ],
-      "@types/*": [
-        "src/types/*"
-      ],
       "@mid/*": [
         "src/middleware/*"
       ],
@@ -40,6 +37,12 @@
       "@lib/*": [
         "src/lib/*"
       ],
+      "@types.d.ts": [
+        "src/types/types.d.ts"
+      ],
+      "@arrays.d.ts": [
+        "src/types/arrays.d.ts"
+      ]
     }
   }
 }

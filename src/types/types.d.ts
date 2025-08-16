@@ -11,6 +11,13 @@ interface Tag {
     color: string;
 }
 
+interface Toast {
+    id: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info" | string;
+    duration?: number;
+}
+
 // Extend Astro's App.Locals to include user information
 declare global {
     namespace App {
@@ -25,4 +32,4 @@ declare global {
     }
 }
 
-export type { Session, Tag };
+export type { Session, Tag, Toast };

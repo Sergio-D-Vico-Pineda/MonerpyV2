@@ -1,7 +1,7 @@
 /**
  * Date utilities for consistent date handling without timezone issues
  */
-import { months } from "@/types/arrays";
+import { months } from "@arrays.d.ts";
 
 /**
  * Formats a datetime-local input value to "YYYY-MM-DD HH:mm:ss" format

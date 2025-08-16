@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
-import type { Session } from '../types/types.ts';
+import type { Session } from '@types.d.ts';
 
 // In-memory session storage
 const sessions = new Map<string, Session>();
