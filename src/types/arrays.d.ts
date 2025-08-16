@@ -76,8 +76,24 @@ const TOAST_TYPES = {
     WARNING: "warning",
 };
 
+const RECURRING_STATUS_COLORS: Record<string, string> = {
+    ACTIVE: "text-green-400",
+    COMPLETED: "text-gray-400",
+    SCHEDULED: "text-yellow-400",
+    CANCELLED: "text-red-400",
+};
+
+const RECURRING_TEXT_COLORS: Record<string, string> = {
+    ACTIVE: "text-green-500",
+    COMPLETED: "text-gray-500",
+    SCHEDULED: "text-yellow-500",
+    CANCELLED: "text-red-500",
+}
+
 export {
     TOAST_TYPES,
+    RECURRING_STATUS_COLORS,
+    RECURRING_TEXT_COLORS,
     transactionTypes,
     accountTypes,
     daysOfWeek,

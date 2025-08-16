@@ -11,6 +11,7 @@ import CreateAccount from "@comps/layout/CreateAccount.astro";
 import TransactionIcon from "@comps/svgs/mono/TransactionIcon.astro";
 import Loop from "@comps/svgs/mono/Loop.astro";
 import Plus from "@comps/svgs/mono/Plus.astro";
+import { RECURRING_STATUS_COLORS, RECURRING_TEXT_COLORS } from "@arrays.d.ts";
 
 const user = Astro.locals.user;
 
@@ -208,30 +209,12 @@ const recurringTransactionsWithNextDates = (recurringTransactions ?? []).map(
 
 // Helper function to get status color
 function getStatusColor(status: string): string {
-    switch (status) {
-        case "active":
-            return "text-green-400";
-        case "completed":
-            return "text-gray-400";
-        case "scheduled":
-            return "text-yellow-400";
-        default:
-            return "text-gray-400";
-    }
+    return RECURRING_STATUS_COLORS[status] || "text-gray-400";
 }
 
 // Helper function to get status text
 function getStatusText(status: string): string {
-    switch (status) {
-        case "active":
-            return "Active";
-        case "completed":
-            return "Completed";
-        case "scheduled":
-            return "Scheduled";
-        default:
-            return "Unknown";
-    }
+    return RECURRING_TEXT_COLORS[status] || "Unknown";
 }
 ---
 
