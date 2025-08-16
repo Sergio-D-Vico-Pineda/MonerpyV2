@@ -129,11 +129,7 @@ function formatDateForDisplay(
     }
 
     // If the input is date-only, ignore includeTime and return date only.
-    if (!timePart) {
-        return formattedDate;
-    }
-
-    if (!includeTime) {
+    if (!timePart || !includeTime) {
         return formattedDate;
     }
 
