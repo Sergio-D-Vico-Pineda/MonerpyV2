@@ -142,7 +142,7 @@ export const leaveFamily = defineAction({
                     }
                 });
 
-                if (memberCount > 1) {
+                if (memberCount <= 1) {
                     return { ok: false, error: "Cannot leave family: You are the only admin. Promote another member to admin first." };
                 }
             }
