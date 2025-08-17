@@ -7,6 +7,8 @@ import Account from "@comps/transaction/Account.astro";
 import Date from "@comps/transaction/Date.astro";
 import Category from "@comps/transaction/Category.astro";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
+
+import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
 ---
 
 <div
@@ -56,6 +58,8 @@ import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
                     placeholder="Enter transaction name"
                     classes="flex-1/3"
                 />
+
+                <ScriptSelect idSelect="accountId" />
             </div>
 
             <!-- Transaction Type and Amount -->

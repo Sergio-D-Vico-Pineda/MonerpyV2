@@ -1,0 +1,70 @@
+---
+import type { Account } from "@prisma/client";
+
+// The page that passes `accounts` sometimes selects a subset of Account fields
+// (omitting `familyId`). Narrow the prop type to the fields this component
+// actually needs so callers that don't include `familyId` won't cause a type error.
+type SelectAccountItem = Partial<Omit<Account, "familyId">>;
+
+interface Props {
+    accounts?: SelectAccountItem[];
+}
+
+const { accounts } = Astro.props as Props;
+---
+
+{
+    accounts && accounts.length !== 0 && (
+        <select
+            id="accountSelection"
+            class="w-full ps-1 pe-2 py-1 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+            <option value="">No default account</option>
+            {accounts.map((account) => (
+                <option value={account.id ?? ""}>{account.name}</option>
+            ))}
+        </select>
+    )
+}
+
+<script>
+    // Persist selected account to localStorage and restore it on load.
+    const STORAGE_KEY = "selectedAccountId";
+    const accountSelection = document.getElementById(
+        "accountSelection",
+    ) as HTMLSelectElement | null;
+
+    if (accountSelection) {
+        // Restore saved value if present
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                accountSelection.value = saved;
+            }
+        } catch (err) {
+            console.error("Error accessing localStorage:", err);
+        }
+
+        accountSelection.addEventListener("change", (event: Event) => {
+            const target = event.target as HTMLSelectElement;
+            const selectedAccountId = target?.value ?? "";
+
+            try {
+                if (selectedAccountId) {
+                    localStorage.setItem(STORAGE_KEY, selectedAccountId);
+                } else {
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+            } catch (err) {
+                console.error("Error saving to localStorage:", err);
+            }
+
+            // Optional: emit a custom event so parent scripts can react to changes
+            const changeEvent = new CustomEvent("accountselectionchange", {
+                detail: { id: selectedAccountId },
+                bubbles: true,
+            });
+            accountSelection.dispatchEvent(changeEvent);
+        });
+    }
+</script>

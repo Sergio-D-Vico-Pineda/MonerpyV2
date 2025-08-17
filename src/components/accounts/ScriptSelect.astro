@@ -1,0 +1,31 @@
+---
+interface Props {
+    idSelect: string;
+}
+
+const { idSelect } = Astro.props as Props;
+---
+
+<script is:inline data-id-select-account={idSelect}>
+    const STORAGE_KEY = "selectedAccountId";
+
+    const id = document.querySelector("[data-id-select-account]")?.dataset
+        ?.idSelectAccount;
+
+    if (id) {
+        const select = document.getElementById(id);
+        if (select) {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved && select.querySelector(`option[value="${saved}"]`)) {
+                    select.value = saved;
+                    select.dispatchEvent(
+                        new Event("change", { bubbles: true }),
+                    );
+                }
+            } catch (err) {
+                console.error(`[selected-account] ${err.message}`);
+            }
+        }
+    }
+</script>
