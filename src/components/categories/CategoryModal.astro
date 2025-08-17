@@ -17,17 +17,20 @@ const userResult = await Astro.callAction(actions.getFamilyDetails, {});
 const userInFamily = userResult.data?.ok && userResult.data.family;
 
 const categoriesResult = userInFamily
-    ? await Astro.callAction(actions.getCategoriesList, {
-          includeDeleted: false,
-      })
-    : { data: { ok: false, categories: [] } };
+        ? await Astro.callAction(actions.getCategories, {
+                    includeDeleted: false,
+            })
+        : { data: { ok: false, categories: [] } };
 
-const allCategories = categoriesResult.data?.ok
-    ? categoriesResult.data.categories
-    : [];
+// Cast to local Category[] to avoid broad union types inferred from the action result
+const allCategories: Category[] = categoriesResult.data?.ok
+    ? (categoriesResult.data.categories as Category[])
+    : ([] as Category[]);
 
-// Filter to get only parent categories for the dropdown
-const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
+// Filter to get only parent categories for the dropdown (explicitly typed)
+const parentCategories: Category[] = (allCategories || []).filter(
+    (cat) => cat && (cat.parentId === undefined || cat.parentId === null),
+);
 ---
 
 <!-- Modal Background -->
@@ -77,8 +80,9 @@ const parentCategories = allCategories?.filter((cat) => !cat.parentId) || [];
                 >
                     <option value="">Select parent category</option>
                     {
-                        parentCategories.map((category) => (
-                            <option value={category.id}>{category.name}</option>
+                        parentCategories.map((category: Category) => (
+                            // ensure value is a primitive type accepted by the value prop
+                            <option value={String(category.id)}>{category.name}</option>
                         ))
                     }
                 </select>
