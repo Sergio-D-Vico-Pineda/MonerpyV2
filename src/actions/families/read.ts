@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
-export const getFamilies = defineAction({
+const getFamilies = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async (input, context) => {
@@ -42,7 +42,7 @@ export const getFamilies = defineAction({
     }
 });
 
-export const getFamilyDetails = defineAction({
+const getFamilyDetails = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async (input, context) => {
@@ -122,7 +122,7 @@ export const getFamilyDetails = defineAction({
     }
 });
 
-export const updateUserRole = defineAction({
+const updateUserRole = defineAction({
     accept: 'form',
     input: z.object({
         userId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "User ID is required"),
@@ -192,7 +192,7 @@ export const updateUserRole = defineAction({
     }
 });
 
-export const removeUserFromFamily = defineAction({
+const removeUserFromFamily = defineAction({
     accept: 'form',
     input: z.object({
         userId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "User ID is required")
@@ -270,3 +270,10 @@ export const removeUserFromFamily = defineAction({
         }
     }
 });
+
+export {
+    getFamilies,
+    getFamilyDetails,
+    updateUserRole,
+    removeUserFromFamily
+};

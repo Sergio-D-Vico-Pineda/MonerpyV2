@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const createFamily = defineAction({
+const createFamily = defineAction({
     accept: 'form',
     input: z.object({
         name: z.string().trim().min(1, "Family name is required")
@@ -53,7 +53,7 @@ export const createFamily = defineAction({
     }
 });
 
-export const joinFamily = defineAction({
+const joinFamily = defineAction({
     accept: 'form',
     input: z.object({
         familyId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Family ID is required")
@@ -105,7 +105,7 @@ export const joinFamily = defineAction({
     }
 });
 
-export const leaveFamily = defineAction({
+const leaveFamily = defineAction({
     accept: 'form',
     input: z.object({}),
     handler: async (input, context) => {
@@ -164,3 +164,9 @@ export const leaveFamily = defineAction({
         }
     }
 });
+
+export {
+    createFamily,
+    joinFamily,
+    leaveFamily
+};

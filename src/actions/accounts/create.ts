@@ -4,7 +4,7 @@ import { prisma } from '@prisma/index.js';
 import { updateDailyBalance } from './helpers.ts';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const createAccount = defineAction({
+const createAccount = defineAction({
     accept: 'form',
     input: z.object({
         name: z.string().trim().min(1, "Account name is required"),
@@ -82,3 +82,5 @@ export const createAccount = defineAction({
         }
     }
 });
+
+export { createAccount };

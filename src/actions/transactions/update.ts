@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { formatDateTimeLocal, getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const updateTransaction = defineAction({
+const updateTransaction = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Transaction ID is required"),
@@ -184,3 +184,5 @@ export const updateTransaction = defineAction({
         }
     }
 });
+
+export { updateTransaction };

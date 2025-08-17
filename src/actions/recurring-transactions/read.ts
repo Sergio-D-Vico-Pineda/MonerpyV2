@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
-export const getRecurringTransactions = defineAction({
+const getRecurringTransactions = defineAction({
     accept: 'json',
     input: z.object({
         page: z.number().default(1),
@@ -137,7 +137,7 @@ export const getRecurringTransactions = defineAction({
     }
 });
 
-export const getRecurringTransaction = defineAction({
+const getRecurringTransaction = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number()
@@ -230,3 +230,5 @@ export const getRecurringTransaction = defineAction({
         }
     }
 });
+
+export { getRecurringTransactions, getRecurringTransaction };

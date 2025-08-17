@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
-export const getTransactions = defineAction({
+const getTransactions = defineAction({
     accept: 'json',
     input: z.object({
         page: z.number().default(1),
@@ -102,7 +102,7 @@ export const getTransactions = defineAction({
     }
 });
 
-export const getTransaction = defineAction({
+const getTransaction = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number()
@@ -161,3 +161,5 @@ export const getTransaction = defineAction({
         }
     }
 });
+
+export { getTransactions, getTransaction };

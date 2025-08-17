@@ -1,7 +1,7 @@
 import { defineAction } from "astro:actions";
 import { destroySession } from '@lib/session-manager.ts';
 
-export const logout = defineAction({
+const logout = defineAction({
     handler: async (input, context) => {
         try {
             // Get session ID from cookie
@@ -25,3 +25,5 @@ export const logout = defineAction({
         }
     }
 });
+
+export { logout };

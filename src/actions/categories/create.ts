@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const createCategory = defineAction({
+const createCategory = defineAction({
     accept: 'form',
     input: z.object({
         name: z.string().trim().min(1, "Category name is required"),
@@ -83,3 +83,5 @@ export const createCategory = defineAction({
         }
     }
 });
+
+export { createCategory };

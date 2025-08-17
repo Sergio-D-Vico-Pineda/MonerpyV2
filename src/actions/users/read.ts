@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { prisma } from '@prisma/index.js';
 
-export const getUser = defineAction({
+const getUser = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number().int().positive()
@@ -31,3 +31,5 @@ export const getUser = defineAction({
         return { ok: true, user };
     }
 });
+
+export { getUser };

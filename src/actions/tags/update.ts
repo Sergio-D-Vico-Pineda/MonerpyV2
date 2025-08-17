@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const updateTag = defineAction({
+const updateTag = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val)),
@@ -79,3 +79,5 @@ export const updateTag = defineAction({
         }
     }
 });
+
+export { updateTag };

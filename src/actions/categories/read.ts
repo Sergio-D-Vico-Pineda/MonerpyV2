@@ -58,7 +58,7 @@ function buildCategorySelect(opts?: { includeUpdated?: boolean; includeChildrenR
     return select;
 }
 
-export const getCategories = defineAction({
+const getCategories = defineAction({
     accept: 'json',
     input: z.object({
         includeDeleted: z.boolean().optional().default(false),
@@ -113,7 +113,7 @@ export const getCategories = defineAction({
     }
 });
 
-export const getCategory = defineAction({
+const getCategory = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number()
@@ -183,3 +183,7 @@ export const getCategory = defineAction({
     }
 });
 
+export {
+    getCategories,
+    getCategory
+};

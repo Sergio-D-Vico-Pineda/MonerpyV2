@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const deleteTag = defineAction({
+const deleteTag = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val))
@@ -67,7 +67,7 @@ export const deleteTag = defineAction({
     }
 });
 
-export const restoreTag = defineAction({
+const restoreTag = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val))
@@ -133,3 +133,8 @@ export const restoreTag = defineAction({
         }
     }
 });
+
+export {
+    deleteTag,
+    restoreTag
+};

@@ -30,7 +30,7 @@ function buildTagSelect(opts?: { includeUpdated?: boolean; includeRecurringCount
     return select;
 }
 
-export const getTags = defineAction({
+const getTags = defineAction({
     accept: 'json',
     input: z.object({
         includeDeleted: z.boolean().optional().default(false),
@@ -76,7 +76,7 @@ export const getTags = defineAction({
     }
 });
 
-export const getTag = defineAction({
+const getTag = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number()
@@ -131,3 +131,4 @@ export const getTag = defineAction({
     }
 });
 
+export { getTags, getTag };

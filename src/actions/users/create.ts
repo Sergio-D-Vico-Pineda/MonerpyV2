@@ -5,7 +5,7 @@ import { createSession } from '@lib/session-manager.ts';
 import { hashPassword } from '@lib/password.ts';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const create = defineAction({
+const create = defineAction({
     accept: 'form',
     input: z.object({
         email: z.string().trim().min(1, "Email is required").includes('@', { message: "Please enter a valid email address" }).includes('.', { message: "Please enter a valid email address" }),
@@ -59,3 +59,5 @@ export const create = defineAction({
         }
     }
 });
+
+export { create };

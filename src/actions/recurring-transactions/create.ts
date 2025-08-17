@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { formatDateTimeLocal, getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const createRecurringTransaction = defineAction({
+const createRecurringTransaction = defineAction({
     accept: 'form',
     input: z.object({
         accountId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account is required"),
@@ -177,3 +177,5 @@ export const createRecurringTransaction = defineAction({
         }
     }
 });
+
+export { createRecurringTransaction };

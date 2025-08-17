@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
-export const getAccounts = defineAction({
+const getAccounts = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async (input, context) => {
@@ -48,7 +48,7 @@ export const getAccounts = defineAction({
     }
 });
 
-export const getCategories = defineAction({
+const getCategories = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async (input, context) => {
@@ -100,7 +100,7 @@ export const getCategories = defineAction({
     }
 });
 
-export const getTags = defineAction({
+const getTags = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async (input, context) => {
@@ -143,3 +143,5 @@ export const getTags = defineAction({
         }
     }
 });
+
+export { getAccounts, getCategories, getTags };

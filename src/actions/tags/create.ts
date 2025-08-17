@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const createTag = defineAction({
+const createTag = defineAction({
     accept: 'form',
     input: z.object({
         name: z.string().trim().min(1, "Tag name is required"),
@@ -65,3 +65,5 @@ export const createTag = defineAction({
         }
     }
 });
+
+export { createTag };

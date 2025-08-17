@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 
-export const getAccounts = defineAction({
+const getAccounts = defineAction({
     accept: 'json',
     input: z.object({
         includeDeleted: z.boolean().optional().default(false)
@@ -56,7 +56,7 @@ export const getAccounts = defineAction({
     }
 });
 
-export const getAccount = defineAction({
+const getAccount = defineAction({
     accept: 'json',
     input: z.object({
         id: z.number()
@@ -121,7 +121,7 @@ export const getAccount = defineAction({
     }
 });
 
-export const getAccountBalanceHistory = defineAction({
+const getAccountBalanceHistory = defineAction({
     accept: 'json',
     input: z.object({
         accountId: z.number(),
@@ -179,3 +179,9 @@ export const getAccountBalanceHistory = defineAction({
         }
     }
 });
+
+export {
+    getAccounts,
+    getAccount,
+    getAccountBalanceHistory
+};

@@ -5,7 +5,7 @@ import { getCurrentDateTime, formatDateTimeLocal } from '@lib/date-utils.ts';
 import type { Tag } from '@types.d.ts';
 
 // Generate transactions from recurring rules
-export const generateRecurringTransactions = defineAction({
+const generateRecurringTransactions = defineAction({
     accept: 'form',
     input: z.object({
         recurringTransactionIds: z.string().transform(val =>
@@ -202,3 +202,5 @@ export const generateRecurringTransactions = defineAction({
         }
     }
 });
+
+export { generateRecurringTransactions };

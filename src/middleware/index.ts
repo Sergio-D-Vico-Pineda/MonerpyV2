@@ -2,7 +2,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { validateSession } from '@lib/session-manager.ts';
 
-export const onRequest = defineMiddleware(async (context, next) => {
+const onRequest = defineMiddleware(async (context, next) => {
     const { request, url, cookies, locals, redirect } = context;
 
     // Ignore Chrome DevTools requests and return 404
@@ -76,3 +76,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const response = await next();
     return response;
 });
+
+export { onRequest };

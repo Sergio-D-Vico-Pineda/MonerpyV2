@@ -59,7 +59,7 @@ import {
     restoreTag
 } from "./tags/index.ts";
 
-export const server = {
+const server = {
     login: login,
     create: create,
     logout: logout,
@@ -107,3 +107,4 @@ export const server = {
     deleteTag,
     restoreTag
 };
+export { server };

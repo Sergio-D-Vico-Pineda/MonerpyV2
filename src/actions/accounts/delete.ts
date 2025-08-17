@@ -3,7 +3,7 @@ import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
 import { getCurrentDateTime } from '@lib/date-utils.ts';
 
-export const deleteAccount = defineAction({
+const deleteAccount = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account ID is required")
@@ -56,7 +56,7 @@ export const deleteAccount = defineAction({
     }
 });
 
-export const restoreAccount = defineAction({
+const restoreAccount = defineAction({
     accept: 'form',
     input: z.object({
         id: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account ID is required")
@@ -122,3 +122,8 @@ export const restoreAccount = defineAction({
         }
     }
 });
+
+export {
+    deleteAccount,
+    restoreAccount
+};
