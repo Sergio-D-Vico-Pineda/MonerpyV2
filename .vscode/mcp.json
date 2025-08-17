@@ -1,17 +1,11 @@
 {
-    "inputs": [
-        {
-            "id": "browsermcp",
-            "type": "promptString",
-            "description": "I think nothing is needed."
-        }
-    ],
+    "inputs": [],
     "servers": {
-        "browsermcp": {
-            "command": "npx",
-            "args": [
-                "@browsermcp/mcp@latest"
-            ]
-        }
+        "MyBrowserMCP": {
+			"command": "node",
+			"args": [
+				"E:\\Lgit\\BrowserMCP\\dist\\index.js"
+			]
+		}
     }
 }

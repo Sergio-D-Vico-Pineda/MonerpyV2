@@ -3,7 +3,7 @@
         ".vscode/tailwind.json"
     ],
     "chat.mcp.serverSampling": {
-        "MonerpyV2/.vscode/mcp.json: browsermcp": {
+        "MonerpyV2/.vscode/mcp.json: MyBrowserMCP": {
             "allowedModels": [
                 "copilot/gpt-4.1",
                 "copilot/gpt-5-mini"
