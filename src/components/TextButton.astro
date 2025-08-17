@@ -1,0 +1,19 @@
+---
+interface Props {
+	id: string;
+	title?: string;
+	class?: string;
+	type?: "button" | "submit" | "reset";
+}
+
+const { id, title, class: extraClass, type = "button" } = Astro.props as Props;
+---
+
+<button
+	id={id}
+	title={title}
+	type={type}
+	class={`bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors ${extraClass}`}
+>
+	<slot />
+</button>

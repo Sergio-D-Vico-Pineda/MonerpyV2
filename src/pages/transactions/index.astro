@@ -13,9 +13,9 @@ import {
 } from "@lib/date-utils.ts";
 import Loop from "@comps/svgs/mono/Loop.astro";
 import TransactionIcon from "@comps/svgs/mono/TransactionIcon.astro";
-import Plus from "@comps/svgs/mono/Plus.astro";
 import CreateAccount from "@comps/layout/CreateAccount.astro";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
+import PlusButton from "@/components/PlusButton.astro";
 
 const user = Astro.locals.user;
 
@@ -158,16 +158,11 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                 <span>Recurring</span>
                             </a>
                         </div>
-                        <div class="flex gap-2">
-                            <button
-                                type="button"
-                                id="addTransactionBtn"
-                                class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
-                                title="Add a Transaction"
-                            >
-                                <Plus />
-                            </button>
-                        </div>
+
+                        <PlusButton
+                            id="addTransactionBtn"
+                            title="Add a new Transaction"
+                        />
                     </div>
 
                     {!transactions || transactions.length === 0 ? (

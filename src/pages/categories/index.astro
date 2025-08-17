@@ -8,8 +8,9 @@ import DeleteConfirmModal from "@comps/categories/DeleteConfirmModal.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
-import Plus from "@svg/mono/Plus.astro";
 import Folder from "@comps/svgs/mono/Folder.astro";
+import PlusButton from "@/components/PlusButton.astro";
+import TextButton from "@/components/TextButton.astro";
 
 const user = Astro.locals.user;
 
@@ -131,13 +132,10 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
                             Categories
                         </h2>
 
-                        <button
+                        <PlusButton
                             id="addCategoryButton"
-                            type="button"
-                            class="add-category-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
-                        >
-                            <Plus />
-                        </button>
+                            title="Add Category"
+                        />
                     </div>
 
                     {(categories?.length || 0) === 0 ? (
@@ -150,13 +148,12 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
                                 Create categories to organize your transactions
                                 better.
                             </p>
-                            <button
-                                type="button"
-                                id="addFirstCategoryButton"
-                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                            <TextButton
+                                id="addCategoryButton"
+                                title="Add Category"
                             >
                                 Create Your First Category
-                            </button>
+                            </TextButton>
                         </div>
                     ) : (
                         <div id="categoryList" class="flex flex-col gap-y-4">

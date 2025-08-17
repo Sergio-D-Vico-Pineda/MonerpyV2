@@ -10,8 +10,8 @@ import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreateAccount from "@comps/layout/CreateAccount.astro";
 import TransactionIcon from "@comps/svgs/mono/TransactionIcon.astro";
 import Loop from "@comps/svgs/mono/Loop.astro";
-import Plus from "@comps/svgs/mono/Plus.astro";
 import { RECURRING_STATUS_COLORS, RECURRING_TEXT_COLORS } from "@arrays.d.ts";
+import PlusButton from "@/components/PlusButton.astro";
 
 const user = Astro.locals.user;
 
@@ -255,16 +255,11 @@ function getStatusText(status: string): string {
                             >
                                 Generate All Pending (WIP)
                             </button>
-                            <div class="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    id="addRecurringTransactionBtn"
-                                    class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
-                                    title="Add a Recurring Transaction"
-                                >
-                                    <Plus />
-                                </button>
-                            </div>
+
+                            <PlusButton
+                                id="addRecurringTransactionBtn"
+                                title="Add a new Recurring Transaction"
+                            />
                         </div>
                     </div>
 

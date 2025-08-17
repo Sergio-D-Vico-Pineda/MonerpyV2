@@ -8,9 +8,11 @@ import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
-import Plus from "@comps/svgs/mono/Plus.astro";
 import { formatCurrency } from "@lib/date-utils.ts";
 import { accountTypes } from "@arrays.d.ts";
+import SelectAccount from "@/components/accounts/SelectAccount.astro";
+import PlusButton from "@/components/PlusButton.astro";
+import TextButton from "@/components/TextButton.astro";
 
 const user = Astro.locals.user;
 
@@ -76,26 +78,14 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
                             </a>
                         </div>
                         <div class="flex items-center gap-x-4">
-                            {accounts && accounts.length !== 0 && (
-                                <select class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                    <option value="">
-                                        Select transaction type
-                                    </option>
-                                    {accounts.map((account) => (
-                                        <option value={account.id}>
-                                            {account.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            {accounts && accounts.length > 0 && (
+                                <SelectAccount accounts={accounts} />
                             )}
-                            <button
-                                type="button"
+
+                            <PlusButton
                                 id="addAccountButton"
-                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
                                 title="Create a new account"
-                            >
-                                <Plus />
-                            </button>
+                            />
                         </div>
                     </div>
 
@@ -108,13 +98,11 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
                             <p class="text-gray-400 mb-6">
                                 Create your first account to get started!
                             </p>
-                            <button
-                                type="button"
+                            <TextButton
                                 id="addFirstAccountButton"
-                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                             >
                                 Create Your First Account
-                            </button>
+                            </TextButton>
                         </div>
                     ) : (
                         <div class="flex flex-col gap-y-4">

@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import TagModal from "@comps/tags/TagModal.astro";
 import TagItem from "@comps/tags/TagItem.astro";
@@ -9,8 +8,9 @@ import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
-import Plus from "@comps/svgs/mono/Plus.astro";
 import Tag from "@comps/svgs/mono/Tag.astro";
+import PlusButton from "@/components/PlusButton.astro";
+import TextButton from "@/components/TextButton.astro";
 
 const user = Astro.locals.user;
 
@@ -111,15 +111,7 @@ const tags: TagShape[] = (rawTags ?? []).map((t: TagShape) => ({
                             <Tag />
                             Tags
                         </h2>
-                        <div class="flex items-center gap-x-4">
-                            <button
-                                type="button"
-                                id="addTagButton"
-                                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded transition-colors"
-                            >
-                                <Plus />
-                            </button>
-                        </div>
+                        <PlusButton id="addTagButton" title="Add a new Tag" />
                     </div>
 
                     {tags && tags.length === 0 ? (
@@ -132,13 +124,9 @@ const tags: TagShape[] = (rawTags ?? []).map((t: TagShape) => ({
                                 Create tags to label and organize your
                                 transactions better.
                             </p>
-                            <button
-                                id="addFirstTagButton"
-                                type="button"
-                                class="create-first-tag-btn bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                            >
+                            <TextButton id="addFirstTagButton" title="Add Tag">
                                 Create Your First Tag
-                            </button>
+                            </TextButton>
                         </div>
                     ) : (
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
