@@ -10,9 +10,7 @@ import {
     getTransaction,
     updateTransaction,
     deleteTransaction,
-    getAccounts,
-    getCategories,
-    getTags
+    getAccounts
 } from "./transactions/index.ts";
 import {
     createRecurringTransaction,
@@ -44,7 +42,7 @@ import {
 } from "./accounts/index.ts";
 import {
     createCategory,
-    getCategories as getCategoriesList,
+    getCategories,
     getCategory,
     updateCategory,
     deleteCategory,
@@ -52,7 +50,7 @@ import {
 } from "./categories/index.ts";
 import {
     createTag,
-    getTags as getTagsList,
+    getTags,
     getTag,
     updateTag,
     deleteTag,
@@ -71,7 +69,6 @@ const server = {
     deleteTransaction,
     getAccounts,
     getCategories,
-    getTags,
     createRecurringTransaction,
     getRecurringTransactions,
     getRecurringTransaction,
@@ -95,16 +92,16 @@ const server = {
     updateDailyBalance,
     recalculateAccountBalance,
     createCategory,
-    getCategoriesList,
     getCategory,
     updateCategory,
     deleteCategory,
     restoreCategory,
     createTag,
-    getTagsList,
+    getTags,
     getTag,
     updateTag,
     deleteTag,
     restoreTag
 };
+
 export { server };

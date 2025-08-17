@@ -71,7 +71,7 @@ const userInFamily = userResult.data?.ok && userResult.data.family;
 
 // Get tags data only if user is in a family
 const tagsResult = userInFamily
-    ? await Astro.callAction(actions.getTagsList, { includeDeleted: false })
+    ? await Astro.callAction(actions.getTags, { includeDeleted: false })
     : { data: { ok: false, tags: [] } };
 
 // Normalize tags to a predictable shape for the TagItem component

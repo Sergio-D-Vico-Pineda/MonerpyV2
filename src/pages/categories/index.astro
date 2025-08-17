@@ -84,10 +84,10 @@ const userInFamily = userResult.data?.ok && userResult.data.family;
 
 // Get categories data only if user is in a family
 const categoriesResult = userInFamily
-    ? await Astro.callAction(actions.getCategoriesList, {
-          includeDeleted: false,
-      })
-    : { data: { ok: false, categories: [] } };
+        ? await Astro.callAction(actions.getCategories, {
+                    includeDeleted: false,
+            })
+        : { data: { ok: false, categories: [] } };
 
 // Normalize categories into a flat array with the exact fields the UI expects
 const rawCategories = categoriesResult.data?.ok
