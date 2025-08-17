@@ -4,6 +4,7 @@ import { actions } from "astro:actions";
 import Asterisk from "@comps/Asterisk.astro";
 
 interface Props {
+    id: string;
     classes?: string;
 }
 
@@ -11,15 +12,15 @@ const accountsResult = await Astro.callAction(actions.getAccounts, {});
 
 const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 
-const { classes }: Props = Astro.props;
+const { id, classes }: Props = Astro.props;
 ---
 
-<label for="accountId" class={classes}>
+<label for={id} class={classes}>
     <p class="text-sm font-medium text-gray-200 mb-2">
         Account <Asterisk id="account" />
     </p>
     <select
-        id="accountId"
+        id={id}
         name="accountId"
         required
         class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"

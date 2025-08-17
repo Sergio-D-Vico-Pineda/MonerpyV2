@@ -8,6 +8,7 @@ import Account from "@comps/transaction/Account.astro";
 import Category from "@comps/transaction/Category.astro";
 import { getCurrentDate } from "@lib/date-utils";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
+import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
 ---
 
 <div
@@ -50,7 +51,7 @@ import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 
             <!-- Account and Name -->
             <div class="flex items-center gap-x-4 justify-center">
-                <Account />
+                <Account id="recurringAccountId" />
                 <Input
                     id="description"
                     label="Recurring Transaction Name"
@@ -59,6 +60,7 @@ import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
                     placeholder="Enter recurring transaction name"
                     classes="flex-1"
                 />
+                <ScriptSelect idSelect="recurringAccountId" />
             </div>
 
             <!-- Columns -->
