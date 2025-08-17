@@ -163,6 +163,7 @@ The following folder structure is designed to support Monerpy’s modular and sc
 - HTML Ids in camelCase
 - CSS classes in kebab-case
 - JavaScript/TypeScript variables in camelCase
+- JavaScript/TypeScript constants in UPPER_SNAKE_CASE
 
 ## License
 
