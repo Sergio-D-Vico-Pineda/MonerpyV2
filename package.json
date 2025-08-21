@@ -6,6 +6,9 @@
     "name": "Scarpy19",
     "url": "https://github.com/Scarpy19"
   },
+  "engines": {
+    "node": "22"
+  },
   "packageManager": "pnpm@10.5.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -14,7 +17,10 @@
     "deve": "astro dev --host",
     "build": "prisma generate && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "start": "prisma generate && node ./dist/server/entry.mjs",
+    "postinstall": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.0",
