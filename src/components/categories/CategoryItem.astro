@@ -4,7 +4,6 @@ import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
 import CompactColorPicker from "@comps/CompactColorPicker.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 
 interface Props {
     category: {
@@ -78,7 +77,6 @@ function isDescendantOf(
             >
                 {category.name}
             </h3>
-            {/* Conditional: render only when there's something to show */}
             {
                 (txnCount > 0 || subCount > 0) && (
                     <p class="text-sm text-gray-400">
@@ -104,9 +102,7 @@ function isDescendantOf(
     <!-- Edit Mode -->
     <div class="category-edit hidden">
         <form class="edit-category-form flex items-center gap-x-3 w-full">
-            <CSRFToken />
             <input type="hidden" name="categoryId" value={category.id} />
-
             <div class="flex items-center gap-x-2">
                 {isChild && <i class="text-gray-400 cursor-default">└─</i>}
                 <select
@@ -458,6 +454,13 @@ function isDescendantOf(
                     const formData = new FormData(form);
                     formData.set("_action", "update");
                     formData.set("id", categoryId.toString());
+                    const csrfInput = document.querySelector(
+                        'input[name="_csrf_token"]',
+                    ) as HTMLInputElement;
+
+                    if (csrfInput && csrfInput.value) {
+                        formData.set("_csrf_token", csrfInput.value);
+                    }
 
                     // Validate required fields
                     const name = formData.get("name") as string;
@@ -583,6 +586,14 @@ function isDescendantOf(
 
                         const formData = new FormData();
                         formData.append("id", categoryId.toString());
+
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        if (csrfInput && csrfInput.value) {
+                            formData.append("_csrf_token", csrfInput.value);
+                        }
+
                         const { data } = await actions.deleteCategory(formData);
 
                         if (data?.ok) {

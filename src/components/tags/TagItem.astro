@@ -4,7 +4,6 @@ import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
 import CompactColorPicker from "@comps/CompactColorPicker.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 import type { Tag } from "@types.d.ts";
 
 interface Props {
@@ -68,7 +67,6 @@ const { tag } = Astro.props as Props;
     <form
         class="tag-edit py-1 edit-tag-form items-center justify-between gap-x-3 w-full hidden"
     >
-        <CSRFToken />
         <input type="hidden" name="tagId" value={tag.id} />
 
         <div class="flex items-center gap-x-2.5 flex-1 min-w-0">
@@ -353,6 +351,13 @@ const { tag } = Astro.props as Props;
                 const formData = new FormData(form);
                 formData.set("_action", "update");
                 formData.set("id", tagId.toString());
+                const csrfInput = document.querySelector(
+                    'input[name="_csrf_token"]',
+                ) as HTMLInputElement;
+
+                if (csrfInput && csrfInput.value) {
+                    formData.set("_csrf_token", csrfInput.value);
+                }
 
                 // Validate required fields
                 const name = formData.get("name") as string;
@@ -471,6 +476,14 @@ const { tag } = Astro.props as Props;
 
                     const formData = new FormData();
                     formData.append("id", tagId.toString());
+
+                    // Add CSRF token
+                    const csrfInput = document.querySelector(
+                        'input[name="_csrf_token"]',
+                    ) as HTMLInputElement;
+                    if (csrfInput && csrfInput.value) {
+                        formData.append("_csrf_token", csrfInput.value);
+                    }
                     const { data } = await actions.deleteTag(formData);
 
                     if (data?.ok) {
