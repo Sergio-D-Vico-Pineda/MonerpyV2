@@ -58,10 +58,10 @@ import {
 } from "./tags/index.ts";
 
 const server = {
-    login: login,
-    create: create,
-    logout: logout,
-    getUser: getUser,
+    login,
+    create,
+    logout,
+    getUser,
     createTransaction,
     getTransactions,
     getTransaction,
