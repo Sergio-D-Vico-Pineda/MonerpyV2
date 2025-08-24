@@ -96,6 +96,8 @@ const accountsResult = userInFamily
 const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 
 // Get data for the page only if user has accounts
+import type { Transaction, GetTransactionsResult } from "@types.d.ts";
+
 const transactionsResult =
     userInFamily && accounts && accounts.length > 0
         ? await Astro.callAction(actions.getTransactions, {
@@ -104,11 +106,14 @@ const transactionsResult =
           })
         : { data: { ok: false, transactions: [], pagination: null } };
 
-const transactions = transactionsResult.data?.ok
-    ? transactionsResult.data.transactions
+const typedTransactionsResult = transactionsResult.data as
+    | GetTransactionsResult
+    | undefined;
+const transactions: Transaction[] = typedTransactionsResult?.ok
+    ? typedTransactionsResult.transactions
     : [];
-const pagination = transactionsResult.data?.ok
-    ? transactionsResult.data.pagination
+const pagination = typedTransactionsResult?.ok
+    ? typedTransactionsResult.pagination
     : null;
 
 // Group transactions by date
@@ -302,26 +307,24 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                                                     </h4>
                                                                     <div class="flex items-center gap-2 mt-1">
                                                                         <span class="text-sm text-gray-400">
-                                                                            {
-                                                                                transaction
-                                                                                    .account
-                                                                                    .name
-                                                                            }
+                                                                            {transaction
+                                                                                .account
+                                                                                ?.name ??
+                                                                                "(No account)"}
                                                                         </span>
                                                                         <span class="text-xs text-gray-500">
                                                                             <div
                                                                                 class="w-1 h-1 rounded-full lg:mt-1"
-                                                                                style={`background-color: ${transaction.account.color}`}
+                                                                                style={`background-color: ${transaction.account?.color ?? "transparent"}`}
                                                                             />
                                                                         </span>
                                                                         <span class="text-xs text-gray-400">
                                                                             Done
                                                                             by
-                                                                            {
-                                                                                transaction
-                                                                                    .user
-                                                                                    .username
-                                                                            }
+                                                                            {transaction
+                                                                                .user
+                                                                                ?.username ??
+                                                                                "(Unknown)"}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -339,7 +342,10 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                                                             }
                                                                         </span>
                                                                     )}
-                                                                    {transaction.tags.map(
+                                                                    {(
+                                                                        transaction.tags ??
+                                                                        []
+                                                                    ).map(
                                                                         (
                                                                             tag,
                                                                         ) => (

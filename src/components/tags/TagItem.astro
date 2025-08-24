@@ -4,19 +4,13 @@ import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
 import CompactColorPicker from "@comps/CompactColorPicker.astro";
+import type { Tag } from "@types.d.ts";
 
 interface Props {
-    tag: {
-        id: number;
-        name: string;
-        color: string;
-        _count?: {
-            transactions?: number;
-        };
-    };
+    tag: Tag;
 }
 
-const { tag } = Astro.props;
+const { tag } = Astro.props as Props;
 ---
 
 <div

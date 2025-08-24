@@ -1,13 +1,8 @@
 ---
-import type { Account } from "@prisma/client";
-
-// The page that passes `accounts` sometimes selects a subset of Account fields
-// (omitting `familyId`). Narrow the prop type to the fields this component
-// actually needs so callers that don't include `familyId` won't cause a type error.
-type SelectAccountItem = Partial<Omit<Account, "familyId">>;
+import type { Account } from "@types.d.ts";
 
 interface Props {
-    accounts?: SelectAccountItem[];
+    accounts?: Account[];
 }
 
 const { accounts } = Astro.props as Props;

@@ -1,5 +1,6 @@
 ---
 import { actions } from "astro:actions";
+import type { Category, GetCategoriesResult } from "@types.d.ts";
 
 interface Props {
     classes?: string;
@@ -9,9 +10,9 @@ const { classes } = Astro.props;
 
 const categoriesResult = await Astro.callAction(actions.getCategories, {});
 
-const categories = categoriesResult.data?.ok
-    ? categoriesResult.data.categories
-    : [];
+// Trust the server action to return the typed payload exported from the action.
+const typedResult = categoriesResult.data as GetCategoriesResult | undefined;
+const categories: Category[] = typedResult?.ok ? typedResult.categories : [];
 ---
 
 <label for="categoryId" class={classes}>
@@ -24,13 +25,20 @@ const categories = categoriesResult.data?.ok
         <option value="">Select a category (optional)</option>
         {
             categories &&
-                categories.map((category) => (
-                    <option value={category.id} data-color={category.color}>
-                        {category.parent
-                            ? `${category.parent.name} > ${category.name}`
-                            : category.name}
-                    </option>
-                ))
+                categories.map((category) => {
+                    const parentName = category.parent?.name ?? null;
+
+                    return (
+                        <option
+                            value={category.id.toString()}
+                            data-color={category.color}
+                        >
+                            {parentName
+                                ? `${parentName} > ${category.name}`
+                                : category.name}
+                        </option>
+                    );
+                })
         }
     </select>
 </label>

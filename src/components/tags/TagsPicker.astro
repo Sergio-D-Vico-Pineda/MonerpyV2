@@ -1,5 +1,6 @@
 ---
 import { actions } from "astro:actions";
+import type { Tag, GetTagsResult } from "@types.d.ts";
 
 interface Props {
   id?: string;
@@ -18,7 +19,8 @@ const {
 } = Astro.props as Props;
 
 const tagsResult = await Astro.callAction(actions.getTags, {});
-const existingTags = tagsResult.data?.ok ? tagsResult.data.tags : [];
+const typedTagsResult = tagsResult.data as GetTagsResult | undefined;
+const existingTags: Tag[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
 ---
 
 <div class="flex gap-x-2" data-tags-input-root data-target-id={id}>
