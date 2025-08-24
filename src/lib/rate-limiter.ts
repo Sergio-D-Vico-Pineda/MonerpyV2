@@ -139,7 +139,7 @@ export function recordFailedAttempt(ip: string, email: string): void {
     }
 
     const ipAttempt = rateLimitData.ipAttempts[ip];
-    
+
     // Reset count if last attempt was more than 1 hour ago
     if (now - ipAttempt.lastAttempt > (60 * 60 * 1000)) {
         ipAttempt.count = 0;
@@ -158,7 +158,7 @@ export function recordFailedAttempt(ip: string, email: string): void {
     }
 
     const emailAttempt = rateLimitData.emailAttempts[email];
-    
+
     // Reset count if last attempt was more than 1 hour ago
     if (now - emailAttempt.lastAttempt > (60 * 60 * 1000)) {
         emailAttempt.count = 0;
