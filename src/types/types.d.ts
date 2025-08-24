@@ -30,6 +30,8 @@ interface Session {
     username: string;
     email: string;
     created: string; // unix timestamp
+    fingerprint: string; // Browser fingerprint hash
+    csrfToken: string; // CSRF protection token
 }
 
 interface Toast {
