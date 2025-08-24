@@ -90,6 +90,12 @@ const RECURRING_TEXT_COLORS: Record<string, string> = {
     CANCELLED: "text-red-500",
 }
 
+const BTN_SIZES: Record<string, string> = {
+    sm: "text-sm px-3 py-1.5 gap-1",
+    md: "text-sm px-4 py-2 gap-2",
+    lg: "text-base px-5 py-2.5 gap-2",
+};
+
 export {
     TOAST_TYPES,
     RECURRING_STATUS_COLORS,
@@ -101,4 +107,5 @@ export {
     timePeriods,
     colors,
     frequency,
+    BTN_SIZES,
 }
