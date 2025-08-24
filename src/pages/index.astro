@@ -4,6 +4,7 @@ import Login from "@comps/svgs/mono/Login.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 import Home from "@comps/svgs/mono/Home.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 // Check if user is authenticated via the new middleware system
 const user = Astro.locals.user;
@@ -38,6 +39,7 @@ const user = Astro.locals.user;
 				</a>
 			) : (
 				<form id="logoutForm" class="inline">
+					<CSRFToken />
 					<button
 						type="submit"
 						class="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition duration-200 font-bold flex items-center gap-2 "

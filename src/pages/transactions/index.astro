@@ -3,7 +3,6 @@ import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import TransactionModal from "@comps/modal/TransactionModal.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import {
     formatDateForDisplay,
@@ -21,68 +20,6 @@ const user = Astro.locals.user;
 
 if (!user) {
     return Astro.redirect("/login");
-}
-
-// Handle form submissions
-let toastMessage = "";
-let toastType = "success";
-
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const action = formData.get("_action") as string;
-
-    if (action === "create") {
-        const result = await Astro.callAction(
-            actions.createTransaction,
-            formData,
-        );
-        console.log("Create transaction result:", result);
-        if (result.data?.ok) {
-            toastMessage = "Transaction created successfully!";
-            toastType = "success";
-        } else {
-            console.error(
-                "Transaction creation failed:",
-                result.error || result.data?.error,
-            );
-            toastMessage = "Failed to create transaction. Please try again.";
-            toastType = "error";
-        }
-    } else if (action === "update") {
-        const result = await Astro.callAction(
-            actions.updateTransaction,
-            formData,
-        );
-        console.log("Update transaction result:", result);
-        if (result.data?.ok) {
-            toastMessage = "Transaction updated successfully!";
-            toastType = "success";
-        } else {
-            console.error(
-                "Transaction update failed:",
-                result.error || result.data?.error,
-            );
-            toastMessage = "Failed to update transaction. Please try again.";
-            toastType = "error";
-        }
-    } else if (action === "delete") {
-        const result = await Astro.callAction(
-            actions.deleteTransaction,
-            formData,
-        );
-        console.log("Delete transaction result:", result);
-        if (result.data?.ok) {
-            toastMessage = "Transaction deleted successfully!";
-            toastType = "success";
-        } else {
-            console.error(
-                "Transaction deletion failed:",
-                result.error || result.data?.error,
-            );
-            toastMessage = "Failed to delete transaction. Please try again.";
-            toastType = "error";
-        }
-    }
 }
 
 // Check if user is in a family first
@@ -409,43 +346,28 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                                                                         />
                                                                     </svg>
                                                                 </button>
-                                                                <form
-                                                                    method="POST"
-                                                                    class="inline"
-                                                                    onsubmit="return confirm('Are you sure you want to delete this transaction?')"
+                                                                <button
+                                                                    type="button"
+                                                                    class="delete-btn bg-red-600 hover:bg-red-700 p-2 rounded-lg text-white transition duration-200 shadow-sm hover:shadow-md"
+                                                                    title="Delete transaction"
+                                                                    data-transaction-id={
+                                                                        transaction.id
+                                                                    }
                                                                 >
-                                                                    <input
-                                                                        type="hidden"
-                                                                        name="_action"
-                                                                        value="delete"
-                                                                    />
-                                                                    <input
-                                                                        type="hidden"
-                                                                        name="id"
-                                                                        value={
-                                                                            transaction.id
-                                                                        }
-                                                                    />
-                                                                    <button
-                                                                        type="submit"
-                                                                        class="bg-red-600 hover:bg-red-700 p-2 rounded-lg text-white transition duration-200 shadow-sm hover:shadow-md"
-                                                                        title="Delete transaction"
+                                                                    <svg
+                                                                        class="w-4 h-4"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
                                                                     >
-                                                                        <svg
-                                                                            class="w-4 h-4"
-                                                                            fill="none"
-                                                                            stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <path
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                                            />
-                                                                        </svg>
-                                                                    </button>
-                                                                </form>
+                                                                        <path
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            stroke-width="2"
+                                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                                        />
+                                                                    </svg>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -484,11 +406,13 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
 </Layout>
 
 <TransactionModal id="transactionModal" />
-{toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
 <LogoutScript />
 
 <script>
+    import { actions } from "astro:actions";
+    import { ToastService } from "@lib/toast.ts";
+
     // Add Transaction button functionality using the modal instance
     const addTransactionBtn = document.getElementById(
         "addTransactionBtn",
@@ -518,6 +442,45 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
                 typeof transactionModal.fillFormForEdit === "function"
             ) {
                 transactionModal.fillFormForEdit(transaction);
+            }
+        });
+    });
+
+    // Delete functionality
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async function (this: HTMLElement) {
+            const transactionId = this.dataset.transactionId;
+            if (!transactionId) return;
+
+            const confirmed = confirm(
+                "Are you sure you want to delete this transaction?",
+            );
+            if (!confirmed) return;
+
+            try {
+                const formData = new FormData();
+                formData.append("id", transactionId);
+
+                const result = await actions.deleteTransaction(formData);
+
+                if (result.data?.ok) {
+                    ToastService.success("Transaction deleted successfully!");
+                    // Reload the page to show updated data
+                    window.location.reload();
+                } else {
+                    console.error(
+                        "Transaction deletion failed:",
+                        result.error || result.data?.error,
+                    );
+                    ToastService.error(
+                        "Failed to delete transaction. Please try again.",
+                    );
+                }
+            } catch (error) {
+                console.error("Error deleting transaction:", error);
+                ToastService.error(
+                    "Failed to delete transaction. Please try again.",
+                );
             }
         });
     });

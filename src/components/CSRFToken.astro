@@ -1,0 +1,24 @@
+---
+// CSRFToken component - includes hidden CSRF token field in forms
+// Usage: <CSRFToken />
+
+const user = Astro.locals.user;
+let csrfToken = '';
+
+if (user) {
+    // Get CSRF token from session via session manager
+    const { getSession } = await import('../lib/session-manager.ts');
+    const sessionId = Astro.cookies.get('astro-auth')?.value;
+    
+    if (sessionId) {
+        const session = getSession(sessionId);
+        if (session) {
+            csrfToken = session.csrfToken;
+        }
+    }
+}
+---
+
+{csrfToken && (
+    <input type="hidden" name="_csrf_token" value={csrfToken} />
+)}

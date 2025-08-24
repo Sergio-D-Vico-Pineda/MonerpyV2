@@ -2,9 +2,9 @@
 import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
+import CSRFToken from "@comps/CSRFToken.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import { accountTypes } from "@arrays.d.ts";
@@ -21,23 +21,6 @@ const userInFamily = userResult.data?.ok && userResult.data.family;
 
 if (!userInFamily) {
     return Astro.redirect("/accounts");
-}
-
-// Handle form submissions
-let toastMessage = "";
-let toastType = "success";
-
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const action = formData.get("_action") as string;
-
-    if (action === "restore") {
-        const result = await Astro.callAction(actions.restoreAccount, formData);
-        if (result.data?.ok) {
-            toastMessage = "Account restored successfully!";
-            toastType = "success";
-        }
-    }
 }
 
 // Get deleted accounts
@@ -147,12 +130,8 @@ const deletedAccounts = allAccounts
                                         </div>
 
                                         <div class="flex items-center gap-x-2">
-                                            <form method="POST" class="inline">
-                                                <input
-                                                    type="hidden"
-                                                    name="_action"
-                                                    value="restore"
-                                                />
+                                            <form class="restore-account-form inline">
+                                                <CSRFToken />
                                                 <input
                                                     type="hidden"
                                                     name="id"
@@ -160,7 +139,7 @@ const deletedAccounts = allAccounts
                                                 />
                                                 <button
                                                     type="submit"
-                                                    onclick="return confirm('Are you sure you want to restore this account?')"
+                                                    data-account-name={account.name}
                                                     class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
                                                 >
                                                     Restore
@@ -208,5 +187,52 @@ const deletedAccounts = allAccounts
     </main>
 
     <LogoutScript />
-    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
+    
+    <script>
+        // Handle restore account forms
+        document.addEventListener("DOMContentLoaded", function () {
+            const restoreForms = document.querySelectorAll(".restore-account-form");
+            
+            restoreForms.forEach((form) => {
+                form.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const button = form.querySelector("button");
+                    const accountName = button?.getAttribute("data-account-name");
+                    
+                    // Confirmation dialog
+                    if (!confirm(`Are you sure you want to restore "${accountName}"?`)) {
+                        return;
+                    }
+
+                    const formData = new FormData(form as HTMLFormElement);
+
+                    try {
+                        const { actions } = await import("astro:actions");
+                        const result = await actions.restoreAccount(formData);
+
+                        if (result.data?.ok) {
+                            const { ToastService } = await import("@lib/toast.ts");
+                            ToastService.success("Account restored successfully!");
+                            // Reload the page to show updated data
+                            window.location.reload();
+                        } else {
+                            const { ToastService } = await import("@lib/toast.ts");
+                            ToastService.error(
+                                result.data?.error || "Failed to restore account",
+                            );
+                            console.error(
+                                "Account restore failed:",
+                                result.error || result.data?.error,
+                            );
+                        }
+                    } catch (error) {
+                        const { ToastService } = await import("@lib/toast.ts");
+                        ToastService.error("An error occurred. Please try again.");
+                        console.error("Error restoring account:", error);
+                    }
+                });
+            });
+        });
+    </script>
 </Layout>

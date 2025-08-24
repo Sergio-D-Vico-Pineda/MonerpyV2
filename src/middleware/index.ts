@@ -1,8 +1,10 @@
 
-import { defineMiddleware } from 'astro:middleware';
-import { validateSession } from '@lib/session-manager.ts';
+import { defineMiddleware, sequence } from 'astro:middleware';
+import { validateSession, destroySession } from '@lib/session-manager.ts';
+import { validateFingerprint } from '@lib/fingerprint.ts';
+import { csrfMiddleware } from './csrf.ts';
 
-const onRequest = defineMiddleware(async (context, next) => {
+const authMiddleware = defineMiddleware(async (context, next) => {
     const { request, url, cookies, locals, redirect } = context;
 
     // Ignore Chrome DevTools requests and return 404
@@ -29,13 +31,23 @@ const onRequest = defineMiddleware(async (context, next) => {
         const longSession = session ? session : validateSession(sessionId, true); // Then try long-term
 
         if (longSession) {
-            // Set user in locals for use in pages
-            locals.user = {
-                id: longSession.userId,
-                username: longSession.username,
-                email: longSession.email,
-                created: longSession.created
-            };
+            // Validate fingerprint for security
+            const fingerprintValid = validateFingerprint(request, longSession.fingerprint);
+            
+            if (!fingerprintValid) {
+                console.log(`[MIDDLEWARE] Invalid fingerprint for session ${sessionId}, destroying session`);
+                destroySession(sessionId);
+                cookies.delete('astro-auth', { path: '/' });
+                // Don't set user in locals, treat as unauthenticated
+            } else {
+                // Set user in locals for use in pages
+                locals.user = {
+                    id: longSession.userId,
+                    username: longSession.username,
+                    email: longSession.email,
+                    created: longSession.created
+                };
+            }
         }
     }
 
@@ -77,4 +89,5 @@ const onRequest = defineMiddleware(async (context, next) => {
     return response;
 });
 
-export { onRequest };
+// Combine middlewares
+export const onRequest = sequence(authMiddleware, csrfMiddleware);

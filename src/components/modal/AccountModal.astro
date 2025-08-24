@@ -2,6 +2,7 @@
 import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 import Input from "@comps/Input.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 import { accountTypes } from "@arrays.d.ts";
 ---
 
@@ -30,8 +31,8 @@ import { accountTypes } from "@arrays.d.ts";
         </header>
 
         <!-- Modal Content -->
-        <form method="POST" class="p-6 flex flex-col gap-y-4">
-            <input type="hidden" name="_action" value="create" />
+        <form id="accountForm" class="p-6 flex flex-col gap-y-4">
+            <CSRFToken />
 
             <Input
                 id="accountName"
@@ -96,9 +97,15 @@ import { accountTypes } from "@arrays.d.ts";
     </div>
 </account-modal>
 
-<script type="module" is:inline>
+<script>
     // Define a small custom element that manages its own inner markup (light DOM)
     class AccountModal extends HTMLElement {
+        private root!: HTMLElement;
+        private _closeBtn: HTMLButtonElement | null = null;
+        private _cancelBtn: HTMLButtonElement | null = null;
+        private _form: HTMLFormElement | null = null;
+        private _downOutside: boolean = false;
+
         constructor() {
             super();
             this._onCloseClick = this._onCloseClick.bind(this);
@@ -114,11 +121,17 @@ import { accountTypes } from "@arrays.d.ts";
 
             this._closeBtn = this.root.querySelector("#closeModal");
             this._cancelBtn = this.root.querySelector("#cancelAccountButton");
+            this._form = this.root.querySelector("#accountForm");
 
             if (this._closeBtn)
                 this._closeBtn.addEventListener("click", this._onCloseClick);
             if (this._cancelBtn)
                 this._cancelBtn.addEventListener("click", this._onCancelClick);
+            if (this._form)
+                this._form.addEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
 
             // background click handling on host
             this.addEventListener("mousedown", this._onMouseDown);
@@ -133,6 +146,11 @@ import { accountTypes } from "@arrays.d.ts";
                     "click",
                     this._onCancelClick,
                 );
+            if (this._form)
+                this._form.removeEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
             this.removeEventListener("mousedown", this._onMouseDown);
             this.removeEventListener("mouseup", this._onMouseUp);
         }
@@ -144,12 +162,45 @@ import { accountTypes } from "@arrays.d.ts";
             this.closeModal();
         }
 
-        _onMouseDown(e) {
+        async _onSubmit(e: Event) {
+            e.preventDefault();
+
+            if (!this._form) return;
+            const formData = new FormData(this._form);
+
+            try {
+                const { actions } = await import("astro:actions");
+                const result = await actions.createAccount(formData);
+
+                if (result.data?.ok) {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.success("Account created successfully!");
+                    this.closeModal();
+                    // Reload the page to show updated data
+                    window.location.reload();
+                } else {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.error(
+                        result.data?.error || "Failed to create account",
+                    );
+                    console.error(
+                        "Account creation failed:",
+                        result.error || result.data?.error,
+                    );
+                }
+            } catch (error) {
+                const { ToastService } = await import("@lib/toast.ts");
+                ToastService.error("An error occurred. Please try again.");
+                console.error("Error creating account:", error);
+            }
+        }
+
+        _onMouseDown(e: MouseEvent) {
             if (e.target === this && e.button === 0) this._downOutside = true;
             else this._downOutside = false;
         }
 
-        _onMouseUp(e) {
+        _onMouseUp(e: MouseEvent) {
             if (this._downOutside && e.target === this && e.button === 0)
                 this.closeModal();
             this._downOutside = false;
@@ -166,11 +217,11 @@ import { accountTypes } from "@arrays.d.ts";
             this.classList.remove("flex");
             document.body.style.overflow = "auto";
             // reset form inside
-            const form = this.querySelector("form");
+            const form = this.querySelector("form") as HTMLFormElement;
             if (form) form.reset();
             // reset first color radio if present
             const firstColor = form
-                ? form.querySelector('input[name="color"]')
+                ? (form.querySelector('input[name="color"]') as HTMLInputElement)
                 : null;
             if (firstColor) firstColor.checked = true;
         }

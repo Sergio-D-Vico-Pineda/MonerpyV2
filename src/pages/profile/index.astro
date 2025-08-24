@@ -2,6 +2,7 @@
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 import Header from "@comps/layout/Header.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 import { actions } from "astro:actions";
 import {
     formatDateForDisplay,
@@ -28,6 +29,7 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                     Account Information
                 </h2>
                 <form id="profileForm" class="flex flex-col gap-y-6">
+                    <CSRFToken />
                     <label for="username">
                         <p class="text-sm font-medium text-purple-300 mb-2">
                             Username
@@ -167,7 +169,9 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                 <h2 class="text-xl font-semibold mb-5 text-purple-400">
                     Change Password
                 </h2>
+
                 <form id="passwordForm" class="flex flex-col gap-y-6">
+                    <CSRFToken />
                     <label for="currentPassword">
                         <p class="text-sm font-medium text-purple-300 mb-2">
                             Current Password
@@ -238,11 +242,70 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
     </main>
 
     <script>
-        const profileForm = document.getElementById(
-            "profileForm",
-        ) as HTMLFormElement;
+        import { actions } from "astro:actions";
+
+        // Password form handler
         const passwordForm = document.getElementById(
             "passwordForm",
+        ) as HTMLFormElement;
+
+        if (passwordForm) {
+            passwordForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const newPassword = passwordForm.querySelector(
+                    'input[name="newPassword"]',
+                ) as HTMLInputElement;
+                const confirmPassword = passwordForm.querySelector(
+                    'input[name="confirmPassword"]',
+                ) as HTMLInputElement;
+
+                if (
+                    newPassword &&
+                    confirmPassword &&
+                    newPassword.value !== confirmPassword.value
+                ) {
+                    alert("New passwords do not match");
+                    return false;
+                }
+
+                try {
+                    const formData = new FormData(passwordForm);
+                    const { data, error } =
+                        await actions.changePassword(formData);
+
+                    if (error) {
+                        throw new Error(
+                            error.message || "Failed to change password",
+                        );
+                    }
+
+                    if (data?.ok) {
+                        alert(
+                            `Password changed successfully! ${data.destroyedSessions} other sessions were logged out for security.`,
+                        );
+                        passwordForm.reset();
+                        // Optionally reload the page to clear any form state
+                        window.location.reload();
+                    } else {
+                        throw new Error(
+                            data?.error || "Failed to change password",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to change password";
+                    alert(errorMessage);
+                }
+            });
+        }
+
+        // Profile form handler (if it exists)
+        const profileForm = document.getElementById(
+            "profileForm",
         ) as HTMLFormElement;
 
         profileForm?.addEventListener("submit", async (e) => {
@@ -273,45 +336,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
             } catch (error) {
                 console.error("Error:", error);
                 alert("Failed to update profile");
-            }
-        });
-
-        passwordForm?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData(e.target as HTMLFormElement);
-            const newPassword = formData.get("newPassword");
-            const confirmPassword = formData.get("confirmPassword");
-
-            if (newPassword !== confirmPassword) {
-                alert("New passwords do not match");
-                return;
-            }
-
-            const data = {
-                currentPassword: formData.get("currentPassword"),
-                newPassword: newPassword,
-            };
-
-            try {
-                const response = await fetch("/api/user/password", {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                if (response.ok) {
-                    alert("Password updated successfully");
-                    (e.target as HTMLFormElement).reset();
-                } else {
-                    const error = await response.json();
-                    alert(error.error || "Failed to update password");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to update password");
             }
         });
     </script>

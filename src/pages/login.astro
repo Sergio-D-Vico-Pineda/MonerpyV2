@@ -1,5 +1,6 @@
 ---
 import Layout from "@layouts/Layout.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 // Check if user is already authenticated via middleware
 if (Astro.locals.user) {
@@ -21,6 +22,7 @@ if (Astro.locals.user) {
         Are you Scarpy?
       </h1>
       <form id="loginForm" class="flex flex-col gap-y-4">
+        <CSRFToken />
         <div>
           <label for="email" class="block text-purple-300 mb-2">Email</label>
           <input

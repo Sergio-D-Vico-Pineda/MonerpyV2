@@ -1,6 +1,7 @@
 ---
 import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 ---
 
 <!-- Render as custom element host -->
@@ -23,8 +24,8 @@ import ColorPicker from "@comps/ColorPicker.astro";
             >
         </header>
 
-        <form method="POST" class="p-6 flex flex-col gap-y-4">
-            <input type="hidden" name="_action" value="create" />
+        <form id="tagForm" class="p-6 flex flex-col gap-y-4">
+            <CSRFToken />
 
             <label for="tagName">
                 <p class="text-sm font-medium text-gray-200 mb-2">Tag Name</p>
@@ -57,8 +58,14 @@ import ColorPicker from "@comps/ColorPicker.astro";
     </div>
 </tag-modal>
 
-<script type="module" is:inline>
+<script>
     class TagModal extends HTMLElement {
+        private root!: HTMLElement;
+        private _closeBtn: HTMLButtonElement | null = null;
+        private _cancelBtn: HTMLButtonElement | null = null;
+        private _form: HTMLFormElement | null = null;
+        private _downOutside: boolean = false;
+
         constructor() {
             super();
             this._onClose = this._onClose.bind(this);
@@ -72,11 +79,17 @@ import ColorPicker from "@comps/ColorPicker.astro";
             this.root = this;
             this._closeBtn = this.root.querySelector("#closeTagModal");
             this._cancelBtn = this.root.querySelector("#cancelTagButton");
+            this._form = this.root.querySelector("#tagForm");
 
             if (this._closeBtn)
                 this._closeBtn.addEventListener("click", this._onClose);
             if (this._cancelBtn)
                 this._cancelBtn.addEventListener("click", this._onCancel);
+            if (this._form)
+                this._form.addEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
 
             this.addEventListener("mousedown", this._onMouseDown);
             this.addEventListener("mouseup", this._onMouseUp);
@@ -87,6 +100,11 @@ import ColorPicker from "@comps/ColorPicker.astro";
                 this._closeBtn.removeEventListener("click", this._onClose);
             if (this._cancelBtn)
                 this._cancelBtn.removeEventListener("click", this._onCancel);
+            if (this._form)
+                this._form.removeEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
             this.removeEventListener("mousedown", this._onMouseDown);
             this.removeEventListener("mouseup", this._onMouseUp);
         }
@@ -98,12 +116,45 @@ import ColorPicker from "@comps/ColorPicker.astro";
             this.closeModal();
         }
 
-        _onMouseDown(e) {
+        async _onSubmit(e: Event) {
+            e.preventDefault();
+
+            if (!this._form) return;
+            const formData = new FormData(this._form);
+
+            try {
+                const { actions } = await import("astro:actions");
+                const result = await actions.createTag(formData);
+
+                if (result.data?.ok) {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.success("Tag created successfully!");
+                    this.closeModal();
+                    // Reload the page to show updated data
+                    window.location.reload();
+                } else {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.error(
+                        result.data?.error || "Failed to create tag",
+                    );
+                    console.error(
+                        "Tag creation failed:",
+                        result.error || result.data?.error,
+                    );
+                }
+            } catch (error) {
+                const { ToastService } = await import("@lib/toast.ts");
+                ToastService.error("An error occurred. Please try again.");
+                console.error("Error creating tag:", error);
+            }
+        }
+
+        _onMouseDown(e: MouseEvent) {
             if (e.target === this && e.button === 0) this._downOutside = true;
             else this._downOutside = false;
         }
 
-        _onMouseUp(e) {
+        _onMouseUp(e: MouseEvent) {
             if (this._downOutside && e.target === this && e.button === 0)
                 this.closeModal();
             this._downOutside = false;
@@ -113,7 +164,7 @@ import ColorPicker from "@comps/ColorPicker.astro";
             this.classList.remove("hidden");
             this.classList.add("flex");
             document.body.style.overflow = "hidden";
-            const nameInput = this.querySelector('input[name="name"]');
+            const nameInput = this.querySelector('input[name="name"]') as HTMLInputElement;
             if (nameInput && typeof nameInput.focus === "function")
                 nameInput.focus();
         }
@@ -122,10 +173,10 @@ import ColorPicker from "@comps/ColorPicker.astro";
             this.classList.add("hidden");
             this.classList.remove("flex");
             document.body.style.overflow = "auto";
-            const form = this.querySelector("form");
+            const form = this.querySelector("form") as HTMLFormElement;
             if (form) form.reset();
             const firstColor = form
-                ? form.querySelector('input[name="color"]')
+                ? (form.querySelector('input[name="color"]') as HTMLInputElement)
                 : null;
             if (firstColor) firstColor.checked = true;
         }

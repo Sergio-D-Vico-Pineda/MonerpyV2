@@ -1,6 +1,7 @@
 ---
 import Logout from "@svg/mono/Logout.astro";
 import User from "@svg/mono/User.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 export interface Props {
     currentPage:
@@ -79,6 +80,7 @@ const currentPageItem = navigationItems.find(
             {user.username}
         </a>
         <form id="logoutForm" method="POST" class="inline">
+            <CSRFToken />
             <button
                 type="submit"
                 class="bg-red-700 hover:bg-red-900 px-3 py-2 rounded text-white transition duration-200 flex items-center gap-2"

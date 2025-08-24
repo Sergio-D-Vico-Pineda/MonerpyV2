@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 // Categories for parent selection
 interface Category {
@@ -55,8 +56,8 @@ const parentCategories: Category[] = (allCategories || []).filter(
             >
         </header>
 
-        <form method="POST" class="p-6 flex flex-col gap-y-4">
-            <input type="hidden" name="_action" value="create" />
+        <form id="categoryForm" class="p-6 flex flex-col gap-y-4">
+            <CSRFToken />
 
             <Input
                 id="categoryName"
@@ -105,8 +106,15 @@ const parentCategories: Category[] = (allCategories || []).filter(
     </div>
 </category-modal>
 
-<script type="module" is:inline>
+<script>
     class CategoryModal extends HTMLElement {
+        private root!: HTMLElement;
+        private _closeBtn: HTMLButtonElement | null = null;
+        private _cancelBtn: HTMLButtonElement | null = null;
+        private _form: HTMLFormElement | null = null;
+        private _downOutside: boolean = false;
+        public showModal?: () => void;
+
         constructor() {
             super();
             this._onClose = this._onClose.bind(this);
@@ -120,11 +128,17 @@ const parentCategories: Category[] = (allCategories || []).filter(
             this.root = this;
             this._closeBtn = this.root.querySelector("#closeCategoryModal");
             this._cancelBtn = this.root.querySelector("#cancelCategoryButton");
+            this._form = this.root.querySelector("#categoryForm");
 
             if (this._closeBtn)
                 this._closeBtn.addEventListener("click", this._onClose);
             if (this._cancelBtn)
                 this._cancelBtn.addEventListener("click", this._onCancel);
+            if (this._form)
+                this._form.addEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
 
             this.addEventListener("mousedown", this._onMouseDown);
             this.addEventListener("mouseup", this._onMouseUp);
@@ -138,6 +152,11 @@ const parentCategories: Category[] = (allCategories || []).filter(
                 this._closeBtn.removeEventListener("click", this._onClose);
             if (this._cancelBtn)
                 this._cancelBtn.removeEventListener("click", this._onCancel);
+            if (this._form)
+                this._form.removeEventListener(
+                    "submit",
+                    this._onSubmit.bind(this),
+                );
             this.removeEventListener("mousedown", this._onMouseDown);
             this.removeEventListener("mouseup", this._onMouseUp);
         }
@@ -149,12 +168,45 @@ const parentCategories: Category[] = (allCategories || []).filter(
             this.closeModal();
         }
 
-        _onMouseDown(e) {
+        async _onSubmit(e: Event) {
+            e.preventDefault();
+
+            if (!this._form) return;
+            const formData = new FormData(this._form);
+
+            try {
+                const { actions } = await import("astro:actions");
+                const result = await actions.createCategory(formData);
+
+                if (result.data?.ok) {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.success("Category created successfully!");
+                    this.closeModal();
+                    // Reload the page to show updated data
+                    window.location.reload();
+                } else {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.error(
+                        result.data?.error || "Failed to create category",
+                    );
+                    console.error(
+                        "Category creation failed:",
+                        result.error || result.data?.error,
+                    );
+                }
+            } catch (error) {
+                const { ToastService } = await import("@lib/toast.ts");
+                ToastService.error("An error occurred. Please try again.");
+                console.error("Error creating category:", error);
+            }
+        }
+
+        _onMouseDown(e: MouseEvent) {
             if (e.target === this && e.button === 0) this._downOutside = true;
             else this._downOutside = false;
         }
 
-        _onMouseUp(e) {
+        _onMouseUp(e: MouseEvent) {
             if (this._downOutside && e.target === this && e.button === 0)
                 this.closeModal();
             this._downOutside = false;
@@ -164,7 +216,7 @@ const parentCategories: Category[] = (allCategories || []).filter(
             this.classList.remove("hidden");
             this.classList.add("flex");
             document.body.style.overflow = "hidden";
-            const nameInput = this.querySelector('input[name="name"]');
+            const nameInput = this.querySelector('input[name="name"]') as HTMLInputElement;
             if (nameInput && typeof nameInput.focus === "function")
                 nameInput.focus();
         }
@@ -173,10 +225,10 @@ const parentCategories: Category[] = (allCategories || []).filter(
             this.classList.add("hidden");
             this.classList.remove("flex");
             document.body.style.overflow = "auto";
-            const form = this.querySelector("form");
+            const form = this.querySelector("form") as HTMLFormElement;
             if (form) form.reset();
             const firstColor = form
-                ? form.querySelector('input[name="color"]')
+                ? (form.querySelector('input[name="color"]') as HTMLInputElement)
                 : null;
             if (firstColor) firstColor.checked = true;
         }

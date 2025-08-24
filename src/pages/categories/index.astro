@@ -5,7 +5,6 @@ import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
 import CategoryItem from "@comps/categories/CategoryItem.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Folder from "@comps/svgs/mono/Folder.astro";
@@ -16,66 +15,6 @@ const user = Astro.locals.user;
 
 if (!user) {
     return Astro.redirect("/login");
-}
-
-// Handle form submissions
-let toastMessage = "";
-let toastType = "success";
-
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const action = formData.get("_action") as string;
-
-    if (action === "create") {
-        const result = await Astro.callAction(actions.createCategory, formData);
-
-        if (result.data?.ok) {
-            toastMessage = "Category created successfully!";
-            toastType = "success";
-        } else if (result.error?.type === "AstroActionInputError") {
-            const errorstring = result.error?.message.replace(
-                /^Failed to validate:\s*/,
-                "",
-            );
-            const error = JSON.parse(errorstring);
-            toastMessage = `Expected ${error[0].expected}, received ${error[0].received} on field "${error[0].path[0]}"`;
-            toastType = "error";
-        } else {
-            console.log(result);
-            toastMessage = result.data?.error || "Failed to create category";
-            toastType = "error";
-        }
-    } else if (action === "update") {
-        const result = await Astro.callAction(actions.updateCategory, formData);
-        if (result.data?.ok) {
-            toastMessage = "Category updated successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to update category";
-            toastType = "error";
-        }
-    } else if (action === "delete") {
-        const result = await Astro.callAction(actions.deleteCategory, formData);
-        if (result.data?.ok) {
-            toastMessage = "Category deleted successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to delete category";
-            toastType = "error";
-        }
-    } else if (action === "restore") {
-        const result = await Astro.callAction(
-            actions.restoreCategory,
-            formData,
-        );
-        if (result.data?.ok) {
-            toastMessage = "Category restored successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to restore category";
-            toastType = "error";
-        }
-    }
 }
 
 // Check if user is in a family first
@@ -212,7 +151,7 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
     <CategoryModal />
     <DeleteConfirmModal title="Delete Category" />
     <LogoutScript />
-    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
+
 </Layout>
 
 <script>

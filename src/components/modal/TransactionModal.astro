@@ -8,6 +8,7 @@ import Date from "@comps/transaction/Date.astro";
 import Category from "@comps/transaction/Category.astro";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 const modalId = Astro.props.id ?? null;
 ---
 
@@ -38,15 +39,10 @@ const modalId = Astro.props.id ?? null;
 
             <form
                 id="transactionForm"
-                method="POST"
                 class="p-6 flex flex-col gap-y-4"
             >
-                <input
-                    type="hidden"
-                    name="_action"
-                    id="formAction"
-                    value="create"
-                />
+                <CSRFToken />
+
                 <input type="hidden" name="id" id="transactionId" />
 
                 <!-- Account and Name -->
@@ -254,6 +250,49 @@ const modalId = Astro.props.id ?? null;
                 if (closeModalButton)
                     closeModalButton.addEventListener("click", closeModal);
                 if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+                // Handle form submission
+                if (form) {
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(form);
+                        const action = formData.get("_action") as string;
+                        
+                        try {
+                            let result;
+                            if (action === "create") {
+                                const { actions } = await import('astro:actions');
+                                result = await actions.createTransaction(formData);
+                            } else if (action === "update") {
+                                const { actions } = await import('astro:actions');
+                                result = await actions.updateTransaction(formData);
+                            }
+                            
+                            if (result?.data?.ok) {
+                                const { ToastService } = await import('@lib/toast.ts');
+                                const message = action === "create" 
+                                    ? "Transaction created successfully!" 
+                                    : "Transaction updated successfully!";
+                                ToastService.success(message);
+                                closeModal();
+                                // Reload the page to show updated data
+                                window.location.reload();
+                            } else {
+                                const { ToastService } = await import('@lib/toast.ts');
+                                const message = action === "create" 
+                                    ? "Failed to create transaction. Please try again." 
+                                    : "Failed to update transaction. Please try again.";
+                                ToastService.error(message);
+                                console.error('Transaction operation failed:', result?.error || result?.data?.error);
+                            }
+                        } catch (error) {
+                            const { ToastService } = await import('@lib/toast.ts');
+                            ToastService.error('An error occurred. Please try again.');
+                            console.error('Error submitting transaction:', error);
+                        }
+                    });
+                }
 
                 if (modal) {
                     let downOutside = false;

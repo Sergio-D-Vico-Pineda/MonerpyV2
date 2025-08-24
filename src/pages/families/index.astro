@@ -2,63 +2,16 @@
 import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import Users from "@comps/svgs/mono/Users.astro";
-import { TOAST_TYPES } from "@arrays.d.ts";
+
 
 const user = Astro.locals.user;
 
 if (!user) {
   return Astro.redirect("/login");
-}
-
-// Handle form submissions
-let toastMessage;
-let toastType;
-
-if (Astro.request.method === "POST") {
-  const formData = await Astro.request.formData();
-  const action = formData.get("_action") as string;
-
-  if (action === "createFamily") {
-    const result = await Astro.callAction(actions.createFamily, formData);
-    if (result.data?.ok) {
-      toastMessage = "Family created successfully!";
-      toastType = TOAST_TYPES.SUCCESS;
-    }
-  } else if (action === "joinFamily") {
-    const result = await Astro.callAction(actions.joinFamily, formData);
-    if (result.data?.ok) {
-      toastMessage = "Successfully joined the family!";
-      toastType = TOAST_TYPES.SUCCESS;
-    }
-  } else if (action === "leaveFamily") {
-    const result = await Astro.callAction(actions.leaveFamily, formData);
-    if (result.data?.ok) {
-      toastMessage = "Successfully left the family!";
-      toastType = TOAST_TYPES.SUCCESS;
-    } else {
-      toastMessage = result.data?.error || "Failed to leave family.";
-      toastType = TOAST_TYPES.ERROR;
-    }
-  } else if (action === "updateRole") {
-    const result = await Astro.callAction(actions.updateUserRole, formData);
-    if (result.data?.ok) {
-      toastMessage = "User role updated successfully!";
-      toastType = TOAST_TYPES.SUCCESS;
-    }
-  } else if (action === "removeUser") {
-    const result = await Astro.callAction(
-      actions.removeUserFromFamily,
-      formData,
-    );
-    if (result.data?.ok) {
-      toastMessage = "User removed from family successfully!";
-      toastType = TOAST_TYPES.SUCCESS;
-    }
-  }
 }
 
 // Get data for the page
@@ -88,8 +41,8 @@ const userRole = familyDetailsResult.data?.ok
               Create New Family
             </h2>
 
-            <form method="POST" class="flex flex-col gap-y-4">
-              <input type="hidden" name="_action" value="createFamily" />
+            <form id="createFamilyForm" class="flex flex-col gap-y-4">
+              <CSRFToken />
 
               <div>
                 <label
@@ -122,8 +75,8 @@ const userRole = familyDetailsResult.data?.ok
               Join Existing Family
             </h2>
 
-            <form method="POST" class="flex flex-col gap-y-4">
-              <input type="hidden" name="_action" value="joinFamily" />
+            <form id="joinFamilyForm" class="flex flex-col gap-y-4">
+              <CSRFToken />
 
               <div>
                 <label
@@ -181,10 +134,10 @@ const userRole = familyDetailsResult.data?.ok
                   {userRole}
                 </span>
                 <form
-                  method="POST"
+                  id="leaveFamilyForm"
                   onsubmit="return confirm('Are you sure you want to leave this family?')"
                 >
-                  <input type="hidden" name="_action" value="leaveFamily" />
+                  <CSRFToken />
                   <button
                     type="submit"
                     class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm text-white transition duration-200"
@@ -272,12 +225,8 @@ const userRole = familyDetailsResult.data?.ok
 
                     {userRole === "Admin" && member.id !== user.id && (
                       <div class="flex gap-2">
-                        <form method="POST" class="inline">
-                          <input
-                            type="hidden"
-                            name="_action"
-                            value="updateRole"
-                          />
+                        <form class="updateRoleForm inline">
+                          <CSRFToken />
                           <input
                             type="hidden"
                             name="userId"
@@ -297,15 +246,10 @@ const userRole = familyDetailsResult.data?.ok
                         </form>
 
                         <form
-                          method="POST"
-                          class="inline"
+                          class="removeUserForm inline"
                           onsubmit="return confirm('Are you sure you want to remove this user from the family?')"
                         >
-                          <input
-                            type="hidden"
-                            name="_action"
-                            value="removeUser"
-                          />
+                          <CSRFToken />
                           <input
                             type="hidden"
                             name="userId"
@@ -377,6 +321,144 @@ const userRole = familyDetailsResult.data?.ok
     }
   </main>
 
+  <script>
+    import { actions } from "astro:actions";
+    import { ToastService } from "@lib/toast.ts";
+
+    // Create Family Form
+    const createFamilyForm = document.getElementById("createFamilyForm") as HTMLFormElement;
+    createFamilyForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      try {
+        const formData = new FormData(createFamilyForm);
+        const { data, error } = await actions.createFamily(formData);
+
+        if (error) {
+          throw new Error(error.message || "Failed to create family");
+        }
+
+        if (data?.ok) {
+          ToastService.success("Family created successfully!");
+          window.location.reload();
+        } else {
+          throw new Error(data?.error || "Failed to create family");
+        }
+      } catch (error) {
+        console.error("Error creating family:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to create family";
+        ToastService.error(errorMessage);
+      }
+    });
+
+    // Join Family Form
+    const joinFamilyForm = document.getElementById("joinFamilyForm") as HTMLFormElement;
+    joinFamilyForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      try {
+        const formData = new FormData(joinFamilyForm);
+        const { data, error } = await actions.joinFamily(formData);
+
+        if (error) {
+          throw new Error(error.message || "Failed to join family");
+        }
+
+        if (data?.ok) {
+          ToastService.success("Successfully joined the family!");
+          window.location.reload();
+        } else {
+          throw new Error(data?.error || "Failed to join family");
+        }
+      } catch (error) {
+        console.error("Error joining family:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to join family";
+        ToastService.error(errorMessage);
+      }
+    });
+
+    // Leave Family Form
+    const leaveFamilyForm = document.getElementById("leaveFamilyForm") as HTMLFormElement;
+    leaveFamilyForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      try {
+        const formData = new FormData(leaveFamilyForm);
+        const { data, error } = await actions.leaveFamily(formData);
+
+        if (error) {
+          throw new Error(error.message || "Failed to leave family");
+        }
+
+        if (data?.ok) {
+          ToastService.success("Successfully left the family!");
+          window.location.reload();
+        } else {
+          throw new Error(data?.error || "Failed to leave family");
+        }
+      } catch (error) {
+        console.error("Error leaving family:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to leave family";
+        ToastService.error(errorMessage);
+      }
+    });
+
+    // Update Role Forms
+    const updateRoleForms = document.querySelectorAll(".updateRoleForm") as NodeListOf<HTMLFormElement>;
+    updateRoleForms.forEach(form => {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        try {
+          const formData = new FormData(form);
+          const { data, error } = await actions.updateUserRole(formData);
+
+          if (error) {
+            throw new Error(error.message || "Failed to update user role");
+          }
+
+          if (data?.ok) {
+            ToastService.success("User role updated successfully!");
+            window.location.reload();
+          } else {
+            throw new Error(data?.error || "Failed to update user role");
+          }
+        } catch (error) {
+          console.error("Error updating user role:", error);
+          const errorMessage = error instanceof Error ? error.message : "Failed to update user role";
+          ToastService.error(errorMessage);
+        }
+      });
+    });
+
+    // Remove User Forms
+    const removeUserForms = document.querySelectorAll(".removeUserForm") as NodeListOf<HTMLFormElement>;
+    removeUserForms.forEach(form => {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        try {
+          const formData = new FormData(form);
+          const { data, error } = await actions.removeUserFromFamily(formData);
+
+          if (error) {
+            throw new Error(error.message || "Failed to remove user from family");
+          }
+
+          if (data?.ok) {
+            ToastService.success("User removed from family successfully!");
+            window.location.reload();
+          } else {
+            throw new Error(data?.error || "Failed to remove user from family");
+          }
+        } catch (error) {
+          console.error("Error removing user from family:", error);
+          const errorMessage = error instanceof Error ? error.message : "Failed to remove user from family";
+          ToastService.error(errorMessage);
+        }
+      });
+    });
+  </script>
+
   <LogoutScript />
-  {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>

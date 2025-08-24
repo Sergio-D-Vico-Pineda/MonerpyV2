@@ -4,6 +4,7 @@ import Edit from "@svg/mono/Edit.astro";
 import Save from "@svg/mono/Save.astro";
 import X from "@svg/mono/X.astro";
 import CompactColorPicker from "@comps/CompactColorPicker.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 interface Props {
     category: {
@@ -105,6 +106,7 @@ function isDescendantOf(
     <!-- Edit Mode -->
     <div class="category-edit hidden">
         <form class="edit-category-form flex items-center gap-x-3 w-full">
+            <CSRFToken />
             <input type="hidden" name="categoryId" value={category.id} />
 
             <div class="flex items-center gap-x-2">

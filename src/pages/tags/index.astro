@@ -5,7 +5,6 @@ import TagModal from "@comps/tags/TagModal.astro";
 import TagItem from "@comps/tags/TagItem.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
 import Header from "@comps/layout/Header.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Tag from "@comps/svgs/mono/Tag.astro";
@@ -17,53 +16,6 @@ const user = Astro.locals.user;
 
 if (!user) {
     return Astro.redirect("/login");
-}
-
-// Handle form submissions
-let toastMessage = "";
-let toastType = "success";
-
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const action = formData.get("_action") as string;
-
-    if (action === "create") {
-        const result = await Astro.callAction(actions.createTag, formData);
-        if (result.data?.ok) {
-            toastMessage = "Tag created successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to create tag";
-            toastType = "error";
-        }
-    } else if (action === "update") {
-        const result = await Astro.callAction(actions.updateTag, formData);
-        if (result.data?.ok) {
-            toastMessage = "Tag updated successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to update tag";
-            toastType = "error";
-        }
-    } else if (action === "delete") {
-        const result = await Astro.callAction(actions.deleteTag, formData);
-        if (result.data?.ok) {
-            toastMessage = "Tag deleted successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to delete tag";
-            toastType = "error";
-        }
-    } else if (action === "restore") {
-        const result = await Astro.callAction(actions.restoreTag, formData);
-        if (result.data?.ok) {
-            toastMessage = "Tag restored successfully!";
-            toastType = "success";
-        } else {
-            toastMessage = result.data?.error || "Failed to restore tag";
-            toastType = "error";
-        }
-    }
 }
 
 // Check if user is in a family first
@@ -124,7 +76,7 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
     <TagModal />
     <DeleteConfirmModal title="Delete Tag" />
     <LogoutScript />
-    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
+
 </Layout>
 
 <script>

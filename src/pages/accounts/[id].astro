@@ -2,11 +2,11 @@
 import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
-import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import { colors, accountTypes } from "@arrays.d.ts";
 import Input from "@comps/Input.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 
 const user = Astro.locals.user;
 
@@ -26,23 +26,6 @@ const userInFamily = userResult.data?.ok && userResult.data.family;
 
 if (!userInFamily) {
     return Astro.redirect("/accounts");
-}
-
-// Handle form submissions
-let toastMessage = "";
-let toastType = "success";
-
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const action = formData.get("_action") as string;
-
-    if (action === "update") {
-        const result = await Astro.callAction(actions.updateAccount, formData);
-        if (result.data?.ok) {
-            toastMessage = "Account updated successfully!";
-            toastType = "success";
-        }
-    }
 }
 
 // Get account data
@@ -130,12 +113,8 @@ const account = accountResult.data.account;
                             Edit Account
                         </h2>
 
-                        <form method="POST" class="flex flex-col gap-y-4">
-                            <input
-                                type="hidden"
-                                name="_action"
-                                value="update"
-                            />
+                        <form id="updateAccountForm" class="flex flex-col gap-y-4">
+                            <CSRFToken />
                             <input type="hidden" name="id" value={account.id} />
 
                             <!-- Account Name -->
@@ -377,6 +356,38 @@ const account = accountResult.data.account;
                 });
             }
         });
+
+        // Handle form submission
+        const updateForm = document.getElementById("updateAccountForm") as HTMLFormElement;
+        if (updateForm) {
+            updateForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(updateForm);
+
+                try {
+                    const { actions } = await import("astro:actions");
+                    const result = await actions.updateAccount(formData);
+
+                    if (result.data?.ok) {
+                        const { ToastService } = await import("@lib/toast.ts");
+                        ToastService.success("Account updated successfully!");
+                    } else {
+                        const { ToastService } = await import("@lib/toast.ts");
+                        ToastService.error(
+                            result.data?.error || "Failed to update account",
+                        );
+                        console.error(
+                            "Account update failed:",
+                            result.error || result.data?.error,
+                        );
+                    }
+                } catch (error) {
+                    const { ToastService } = await import("@lib/toast.ts");
+                    ToastService.error("An error occurred. Please try again.");
+                    console.error("Error updating account:", error);
+                }
+            });
+        }
     </script>
-    {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>
