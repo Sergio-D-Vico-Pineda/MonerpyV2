@@ -2,7 +2,8 @@ import {
     login,
     create,
     logout,
-    getUser
+    getUser,
+    changePassword
 } from "./users/index.ts";
 import {
     createTransaction,
@@ -62,6 +63,7 @@ const server = {
     create,
     logout,
     getUser,
+    changePassword,
     createTransaction,
     getTransactions,
     getTransaction,
