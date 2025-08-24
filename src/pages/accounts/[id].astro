@@ -113,7 +113,10 @@ const account = accountResult.data.account;
                             Edit Account
                         </h2>
 
-                        <form id="updateAccountForm" class="flex flex-col gap-y-4">
+                        <form
+                            id="updateAccountForm"
+                            class="flex flex-col gap-y-4"
+                        >
                             <CSRFToken />
                             <input type="hidden" name="id" value={account.id} />
 
@@ -358,22 +361,23 @@ const account = accountResult.data.account;
         });
 
         // Handle form submission
-        const updateForm = document.getElementById("updateAccountForm") as HTMLFormElement;
+        const updateForm = document.getElementById(
+            "updateAccountForm",
+        ) as HTMLFormElement;
         if (updateForm) {
             updateForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
 
                 const formData = new FormData(updateForm);
 
+                const { ToastService } = await import("@lib/toast.ts");
                 try {
                     const { actions } = await import("astro:actions");
                     const result = await actions.updateAccount(formData);
 
                     if (result.data?.ok) {
-                        const { ToastService } = await import("@lib/toast.ts");
                         ToastService.success("Account updated successfully!");
                     } else {
-                        const { ToastService } = await import("@lib/toast.ts");
                         ToastService.error(
                             result.data?.error || "Failed to update account",
                         );
@@ -383,7 +387,6 @@ const account = accountResult.data.account;
                         );
                     }
                 } catch (error) {
-                    const { ToastService } = await import("@lib/toast.ts");
                     ToastService.error("An error occurred. Please try again.");
                     console.error("Error updating account:", error);
                 }

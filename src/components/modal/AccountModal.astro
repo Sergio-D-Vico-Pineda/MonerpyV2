@@ -167,19 +167,18 @@ import { accountTypes } from "@arrays.d.ts";
 
             if (!this._form) return;
             const formData = new FormData(this._form);
+            const { ToastService } = await import("@lib/toast.ts");
 
             try {
                 const { actions } = await import("astro:actions");
                 const result = await actions.createAccount(formData);
 
                 if (result.data?.ok) {
-                    const { ToastService } = await import("@lib/toast.ts");
                     ToastService.success("Account created successfully!");
                     this.closeModal();
                     // Reload the page to show updated data
                     window.location.reload();
                 } else {
-                    const { ToastService } = await import("@lib/toast.ts");
                     ToastService.error(
                         result.data?.error || "Failed to create account",
                     );
@@ -189,7 +188,6 @@ import { accountTypes } from "@arrays.d.ts";
                     );
                 }
             } catch (error) {
-                const { ToastService } = await import("@lib/toast.ts");
                 ToastService.error("An error occurred. Please try again.");
                 console.error("Error creating account:", error);
             }
@@ -221,7 +219,9 @@ import { accountTypes } from "@arrays.d.ts";
             if (form) form.reset();
             // reset first color radio if present
             const firstColor = form
-                ? (form.querySelector('input[name="color"]') as HTMLInputElement)
+                ? (form.querySelector(
+                      'input[name="color"]',
+                  ) as HTMLInputElement)
                 : null;
             if (firstColor) firstColor.checked = true;
         }

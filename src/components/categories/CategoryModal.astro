@@ -173,19 +173,18 @@ const parentCategories: Category[] = (allCategories || []).filter(
 
             if (!this._form) return;
             const formData = new FormData(this._form);
+            const { ToastService } = await import("@lib/toast.ts");
 
             try {
                 const { actions } = await import("astro:actions");
                 const result = await actions.createCategory(formData);
 
                 if (result.data?.ok) {
-                    const { ToastService } = await import("@lib/toast.ts");
                     ToastService.success("Category created successfully!");
                     this.closeModal();
                     // Reload the page to show updated data
                     window.location.reload();
                 } else {
-                    const { ToastService } = await import("@lib/toast.ts");
                     ToastService.error(
                         result.data?.error || "Failed to create category",
                     );
@@ -195,7 +194,6 @@ const parentCategories: Category[] = (allCategories || []).filter(
                     );
                 }
             } catch (error) {
-                const { ToastService } = await import("@lib/toast.ts");
                 ToastService.error("An error occurred. Please try again.");
                 console.error("Error creating category:", error);
             }
@@ -216,7 +214,9 @@ const parentCategories: Category[] = (allCategories || []).filter(
             this.classList.remove("hidden");
             this.classList.add("flex");
             document.body.style.overflow = "hidden";
-            const nameInput = this.querySelector('input[name="name"]') as HTMLInputElement;
+            const nameInput = this.querySelector(
+                'input[name="name"]',
+            ) as HTMLInputElement;
             if (nameInput && typeof nameInput.focus === "function")
                 nameInput.focus();
         }
@@ -228,7 +228,9 @@ const parentCategories: Category[] = (allCategories || []).filter(
             const form = this.querySelector("form") as HTMLFormElement;
             if (form) form.reset();
             const firstColor = form
-                ? (form.querySelector('input[name="color"]') as HTMLInputElement)
+                ? (form.querySelector(
+                      'input[name="color"]',
+                  ) as HTMLInputElement)
                 : null;
             if (firstColor) firstColor.checked = true;
         }
