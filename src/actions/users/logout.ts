@@ -1,7 +1,12 @@
 import { defineAction } from "astro:actions";
+import { z } from "astro:content";
 import { destroySession } from '@lib/session-manager.ts';
 
 const logout = defineAction({
+    accept: 'form',
+    input: z.object({
+        _csrf_token: z.string().optional(), // CSRF token will be handled by middleware
+    }).optional(),
     handler: async (input, context) => {
         try {
             // Get session ID from cookie

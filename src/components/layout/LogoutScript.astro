@@ -9,7 +9,12 @@
             e.preventDefault();
 
             try {
-                const { data, error } = await actions.logout();
+                // Get the form element and CSRF token
+                const form = e.target as HTMLFormElement;
+                const formData = new FormData(form);
+
+                // Call logout action with CSRF token included in the form data
+                const { data, error } = await actions.logout(formData);
 
                 if (error) {
                     console.error("Logout error:", error);
