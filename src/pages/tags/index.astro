@@ -64,7 +64,7 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
                             </TextButton>
                         </div>
                     ) : (
-                        <div class="flex flex-wrap gap-4">
+                        <div class="flex flex-wrap gap-4 items-baseline">
                             {tags && tags.map((tag) => <TagItem tag={tag} />)}
                         </div>
                     )}
