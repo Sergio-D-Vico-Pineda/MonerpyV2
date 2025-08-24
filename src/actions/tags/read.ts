@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import type { Tag, GetTagsResult } from "@types.d.ts";
 
 // Helper to build the `select` object for tag queries.
 function buildTagSelect(opts?: { includeUpdated?: boolean; includeRecurringCount?: boolean }) {
@@ -36,7 +37,7 @@ const getTags = defineAction({
         includeDeleted: z.boolean().optional().default(false),
         compact: z.boolean().optional().default(false)
     }).optional(),
-    handler: async (input, context) => {
+    handler: async (input, context): Promise<GetTagsResult> => {
         try {
             const user = context.locals.user;
             if (!user) {
@@ -67,7 +68,7 @@ const getTags = defineAction({
                 ]
             });
 
-            return { ok: true, tags };
+            return { ok: true, tags: tags as unknown as Tag[] };
 
         } catch (error) {
             console.error('Error fetching tags:', error);

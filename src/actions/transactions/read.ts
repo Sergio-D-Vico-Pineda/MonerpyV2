@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import type { Transaction, GetTransactionsResult } from "@types.d.ts";
 
 const getTransactions = defineAction({
     accept: 'json',
@@ -13,7 +14,7 @@ const getTransactions = defineAction({
         startDate: z.string().optional(),
         endDate: z.string().optional()
     }),
-    handler: async (input, context) => {
+    handler: async (input, context): Promise<GetTransactionsResult> => {
         try {
             const user = context.locals.user;
             if (!user) {
@@ -86,7 +87,7 @@ const getTransactions = defineAction({
 
             return {
                 ok: true,
-                transactions,
+                transactions: transactions as unknown as Transaction[],
                 pagination: {
                     total,
                     page: input.page,

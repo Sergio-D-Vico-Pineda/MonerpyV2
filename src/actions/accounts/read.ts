@@ -1,13 +1,14 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import type { Account, GetAccountsResult } from "@types.d.ts";
 
 const getAccounts = defineAction({
     accept: 'json',
     input: z.object({
         includeDeleted: z.boolean().optional().default(false)
     }).optional(),
-    handler: async (input, context) => {
+    handler: async (input, context): Promise<GetAccountsResult> => {
         try {
             const user = context.locals.user;
             if (!user) {
@@ -47,7 +48,7 @@ const getAccounts = defineAction({
                 ]
             });
 
-            return { ok: true, accounts };
+            return { ok: true, accounts: accounts as unknown as Account[] };
 
         } catch (error) {
             console.error("Error fetching accounts:", error);

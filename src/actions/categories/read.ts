@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from 'astro:schema';
 import { prisma } from '@prisma/index.js';
+import type { Category, GetCategoriesResult } from "@types.d.ts";
 
 // Helper to build the `select` object for category queries.
 function buildCategorySelect(opts?: { includeUpdated?: boolean; includeChildrenRelation?: boolean; includeChildrenRelationIncludeDeleted?: boolean; includeParentRelation?: boolean; childrenCountIncludeDeleted?: boolean }) {
@@ -58,6 +59,8 @@ function buildCategorySelect(opts?: { includeUpdated?: boolean; includeChildrenR
     return select;
 }
 
+// GetCategoriesResult is imported from the shared types file.
+
 const getCategories = defineAction({
     accept: 'json',
     input: z.object({
@@ -65,7 +68,7 @@ const getCategories = defineAction({
         parentId: z.number().optional().nullable(),
         compact: z.boolean().optional().default(false)
     }).optional(),
-    handler: async (input, context) => {
+    handler: async (input, context): Promise<GetCategoriesResult> => {
         try {
             const user = context.locals.user;
             if (!user) {
@@ -104,7 +107,10 @@ const getCategories = defineAction({
                 ]
             });
 
-            return { ok: true, categories };
+            // categories comes from Prisma; it should match Category when
+            // the query includes the parent/children/_count fields as built
+            // by buildCategorySelect. We trust the server shape here.
+            return { ok: true, categories: categories as unknown as Category[] };
 
         } catch (error) {
             console.error('Error fetching categories:', error);
