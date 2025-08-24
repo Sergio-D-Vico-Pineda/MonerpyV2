@@ -28,3 +28,4 @@ ignore.txt
 ignore/
 
 sessions.json
+rate-limits.json
