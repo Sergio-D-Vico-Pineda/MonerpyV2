@@ -3,7 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import TagModal from "@comps/tags/TagModal.astro";
 import TagItem from "@comps/tags/TagItem.astro";
-import DeleteTagConfirmModal from "@comps/tags/DeleteTagConfirmModal.astro";
+import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
 import Header from "@comps/layout/Header.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
@@ -122,7 +122,7 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
     </main>
 
     <TagModal />
-    <DeleteTagConfirmModal />
+    <DeleteConfirmModal title="Delete Tag" />
     <LogoutScript />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>
@@ -163,10 +163,10 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
             "addTagButton",
         ) as HTMLButtonElement;
         if (addTagButton) {
-            addTagButton.addEventListener("click", () => {
-                if ((window as any).openTagModal) {
-                    (window as any).openTagModal();
-                }
+            addTagButton.addEventListener("click", async () => {
+                const modal = document.getElementById("tagModal");
+                if (modal && typeof (modal as any).openModal === "function")
+                    (modal as any).openModal();
             });
         }
 
@@ -174,10 +174,10 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
             "addFirstTagButton",
         ) as HTMLButtonElement;
         if (addFirstTagButton) {
-            addFirstTagButton.addEventListener("click", () => {
-                if ((window as any).openTagModal) {
-                    (window as any).openTagModal();
-                }
+            addFirstTagButton.addEventListener("click", async () => {
+                const modal = document.getElementById("tagModal");
+                if (modal && typeof (modal as any).openModal === "function")
+                    (modal as any).openModal();
             });
         }
 

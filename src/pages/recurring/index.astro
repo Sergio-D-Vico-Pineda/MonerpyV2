@@ -603,26 +603,31 @@ function getStatusText(status: string): string {
         }
     </main>
 
-    <RecurringTransactionModal />
+    <RecurringTransactionModal id="recurringTransactionModal" />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
     <LogoutScript />
 
     <script>
-        // Add Recurring Transaction button functionality
+        // Add Recurring Transaction button functionality (use modal instance)
         const addRecurringTransactionBtn = document.getElementById(
             "addRecurringTransactionBtn",
         ) as HTMLButtonElement;
+        const recurringModal = document.getElementById(
+            "recurringTransactionModal",
+        ) as any;
         if (addRecurringTransactionBtn) {
             addRecurringTransactionBtn.addEventListener("click", function () {
-                const openModal = (window as any).openRecurringTransactionModal;
-                if (openModal) {
-                    openModal();
+                if (
+                    recurringModal &&
+                    typeof recurringModal.openModal === "function"
+                ) {
+                    recurringModal.openModal();
                 }
             });
         }
 
-        // Edit functionality
+        // Edit functionality using modal instance
         document.querySelectorAll(".edit-btn").forEach((btn) => {
             btn.addEventListener("click", function (this: HTMLElement) {
                 const recurringTransactionData =
@@ -632,10 +637,11 @@ function getStatusText(status: string): string {
                 const recurringTransaction = JSON.parse(
                     recurringTransactionData,
                 );
-                const fillFormForEdit = (window as any)
-                    .fillRecurringFormForEdit;
-                if (fillFormForEdit) {
-                    fillFormForEdit(recurringTransaction);
+                if (
+                    recurringModal &&
+                    typeof recurringModal.fillFormForEdit === "function"
+                ) {
+                    recurringModal.fillFormForEdit(recurringTransaction);
                 }
             });
         });

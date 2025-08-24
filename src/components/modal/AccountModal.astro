@@ -5,8 +5,8 @@ import Input from "@comps/Input.astro";
 import { accountTypes } from "@arrays.d.ts";
 ---
 
-<!-- Modal Background -->
-<div
+<!-- Modal as a Custom Element host -->
+<account-modal
     id="accountModal"
     class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center h-screen"
 >
@@ -84,74 +84,99 @@ import { accountTypes } from "@arrays.d.ts";
                     type="button"
                     id="cancelAccountButton"
                     class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                    >Cancel</button
                 >
-                    Cancel
-                </button>
                 <button
                     type="submit"
                     class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded transition-colors"
+                    >Create Account</button
                 >
-                    Create Account
-                </button>
             </div>
         </form>
     </div>
-</div>
+</account-modal>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.getElementById("accountModal");
-        const closeModalBtn = document.getElementById("closeModal");
-        const cancelBtn = document.getElementById("cancelAccountButton");
-
-        // Modal controls
-        function showModal() {
-            if (modal) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-                document.body.style.overflow = "hidden";
-            }
+<script type="module" is:inline>
+    // Define a small custom element that manages its own inner markup (light DOM)
+    class AccountModal extends HTMLElement {
+        constructor() {
+            super();
+            this._onCloseClick = this._onCloseClick.bind(this);
+            this._onCancelClick = this._onCancelClick.bind(this);
+            this._onMouseDown = this._onMouseDown.bind(this);
+            this._onMouseUp = this._onMouseUp.bind(this);
+            this._downOutside = false;
         }
 
-        function closeModal() {
-            if (modal) {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-                document.body.style.overflow = "auto";
-            }
+        connectedCallback() {
+            // use the element itself as the modal root
+            this.root = this;
+
+            this._closeBtn = this.root.querySelector("#closeModal");
+            this._cancelBtn = this.root.querySelector("#cancelAccountButton");
+
+            if (this._closeBtn)
+                this._closeBtn.addEventListener("click", this._onCloseClick);
+            if (this._cancelBtn)
+                this._cancelBtn.addEventListener("click", this._onCancelClick);
+
+            // background click handling on host
+            this.addEventListener("mousedown", this._onMouseDown);
+            this.addEventListener("mouseup", this._onMouseUp);
         }
 
-        // Close modal events
-        if (closeModalBtn) {
-            closeModalBtn.addEventListener("click", closeModal);
+        disconnectedCallback() {
+            if (this._closeBtn)
+                this._closeBtn.removeEventListener("click", this._onCloseClick);
+            if (this._cancelBtn)
+                this._cancelBtn.removeEventListener(
+                    "click",
+                    this._onCancelClick,
+                );
+            this.removeEventListener("mousedown", this._onMouseDown);
+            this.removeEventListener("mouseup", this._onMouseUp);
         }
 
-        if (cancelBtn) {
-            cancelBtn.addEventListener("click", closeModal);
+        _onCloseClick() {
+            this.closeModal();
+        }
+        _onCancelClick() {
+            this.closeModal();
         }
 
-        // Close modal only if the *entire* left-click starts and finishes outside the modal content
-        if (modal) {
-            let downOutside = false;
-
-            modal.addEventListener("mousedown", function (e) {
-                // button 0 = left mouse button
-                if (e.target === modal && e.button === 0) {
-                    downOutside = true;
-                } else {
-                    downOutside = false;
-                }
-            });
-
-            modal.addEventListener("mouseup", function (e) {
-                if (downOutside && e.target === modal && e.button === 0) {
-                    closeModal();
-                }
-                downOutside = false;
-            });
+        _onMouseDown(e) {
+            if (e.target === this && e.button === 0) this._downOutside = true;
+            else this._downOutside = false;
         }
 
-        // Expose showModal function globally
-        (window as any).openAccountModal = showModal;
-    });
+        _onMouseUp(e) {
+            if (this._downOutside && e.target === this && e.button === 0)
+                this.closeModal();
+            this._downOutside = false;
+        }
+
+        openModal() {
+            this.classList.remove("hidden");
+            this.classList.add("flex");
+            document.body.style.overflow = "hidden";
+        }
+
+        closeModal() {
+            this.classList.add("hidden");
+            this.classList.remove("flex");
+            document.body.style.overflow = "auto";
+            // reset form inside
+            const form = this.querySelector("form");
+            if (form) form.reset();
+            // reset first color radio if present
+            const firstColor = form
+                ? form.querySelector('input[name="color"]')
+                : null;
+            if (firstColor) firstColor.checked = true;
+        }
+    }
+
+    if (!customElements.get("account-modal")) {
+        customElements.define("account-modal", AccountModal);
+    }
 </script>

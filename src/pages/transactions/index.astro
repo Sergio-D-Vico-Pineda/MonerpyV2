@@ -483,38 +483,45 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
     </main>
 </Layout>
 
-<TransactionModal />
+<TransactionModal id="transactionModal" />
 {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 
 <LogoutScript />
 
 <script>
-    // Add Transaction button functionality
+    // Add Transaction button functionality using the modal instance
     const addTransactionBtn = document.getElementById(
         "addTransactionBtn",
     ) as HTMLButtonElement;
+    const transactionModal = document.getElementById("transactionModal") as any;
+
     if (addTransactionBtn) {
         addTransactionBtn.addEventListener("click", function () {
-            const openModal = (window as any).openTransactionModal;
-            if (openModal) {
-                openModal();
+            if (
+                transactionModal &&
+                typeof transactionModal.openModal === "function"
+            ) {
+                transactionModal.openModal();
             }
         });
     }
 
-    // Edit functionality
+    // Edit functionality using the modal instance
     document.querySelectorAll(".edit-btn").forEach((btn) => {
         btn.addEventListener("click", function (this: HTMLElement) {
             const transactionData = this.dataset.transaction;
             if (!transactionData) return;
 
             const transaction = JSON.parse(transactionData);
-            const fillFormForEdit = (window as any).fillFormForEdit;
-            if (fillFormForEdit) {
-                fillFormForEdit(transaction);
+            if (
+                transactionModal &&
+                typeof transactionModal.fillFormForEdit === "function"
+            ) {
+                transactionModal.fillFormForEdit(transaction);
             }
         });
     });
 
-    addTransactionBtn.click();
+    // optional: focus-open modal for development (previous behavior)
+    if (addTransactionBtn) addTransactionBtn.click();
 </script>

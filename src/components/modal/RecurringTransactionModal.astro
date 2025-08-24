@@ -9,638 +9,705 @@ import Category from "@comps/transaction/Category.astro";
 import { getCurrentDate } from "@lib/date-utils";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
+const modalId = Astro.props.id ?? null;
 ---
 
-<div
-    id="recurringTransactionModal"
-    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
->
+<recurring-transaction-modal id={modalId ?? undefined}>
     <div
-        class="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
+        class="modal-root fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
     >
-        <header
-            class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
+        <div
+            class="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
         >
-            <h2
-                class="font-semibold text-purple-400 text-xl"
-                id="recurringModalTitle"
+            <header
+                class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
             >
-                Add Recurring Transaction
-            </h2>
-            <button
-                type="button"
-                id="closeRecurringModal"
-                class="text-gray-400 hover:text-white"
+                <h2
+                    class="font-semibold text-purple-400 text-xl"
+                    id="recurringModalTitle"
+                >
+                    Add Recurring Transaction
+                </h2>
+                <button
+                    type="button"
+                    id="closeRecurringModal"
+                    class="text-gray-400 hover:text-white"
+                >
+                    <X class="w-6 h-6" />
+                </button>
+            </header>
+
+            <form
+                id="recurringTransactionForm"
+                method="POST"
+                class="p-6 flex flex-col gap-y-6"
             >
-                <X class="w-6 h-6" />
-            </button>
-        </header>
-
-        <form
-            id="recurringTransactionForm"
-            method="POST"
-            class="p-6 flex flex-col gap-y-6"
-        >
-            <input
-                type="hidden"
-                name="_action"
-                id="recurringFormAction"
-                value="create"
-            />
-            <input type="hidden" name="id" id="recurringId" />
-
-            <!-- Account and Name -->
-            <div class="flex items-center gap-x-4 justify-center">
-                <Account id="recurringAccountId" />
-                <Input
-                    id="description"
-                    label="Recurring Transaction Name"
-                    name="description"
-                    required
-                    placeholder="Enter recurring transaction name"
-                    classes="flex-1"
+                <input
+                    type="hidden"
+                    name="_action"
+                    id="recurringFormAction"
+                    value="create"
                 />
-                <ScriptSelect idSelect="recurringAccountId" />
-            </div>
+                <input type="hidden" name="id" id="recurringId" />
 
-            <!-- Columns -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[346px]">
-                <!-- Left Column -->
-                <div class="flex flex-col gap-y-4">
-                    <div class="flex items-center gap-x-4 justify-center">
-                        <TypePicker />
-                        <Amount classes="flex-1" />
-                    </div>
-
-                    <Category />
-
-                    <!-- Start Date -->
-                    <label for="startDate">
-                        <p class="text-sm font-medium text-gray-300 mb-2">
-                            Start Date *
-                        </p>
-                        <input
-                            type="date"
-                            id="startDate"
-                            name="startDate"
-                            required
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                    </label>
-
-                    <!-- End Condition -->
-                    <div>
-                        <p
-                            class="text-sm font-medium text-gray-300 mb-2 cursor-default"
-                        >
-                            End Condition *
-                        </p>
-                        <div
-                            class="flex items-center justify-between flex-wrap"
-                        >
-                            <label
-                                for="endConditionNever"
-                                class="flex items-center gap-x-2"
-                            >
-                                <input
-                                    id="endConditionNever"
-                                    type="radio"
-                                    name="endCondition"
-                                    value="never"
-                                    checked
-                                    class="text-purple-600 focus:ring-purple-500"
-                                />
-                                <span class="text-white">Never ends</span>
-                            </label>
-                            <label
-                                for="endConditionEndDate"
-                                class="flex items-center gap-x-2"
-                            >
-                                <input
-                                    id="endConditionEndDate"
-                                    type="radio"
-                                    name="endCondition"
-                                    value="endDate"
-                                    class="text-purple-600 focus:ring-purple-500"
-                                />
-                                <span class="text-white">End by date</span>
-                            </label>
-                            <label
-                                for="endConditionMaxOccurrences"
-                                class="flex items-center gap-x-2"
-                            >
-                                <input
-                                    id="endConditionMaxOccurrences"
-                                    type="radio"
-                                    name="endCondition"
-                                    value="maxOccurrences"
-                                    class="text-purple-600 focus:ring-purple-500"
-                                />
-                                <span class="text-white"
-                                    >End after X occurrences</span
-                                >
-                            </label>
-                        </div>
-                    </div>
+                <!-- Account and Name -->
+                <div class="flex items-center gap-x-4 justify-center">
+                    <Account id="recurringAccountId" />
+                    <Input
+                        id="description"
+                        label="Recurring Transaction Name"
+                        name="description"
+                        required
+                        placeholder="Enter recurring transaction name"
+                        classes="flex-1"
+                    />
+                    <ScriptSelect idSelect="recurringAccountId" />
                 </div>
 
-                <!-- Right Column -->
-                <div class="flex flex-col gap-y-4">
-                    <!-- Frequency -->
-                    <label for="frequency">
-                        <p class="text-sm font-medium text-gray-300 mb-2">
-                            Frequency *
-                        </p>
-                        <select
-                            id="frequency"
-                            name="frequency"
-                            required
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                            <option value="" class="hidden"
-                                >Select frequency</option
-                            >
-                            {
-                                frequency.map((freq) => (
-                                    <option value={freq}>
-                                        {freq.charAt(0).toUpperCase() +
-                                            freq.slice(1)}
-                                    </option>
-                                ))
-                            }
-                        </select>
-                    </label>
+                <!-- Columns -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[346px]">
+                    <!-- Left Column -->
+                    <div class="flex flex-col gap-y-4">
+                        <div class="flex items-center gap-x-4 justify-center">
+                            <TypePicker />
+                            <Amount classes="flex-1" />
+                        </div>
 
-                    <div
-                        class="flex items-baseline gap-x-4 justify-center *:grow"
-                    >
-                        <!-- Day of Month (for Monthly/Yearly) -->
-                        <label
-                            for="dayOfMonth"
-                            id="dayOfMonthContainer"
-                            class="hidden"
-                        >
+                        <Category />
+
+                        <!-- Start Date -->
+                        <label for="startDate">
                             <p class="text-sm font-medium text-gray-300 mb-2">
-                                Day of Month *
+                                Start Date *
                             </p>
                             <input
-                                type="number"
-                                id="dayOfMonth"
-                                name="dayOfMonth"
-                                min="1"
-                                max="31"
-                                placeholder="1-31"
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                required
                                 class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                             />
-                            <p class="text-xs text-gray-400 mt-1 w-[125%]">
-                                For months with fewer days, the last day of the
-                                month will be used
-                            </p>
                         </label>
 
-                        <!-- Day of Week (for Weekly) -->
-                        <label
-                            for="dayOfWeek"
-                            id="dayOfWeekContainer"
-                            class="hidden"
-                        >
+                        <!-- End Condition -->
+                        <div>
+                            <p
+                                class="text-sm font-medium text-gray-300 mb-2 cursor-default"
+                            >
+                                End Condition *
+                            </p>
+                            <div
+                                class="flex items-center justify-between flex-wrap"
+                            >
+                                <label
+                                    for="endConditionNever"
+                                    class="flex items-center gap-x-2"
+                                >
+                                    <input
+                                        id="endConditionNever"
+                                        type="radio"
+                                        name="endCondition"
+                                        value="never"
+                                        checked
+                                        class="text-purple-600 focus:ring-purple-500"
+                                    />
+                                    <span class="text-white">Never ends</span>
+                                </label>
+                                <label
+                                    for="endConditionEndDate"
+                                    class="flex items-center gap-x-2"
+                                >
+                                    <input
+                                        id="endConditionEndDate"
+                                        type="radio"
+                                        name="endCondition"
+                                        value="endDate"
+                                        class="text-purple-600 focus:ring-purple-500"
+                                    />
+                                    <span class="text-white">End by date</span>
+                                </label>
+                                <label
+                                    for="endConditionMaxOccurrences"
+                                    class="flex items-center gap-x-2"
+                                >
+                                    <input
+                                        id="endConditionMaxOccurrences"
+                                        type="radio"
+                                        name="endCondition"
+                                        value="maxOccurrences"
+                                        class="text-purple-600 focus:ring-purple-500"
+                                    />
+                                    <span class="text-white"
+                                        >End after X occurrences</span
+                                    >
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="flex flex-col gap-y-4">
+                        <!-- Frequency -->
+                        <label for="frequency">
                             <p class="text-sm font-medium text-gray-300 mb-2">
-                                Day of Week *
+                                Frequency *
                             </p>
                             <select
-                                id="dayOfWeek"
-                                name="dayOfWeek"
+                                id="frequency"
+                                name="frequency"
+                                required
                                 class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 <option value="" class="hidden"
-                                    >Select day of week</option
+                                    >Select frequency</option
                                 >
                                 {
-                                    daysOfWeek.map((day) => (
-                                        <option value={day.value}>
-                                            {day.label}
+                                    frequency.map((freq) => (
+                                        <option value={freq}>
+                                            {freq.charAt(0).toUpperCase() +
+                                                freq.slice(1)}
                                         </option>
                                     ))
                                 }
                             </select>
                         </label>
 
-                        <!-- Time of Day -->
+                        <div
+                            class="flex items-baseline gap-x-4 justify-center *:grow"
+                        >
+                            <!-- Day of Month (for Monthly/Yearly) -->
+                            <label
+                                for="dayOfMonth"
+                                id="dayOfMonthContainer"
+                                class="hidden"
+                            >
+                                <p
+                                    class="text-sm font-medium text-gray-300 mb-2"
+                                >
+                                    Day of Month *
+                                </p>
+                                <input
+                                    type="number"
+                                    id="dayOfMonth"
+                                    name="dayOfMonth"
+                                    min="1"
+                                    max="31"
+                                    placeholder="1-31"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                />
+                                <p class="text-xs text-gray-400 mt-1 w-[125%]">
+                                    For months with fewer days, the last day of
+                                    the month will be used
+                                </p>
+                            </label>
+
+                            <!-- Day of Week (for Weekly) -->
+                            <label
+                                for="dayOfWeek"
+                                id="dayOfWeekContainer"
+                                class="hidden"
+                            >
+                                <p
+                                    class="text-sm font-medium text-gray-300 mb-2"
+                                >
+                                    Day of Week *
+                                </p>
+                                <select
+                                    id="dayOfWeek"
+                                    name="dayOfWeek"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    <option value="" class="hidden"
+                                        >Select day of week</option
+                                    >
+                                    {
+                                        daysOfWeek.map((day) => (
+                                            <option value={day.value}>
+                                                {day.label}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                            </label>
+
+                            <!-- Time of Day -->
+                            <label
+                                for="timeOfDay"
+                                id="timeOfDayContainer"
+                                class="hidden grow-0"
+                            >
+                                <p
+                                    class="text-sm font-medium text-gray-300 mb-2"
+                                >
+                                    Time of Day *
+                                </p>
+                                <input
+                                    type="time"
+                                    id="timeOfDay"
+                                    name="timeOfDay"
+                                    required
+                                    value="09:00"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                />
+                            </label>
+                        </div>
+
+                        <!-- Month (for Yearly) -->
+                        <label for="month" id="monthContainer" class="hidden">
+                            <p class="text-sm font-medium text-gray-300 mb-2">
+                                Month *
+                            </p>
+                            <select
+                                id="month"
+                                name="month"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            >
+                                <option value="" class="hidden"
+                                    >Select month</option
+                                >
+                                {
+                                    months.map((month) => (
+                                        <option value={month.value}>
+                                            {month.label}
+                                        </option>
+                                    ))
+                                }
+                            </select>
+                        </label>
+
+                        <!-- End Date (when endCondition is endDate) -->
                         <label
-                            for="timeOfDay"
-                            id="timeOfDayContainer"
-                            class="hidden grow-0"
+                            for="endDate"
+                            id="endDateContainer"
+                            class="hidden"
                         >
                             <p class="text-sm font-medium text-gray-300 mb-2">
-                                Time of Day *
+                                End Date *
                             </p>
                             <input
-                                type="time"
-                                id="timeOfDay"
-                                name="timeOfDay"
-                                required
-                                value="09:00"
+                                type="date"
+                                id="endDate"
+                                name="endDate"
+                                min={getCurrentDate()}
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                        </label>
+
+                        <!-- Max Occurrences (when endCondition is maxOccurrences) -->
+                        <label
+                            for="maxOccurrences"
+                            id="maxOccurrencesContainer"
+                            class="hidden"
+                        >
+                            <p class="text-sm font-medium text-gray-300 mb-2">
+                                Maximum Occurrences *
+                            </p>
+                            <input
+                                type="number"
+                                id="maxOccurrences"
+                                name="maxOccurrences"
+                                min="1"
+                                placeholder="Number of times to repeat"
                                 class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                             />
                         </label>
                     </div>
-
-                    <!-- Month (for Yearly) -->
-                    <label for="month" id="monthContainer" class="hidden">
-                        <p class="text-sm font-medium text-gray-300 mb-2">
-                            Month *
-                        </p>
-                        <select
-                            id="month"
-                            name="month"
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                            <option value="" class="hidden">Select month</option
-                            >
-                            {
-                                months.map((month) => (
-                                    <option value={month.value}>
-                                        {month.label}
-                                    </option>
-                                ))
-                            }
-                        </select>
-                    </label>
-
-                    <!-- End Date (when endCondition is endDate) -->
-                    <label for="endDate" id="endDateContainer" class="hidden">
-                        <p class="text-sm font-medium text-gray-300 mb-2">
-                            End Date *
-                        </p>
-                        <input
-                            type="date"
-                            id="endDate"
-                            name="endDate"
-                            min={getCurrentDate()}
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                    </label>
-
-                    <!-- Max Occurrences (when endCondition is maxOccurrences) -->
-                    <label
-                        for="maxOccurrences"
-                        id="maxOccurrencesContainer"
-                        class="hidden"
-                    >
-                        <p class="text-sm font-medium text-gray-300 mb-2">
-                            Maximum Occurrences *
-                        </p>
-                        <input
-                            type="number"
-                            id="maxOccurrences"
-                            name="maxOccurrences"
-                            min="1"
-                            placeholder="Number of times to repeat"
-                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                    </label>
                 </div>
-            </div>
 
-            <TagsDropdownSelect />
-            <!-- <TagsPicker
+                <TagsDropdownSelect />
+                <!-- <TagsPicker
                 id="recurringTags"
                 name="tags"
                 label="Tags (comma-separated)"
             /> -->
 
-            <!-- Form Buttons -->
-            <div class="flex gap-3 pt-4">
-                <div class="flex-3 text-right">
+                <!-- Form Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <div class="flex-3 text-right">
+                        <button
+                            type="button"
+                            id="recurringModalCancelBtn"
+                            class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                     <button
-                        type="button"
-                        id="recurringModalCancelBtn"
-                        class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                        type="submit"
+                        class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
                     >
-                        Cancel
+                        <span id="recurringSubmitBtnText"
+                            >Add Recurring Transaction</span
+                        >
                     </button>
                 </div>
-                <button
-                    type="submit"
-                    class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
-                >
-                    <span id="recurringSubmitBtnText"
-                        >Add Recurring Transaction</span
-                    >
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+</recurring-transaction-modal>
 
 <script>
-    // Modal functionality
-    const modal = document.getElementById("recurringTransactionModal");
-    const closeButton = document.getElementById("closeRecurringModal");
-    const cancelBtn = document.getElementById("recurringModalCancelBtn");
+    // Create a web component for recurring transaction modal
+    class RecurringTransactionModal extends HTMLElement {
+        connectedCallback() {
+            const root = this;
+            const modal = root.querySelector(".modal-root") as HTMLDivElement;
+            const closeButton = root.querySelector(
+                "#closeRecurringModal",
+            ) as HTMLButtonElement;
+            const cancelBtn = root.querySelector(
+                "#recurringModalCancelBtn",
+            ) as HTMLButtonElement;
 
-    function openModal() {
-        if (modal) {
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            document.body.style.overflow = "hidden";
-        }
-    }
+            const formTitle = root.querySelector(
+                "#recurringModalTitle",
+            ) as HTMLHeadingElement;
+            const formAction = root.querySelector(
+                "#recurringFormAction",
+            ) as HTMLInputElement;
+            const recurringTransactionId = root.querySelector(
+                "#recurringId",
+            ) as HTMLInputElement;
+            const submitText = root.querySelector(
+                "#recurringSubmitBtnText",
+            ) as HTMLSpanElement;
+            const form = root.querySelector(
+                "#recurringTransactionForm",
+            ) as HTMLFormElement;
+            const startDateInput = root.querySelector(
+                "#startDate",
+            ) as HTMLInputElement;
+            const tagsDropdownRoots = root.querySelectorAll(
+                "[data-tags-dropdown-root]",
+            ) as NodeListOf<HTMLDivElement>;
 
-    function closeModal() {
-        if (modal) {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-            document.body.style.overflow = "auto";
-            resetForm();
-        }
-    }
+            const frequencySelect = root.querySelector(
+                "#frequency",
+            ) as HTMLSelectElement;
+            const dayOfWeekContainer = root.querySelector(
+                "#dayOfWeekContainer",
+            ) as HTMLDivElement;
+            const dayOfMonthContainer = root.querySelector(
+                "#dayOfMonthContainer",
+            ) as HTMLDivElement;
+            const monthContainer = root.querySelector(
+                "#monthContainer",
+            ) as HTMLDivElement;
+            const timeOfDayContainer = root.querySelector(
+                "#timeOfDayContainer",
+            ) as HTMLDivElement;
 
-    const formTitle = document.getElementById("recurringModalTitle");
-    const formAction = document.getElementById(
-        "recurringFormAction",
-    ) as HTMLInputElement;
-    const recurringTransactionId = document.getElementById(
-        "recurringId",
-    ) as HTMLInputElement;
-    const submitText = document.getElementById("recurringSubmitBtnText");
-    const form = document.getElementById(
-        "recurringTransactionForm",
-    ) as HTMLFormElement;
-    const startDateInput = document.getElementById(
-        "startDate",
-    ) as HTMLInputElement;
-    const tagsDropdownRoots = document.querySelectorAll(
-        "[data-tags-dropdown-root]",
-    ) as NodeListOf<HTMLDivElement>;
-
-    async function resetForm() {
-        if (formTitle) formTitle.textContent = "Add Recurring Transaction";
-        if (formAction) formAction.value = "create";
-        if (recurringTransactionId) recurringTransactionId.value = "";
-        if (submitText) submitText.textContent = "Add Recurring Transaction";
-        if (form) form.reset();
-        if (startDateInput) {
-            const today = new Date();
-            startDateInput.value = today.toISOString().split("T")[0];
-        }
-        // Reset time to default
-        const timeInput = document.getElementById(
-            "timeOfDay",
-        ) as HTMLInputElement;
-
-        if (timeInput) timeInput.value = "09:00";
-
-        // Reset end condition to never
-        const neverRadio = document.querySelector(
-            'input[name="endCondition"][value="never"]',
-        ) as HTMLInputElement;
-
-        if (neverRadio) neverRadio.checked = true;
-
-        // Hide frequency-specific fields
-        hideAllFrequencyFields();
-        hideAllEndConditionFields();
-
-        // Reset tags
-        const recurringTags = document.getElementById(
-            "recurringTags",
-        ) as HTMLInputElement;
-
-        if (recurringTags) recurringTags.value = "";
-
-        if (tagsDropdownRoots) {
-            tagsDropdownRoots.forEach((tagsDropdownRoot) => {
-                const resetTags = (tagsDropdownRoot as any).resetTags;
-                if (typeof resetTags === "function") {
-                    resetTags();
-                }
-            });
-        }
-    }
-
-    // Event listeners
-    if (closeButton) {
-        closeButton.addEventListener("click", closeModal);
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener("click", closeModal);
-    }
-
-    // Close modal only if the *entire* left-click starts and finishes outside the modal content
-    if (modal) {
-        let downOutside = false;
-
-        modal.addEventListener("mousedown", function (e) {
-            // button 0 = left mouse button
-            if (e.target === modal && e.button === 0) {
-                downOutside = true;
-            } else {
-                downOutside = false;
-            }
-        });
-
-        modal.addEventListener("mouseup", function (e) {
-            if (downOutside && e.target === modal && e.button === 0) {
-                closeModal();
-            }
-            downOutside = false;
-        });
-    }
-
-    // Frequency change handler
-    const frequencySelect = document.getElementById(
-        "frequency",
-    ) as HTMLSelectElement;
-    const dayOfWeekContainer = document.getElementById("dayOfWeekContainer");
-    const dayOfMonthContainer = document.getElementById("dayOfMonthContainer");
-    const monthContainer = document.getElementById("monthContainer");
-    const timeOfDayContainer = document.getElementById("timeOfDayContainer");
-
-    function hideAllFrequencyFields() {
-        if (dayOfWeekContainer) dayOfWeekContainer.classList.add("hidden");
-        if (dayOfMonthContainer) dayOfMonthContainer.classList.add("hidden");
-        if (monthContainer) monthContainer.classList.add("hidden");
-        if (timeOfDayContainer) timeOfDayContainer.classList.add("hidden");
-    }
-
-    if (frequencySelect) {
-        frequencySelect.addEventListener("change", function () {
-            hideAllFrequencyFields();
-
-            const frequency = this.value;
-
-            // Show time of day for any valid frequency
-            if (frequency && frequency !== "") {
-                if (timeOfDayContainer)
-                    timeOfDayContainer.classList.remove("hidden");
-            }
-
-            if (frequency === "weekly") {
+            function hideAllFrequencyFields() {
                 if (dayOfWeekContainer)
-                    dayOfWeekContainer.classList.remove("hidden");
-            } else if (frequency === "monthly") {
+                    dayOfWeekContainer.classList.add("hidden");
                 if (dayOfMonthContainer)
-                    dayOfMonthContainer.classList.remove("hidden");
-            } else if (frequency === "yearly") {
-                if (dayOfMonthContainer)
-                    dayOfMonthContainer.classList.remove("hidden");
-                if (monthContainer) monthContainer.classList.remove("hidden");
+                    dayOfMonthContainer.classList.add("hidden");
+                if (monthContainer) monthContainer.classList.add("hidden");
+                if (timeOfDayContainer)
+                    timeOfDayContainer.classList.add("hidden");
             }
-        });
-    }
 
-    // End condition change handler
-    const endConditionRadios = document.querySelectorAll(
-        'input[name="endCondition"]',
-    );
-    const endDateContainer = document.getElementById("endDateContainer");
-    const maxOccurrencesContainer = document.getElementById(
-        "maxOccurrencesContainer",
-    );
-
-    function hideAllEndConditionFields() {
-        if (endDateContainer) endDateContainer.classList.add("hidden");
-        if (maxOccurrencesContainer)
-            maxOccurrencesContainer.classList.add("hidden");
-    }
-
-    endConditionRadios.forEach((radio) => {
-        radio.addEventListener("change", function (this: HTMLInputElement) {
-            hideAllEndConditionFields();
-
-            const endCondition = this.value;
-
-            if (endCondition === "endDate") {
-                if (endDateContainer)
-                    endDateContainer.classList.remove("hidden");
-            } else if (endCondition === "maxOccurrences") {
+            function hideAllEndConditionFields() {
+                const endDateContainer = root.querySelector(
+                    "#endDateContainer",
+                ) as HTMLDivElement;
+                const maxOccurrencesContainer = root.querySelector(
+                    "#maxOccurrencesContainer",
+                ) as HTMLDivElement;
+                if (endDateContainer) endDateContainer.classList.add("hidden");
                 if (maxOccurrencesContainer)
-                    maxOccurrencesContainer.classList.remove("hidden");
+                    maxOccurrencesContainer.classList.add("hidden");
             }
-        });
-    });
 
-    // Set today's date as default
-    (() => {
-        const startDateInput = document.getElementById(
-            "startDate",
-        ) as HTMLInputElement;
+            const endConditionRadios = root.querySelectorAll(
+                'input[name="endCondition"]',
+            ) as NodeListOf<HTMLInputElement>;
 
-        if (startDateInput) {
-            const today = new Date();
-            startDateInput.value = today.toISOString().split("T")[0];
-        }
-    })();
-
-    // Function to fill form for editing (will be called from parent page)
-    async function fillFormForEdit(recurringTransaction: any) {
-        // Fill form with recurring transaction data
-        const accountId = document.getElementById(
-            "accountId",
-        ) as HTMLSelectElement;
-        const type = document.getElementById(
-            "recurringType",
-        ) as HTMLSelectElement;
-        const description = document.getElementById(
-            "description",
-        ) as HTMLInputElement;
-        const amount = document.getElementById("amount") as HTMLInputElement;
-        const frequency = document.getElementById(
-            "frequency",
-        ) as HTMLSelectElement;
-        const dayOfWeek = document.getElementById(
-            "dayOfWeek",
-        ) as HTMLSelectElement;
-        const dayOfMonth = document.getElementById(
-            "dayOfMonth",
-        ) as HTMLInputElement;
-        const month = document.getElementById("month") as HTMLSelectElement;
-        const timeOfDay = document.getElementById(
-            "timeOfDay",
-        ) as HTMLInputElement;
-        const startDate = document.getElementById(
-            "startDate",
-        ) as HTMLInputElement;
-        const endDate = document.getElementById("endDate") as HTMLInputElement;
-        const maxOccurrences = document.getElementById(
-            "maxOccurrences",
-        ) as HTMLInputElement;
-        const categoryId = document.getElementById(
-            "categoryId",
-        ) as HTMLSelectElement;
-        const tagsInput = document.getElementById(
-            "recurringTags",
-        ) as HTMLInputElement;
-
-        if (recurringTransactionId)
-            recurringTransactionId.value = recurringTransaction.id;
-
-        if (submitText) submitText.textContent = "Update Recurring Transaction";
-
-        if (accountId) accountId.value = recurringTransaction.accountId;
-        if (type) type.value = recurringTransaction.type;
-        if (description) description.value = recurringTransaction.description;
-        if (amount) amount.value = recurringTransaction.amount;
-        if (frequency) {
-            frequency.value = recurringTransaction.frequency;
-            // Trigger change event to show appropriate fields
-            frequency.dispatchEvent(new Event("change"));
-        }
-        if (dayOfWeek && recurringTransaction.dayOfWeek !== null)
-            dayOfWeek.value = recurringTransaction.dayOfWeek;
-        if (dayOfMonth && recurringTransaction.dayOfMonth !== null)
-            dayOfMonth.value = recurringTransaction.dayOfMonth;
-        if (month && recurringTransaction.month !== null)
-            month.value = recurringTransaction.month;
-        if (timeOfDay) timeOfDay.value = recurringTransaction.timeOfDay;
-        if (startDate) {
-            // Convert database date string to date input format
-            const startDateObj = new Date(recurringTransaction.startDate);
-            startDate.value = startDateObj.toISOString().split("T")[0];
-        }
-        if (categoryId)
-            categoryId.value = recurringTransaction.categoryId || "";
-
-        // Handle end condition
-        let endCondition = "never";
-
-        if (recurringTransaction.endDate) {
-            endCondition = "endDate";
-            if (endDate) {
-                const endDateObj = new Date(recurringTransaction.endDate);
-                endDate.value = endDateObj.toISOString().split("T")[0];
+            // Event handlers wiring
+            if (frequencySelect) {
+                frequencySelect.addEventListener(
+                    "change",
+                    function (this: HTMLSelectElement) {
+                        hideAllFrequencyFields();
+                        const frequency = this.value;
+                        if (frequency && frequency !== "") {
+                            if (timeOfDayContainer)
+                                timeOfDayContainer.classList.remove("hidden");
+                        }
+                        if (frequency === "weekly") {
+                            if (dayOfWeekContainer)
+                                dayOfWeekContainer.classList.remove("hidden");
+                        } else if (frequency === "monthly") {
+                            if (dayOfMonthContainer)
+                                dayOfMonthContainer.classList.remove("hidden");
+                        } else if (frequency === "yearly") {
+                            if (dayOfMonthContainer)
+                                dayOfMonthContainer.classList.remove("hidden");
+                            if (monthContainer)
+                                monthContainer.classList.remove("hidden");
+                        }
+                    },
+                );
             }
-        } else if (recurringTransaction.maxOccurrences) {
-            endCondition = "maxOccurrences";
-            if (maxOccurrences)
-                maxOccurrences.value = recurringTransaction.maxOccurrences;
+
+            endConditionRadios.forEach((radio) => {
+                radio.addEventListener(
+                    "change",
+                    function (this: HTMLInputElement) {
+                        hideAllEndConditionFields();
+                        const endCondition = this.value;
+                        const endDateContainer = root.querySelector(
+                            "#endDateContainer",
+                        ) as HTMLDivElement;
+                        const maxOccurrencesContainer = root.querySelector(
+                            "#maxOccurrencesContainer",
+                        ) as HTMLDivElement;
+                        if (endCondition === "endDate") {
+                            if (endDateContainer)
+                                endDateContainer.classList.remove("hidden");
+                        } else if (endCondition === "maxOccurrences") {
+                            if (maxOccurrencesContainer)
+                                maxOccurrencesContainer.classList.remove(
+                                    "hidden",
+                                );
+                        }
+                    },
+                );
+            });
+
+            const openModal = (opts?: any) => {
+                // opts: { type?: string, accountId?: string }
+                try {
+                    const savedAccount =
+                        opts && opts.accountId
+                            ? opts.accountId
+                            : window.localStorage
+                              ? window.localStorage.getItem("selectedAccountId")
+                              : null;
+                    const accountSelect = root.querySelector(
+                        "#recurringAccountId",
+                    );
+                    if (
+                        savedAccount &&
+                        accountSelect &&
+                        accountSelect instanceof HTMLSelectElement
+                    )
+                        accountSelect.value = savedAccount;
+                } catch (e) {}
+
+                if (opts && opts.type) {
+                    const radios = Array.from(
+                        root.querySelectorAll('input[name="type"]'),
+                    );
+                    const matching = radios.find(
+                        (r) => r.getAttribute("value") === opts.type,
+                    );
+                    if (matching && matching instanceof HTMLInputElement) {
+                        matching.checked = true;
+                        matching.dispatchEvent(new Event("change"));
+                    }
+                }
+
+                if (modal) {
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                    document.body.style.overflow = "hidden";
+                }
+            };
+
+            const closeModal = () => {
+                if (modal) {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+                    document.body.style.overflow = "auto";
+                    resetForm();
+                }
+            };
+
+            const resetForm = async () => {
+                if (formTitle)
+                    formTitle.textContent = "Add Recurring Transaction";
+                if (formAction) formAction.value = "create";
+                if (recurringTransactionId) recurringTransactionId.value = "";
+                if (submitText)
+                    submitText.textContent = "Add Recurring Transaction";
+                if (form) form.reset();
+                if (startDateInput) {
+                    const today = new Date();
+                    startDateInput.value = today.toISOString().split("T")[0];
+                }
+                const timeInput = root.querySelector(
+                    "#timeOfDay",
+                ) as HTMLInputElement;
+                if (timeInput) timeInput.value = "09:00";
+                const neverRadio = root.querySelector(
+                    'input[name="endCondition"][value="never"]',
+                ) as HTMLInputElement;
+                if (neverRadio) neverRadio.checked = true;
+                hideAllFrequencyFields();
+                hideAllEndConditionFields();
+                const recurringTags = root.querySelector(
+                    "#recurringTags",
+                ) as HTMLInputElement;
+                if (recurringTags) recurringTags.value = "";
+                if (tagsDropdownRoots) {
+                    tagsDropdownRoots.forEach((tagsDropdownRoot) => {
+                        const resetTags = (tagsDropdownRoot as any).resetTags;
+                        if (typeof resetTags === "function") resetTags();
+                    });
+                }
+            };
+
+            // Hook events
+            if (closeButton) closeButton.addEventListener("click", closeModal);
+            if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+            if (modal) {
+                let downOutside = false;
+                modal.addEventListener("mousedown", (e) => {
+                    if (e.target === modal && (e as MouseEvent).button === 0)
+                        downOutside = true;
+                    else downOutside = false;
+                });
+                modal.addEventListener("mouseup", (e) => {
+                    if (
+                        downOutside &&
+                        e.target === modal &&
+                        (e as MouseEvent).button === 0
+                    )
+                        closeModal();
+                    downOutside = false;
+                });
+            }
+
+            // default start date
+            if (startDateInput) {
+                const today = new Date();
+                startDateInput.value = today.toISOString().split("T")[0];
+            }
+
+            // expose instance methods
+            (this as any).openModal = openModal;
+            (this as any).closeModal = closeModal;
+            (this as any).resetForm = resetForm;
+            (this as any).fillFormForEdit = async (
+                recurringTransaction: any,
+            ) => {
+                const accountId = root.querySelector(
+                    "#accountId",
+                ) as HTMLSelectElement;
+                const type = root.querySelector(
+                    "#recurringType",
+                ) as HTMLSelectElement;
+                const description = root.querySelector(
+                    "#description",
+                ) as HTMLInputElement;
+                const amount = root.querySelector(
+                    "#amount",
+                ) as HTMLInputElement;
+                const frequency = root.querySelector(
+                    "#frequency",
+                ) as HTMLSelectElement;
+                const dayOfWeek = root.querySelector(
+                    "#dayOfWeek",
+                ) as HTMLSelectElement;
+                const dayOfMonth = root.querySelector(
+                    "#dayOfMonth",
+                ) as HTMLInputElement;
+                const month = root.querySelector("#month") as HTMLSelectElement;
+                const timeOfDay = root.querySelector(
+                    "#timeOfDay",
+                ) as HTMLInputElement;
+                const startDate = root.querySelector(
+                    "#startDate",
+                ) as HTMLInputElement;
+                const endDate = root.querySelector(
+                    "#endDate",
+                ) as HTMLInputElement;
+                const maxOccurrences = root.querySelector(
+                    "#maxOccurrences",
+                ) as HTMLInputElement;
+                const categoryId = root.querySelector(
+                    "#categoryId",
+                ) as HTMLSelectElement;
+                const tagsInput = root.querySelector(
+                    "#recurringTags",
+                ) as HTMLInputElement;
+
+                if (recurringTransactionId)
+                    recurringTransactionId.value = recurringTransaction.id;
+                if (submitText)
+                    submitText.textContent = "Update Recurring Transaction";
+                if (accountId) accountId.value = recurringTransaction.accountId;
+                if (type) type.value = recurringTransaction.type;
+                if (description)
+                    description.value = recurringTransaction.description;
+                if (amount) amount.value = recurringTransaction.amount;
+                if (frequency) {
+                    frequency.value = recurringTransaction.frequency;
+                    frequency.dispatchEvent(new Event("change"));
+                }
+                if (dayOfWeek && recurringTransaction.dayOfWeek !== null)
+                    dayOfWeek.value = recurringTransaction.dayOfWeek;
+                if (dayOfMonth && recurringTransaction.dayOfMonth !== null)
+                    dayOfMonth.value = recurringTransaction.dayOfMonth;
+                if (month && recurringTransaction.month !== null)
+                    month.value = recurringTransaction.month;
+                if (timeOfDay) timeOfDay.value = recurringTransaction.timeOfDay;
+                if (startDate) {
+                    const startDateObj = new Date(
+                        recurringTransaction.startDate,
+                    );
+                    startDate.value = startDateObj.toISOString().split("T")[0];
+                }
+                if (categoryId)
+                    categoryId.value = recurringTransaction.categoryId || "";
+
+                let endCondition = "never";
+                if (recurringTransaction.endDate) {
+                    endCondition = "endDate";
+                    if (endDate) {
+                        const endDateObj = new Date(
+                            recurringTransaction.endDate,
+                        );
+                        endDate.value = endDateObj.toISOString().split("T")[0];
+                    }
+                } else if (recurringTransaction.maxOccurrences) {
+                    endCondition = "maxOccurrences";
+                    if (maxOccurrences)
+                        maxOccurrences.value =
+                            recurringTransaction.maxOccurrences;
+                }
+
+                const endConditionRadio = root.querySelector(
+                    `input[name="endCondition"][value="${endCondition}"]`,
+                ) as HTMLInputElement;
+                if (endConditionRadio) {
+                    endConditionRadio.checked = true;
+                    endConditionRadio.dispatchEvent(new Event("change"));
+                }
+
+                if (formTitle)
+                    formTitle.textContent = "Edit Recurring Transaction";
+                if (formAction) formAction.value = "update";
+
+                if (tagsInput && Array.isArray(recurringTransaction.tags)) {
+                    tagsInput.value = recurringTransaction.tags
+                        .map((t: any) => t.name)
+                        .join(", ");
+                }
+
+                openModal();
+            };
         }
-
-        // Set end condition radio
-        const endConditionRadio = document.querySelector(
-            `input[name="endCondition"][value="${endCondition}"]`,
-        ) as HTMLInputElement;
-
-        if (endConditionRadio) {
-            endConditionRadio.checked = true;
-            endConditionRadio.dispatchEvent(new Event("change"));
-        }
-
-        if (formTitle) formTitle.textContent = "Edit Recurring Transaction";
-        if (formAction) formAction.value = "update";
-
-        if (tagsInput && Array.isArray(recurringTransaction.tags)) {
-            tagsInput.value = recurringTransaction.tags
-                .map((t: any) => t.name)
-                .join(", ");
-        }
-
-        openModal();
     }
 
-    // Make functions available globally
-    (window as any).openRecurringTransactionModal = openModal;
-    (window as any).fillRecurringFormForEdit = fillFormForEdit;
+    if (!customElements.get("recurring-transaction-modal")) {
+        customElements.define(
+            "recurring-transaction-modal",
+            RecurringTransactionModal,
+        );
+    }
+
+    // No global helpers: prefer instance methods on <recurring-transaction-modal id="..."> elements
 </script>

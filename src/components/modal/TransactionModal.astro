@@ -7,256 +7,329 @@ import Account from "@comps/transaction/Account.astro";
 import Date from "@comps/transaction/Date.astro";
 import Category from "@comps/transaction/Category.astro";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
-
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
+const modalId = Astro.props.id ?? null;
 ---
 
-<div
-    id="transactionModal"
-    class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
->
+<transaction-modal id={modalId ?? undefined}>
     <div
-        class="bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        class="modal-root fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
     >
-        <header
-            class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
+        <div
+            class="bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         >
-            <h2 class="font-semibold text-purple-400 text-xl" id="modalTitle">
-                Add Transaction
-            </h2>
-            <button
-                type="button"
-                id="closeModalButton"
-                class="text-gray-400 hover:text-white"
+            <header
+                class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
             >
-                <X class="w-6 h-6" />
-            </button>
-        </header>
+                <h2
+                    class="font-semibold text-purple-400 text-xl"
+                    id="modalTitle"
+                >
+                    Add Transaction
+                </h2>
+                <button
+                    type="button"
+                    id="closeModalButton"
+                    class="text-gray-400 hover:text-white"
+                >
+                    <X class="w-6 h-6" />
+                </button>
+            </header>
 
-        <form
-            id="transactionForm"
-            method="POST"
-            class="p-6 flex flex-col gap-y-4"
-        >
-            <input
-                type="hidden"
-                name="_action"
-                id="formAction"
-                value="create"
-            />
-            <input type="hidden" name="id" id="transactionId" />
-
-            <!-- Account and Name -->
-            <div class="flex items-center gap-x-4 justify-center">
-                <Account id="accountId" classes="flex-1" />
-
-                <Input
-                    id="name"
-                    label="Transaction Name"
-                    name="name"
-                    required
-                    placeholder="Enter transaction name"
-                    classes="flex-1/3"
+            <form
+                id="transactionForm"
+                method="POST"
+                class="p-6 flex flex-col gap-y-4"
+            >
+                <input
+                    type="hidden"
+                    name="_action"
+                    id="formAction"
+                    value="create"
                 />
+                <input type="hidden" name="id" id="transactionId" />
 
-                <ScriptSelect idSelect="accountId" />
-            </div>
+                <!-- Account and Name -->
+                <div class="flex items-center gap-x-4 justify-center">
+                    <Account id="accountId" classes="flex-1" />
 
-            <!-- Transaction Type and Amount -->
-            <div class="flex items-center gap-x-4 justify-center">
-                <TypePicker classes="flex-1" />
-                <Amount classes="flex-1/3" />
-            </div>
+                    <Input
+                        id="name"
+                        label="Transaction Name"
+                        name="name"
+                        required
+                        placeholder="Enter transaction name"
+                        classes="flex-1/3"
+                    />
 
-            <div class="flex items-center gap-x-4 justify-center">
-                <Category classes="flex-1" />
-                <Date id="date" name="date" label="Date" />
-            </div>
+                    <ScriptSelect idSelect="accountId" />
+                </div>
 
-            <!-- Tags -->
-            <TagsDropdownSelect
-                id="tags"
-                name="tags"
-                label="Tags (custom dropdown)"
-            />
-            <!-- <TagsPicker id="tags" name="tags" /> -->
-            <!-- Form Buttons -->
-            <div class="flex gap-3 pt-4">
-                <div class="flex-3 text-right">
+                <!-- Transaction Type and Amount -->
+                <div class="flex items-center gap-x-4 justify-center">
+                    <TypePicker classes="flex-1" />
+                    <Amount classes="flex-1/3" />
+                </div>
+
+                <div class="flex items-center gap-x-4 justify-center">
+                    <Category classes="flex-1" />
+                    <Date id="date" name="date" label="Date" />
+                </div>
+
+                <!-- Tags -->
+                <TagsDropdownSelect
+                    id="tags"
+                    name="tags"
+                    label="Tags (custom dropdown)"
+                />
+                <!-- <TagsPicker id="tags" name="tags" /> -->
+                <!-- Form Buttons -->
+                <div class="flex gap-3 pt-4">
+                    <div class="flex-3 text-right">
+                        <button
+                            type="button"
+                            id="cancelBtn"
+                            class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                     <button
-                        type="button"
-                        id="cancelBtn"
-                        class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                        type="submit"
+                        class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
                     >
-                        Cancel
+                        <span id="submitBtnText">Save Transaction</span>
                     </button>
                 </div>
-                <button
-                    type="submit"
-                    class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
-                >
-                    <span id="submitBtnText">Save Transaction</span>
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<script>
-    // Import date utility functions once
-    import {
-        getCurrentDateTimeLocal,
-        formatToDateTimeLocal,
-    } from "@lib/date-utils.ts";
+    <script>
+        // Import date utility functions once
+        import {
+            getCurrentDateTimeLocal,
+            formatToDateTimeLocal,
+        } from "@lib/date-utils.ts";
 
-    // Define a TypeScript interface for transaction
-    interface TransactionTag {
-        name: string;
-    }
-    interface Transaction {
-        id: string;
-        accountId: string;
-        type: string;
-        name: string;
-        amount: string;
-        date: string;
-        categoryId?: string;
-        tags?: TransactionTag[];
-    }
-
-    // Modal functionality
-    const modal = document.getElementById("transactionModal");
-    const closeModalButton = document.getElementById("closeModalButton");
-    const cancelBtn = document.getElementById("cancelBtn");
-
-    function openModal() {
-        if (modal) {
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            document.body.style.overflow = "hidden";
+        // Define a TypeScript interface for transaction
+        interface TransactionTag {
+            name: string;
         }
-    }
-
-    function closeModal() {
-        if (modal) {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-            document.body.style.overflow = "auto";
-            resetForm();
-        }
-    }
-
-    const dateInput = document.getElementById("date") as HTMLInputElement;
-    const formTitle = document.getElementById("modalTitle");
-    const formAction = document.getElementById(
-        "formAction",
-    ) as HTMLInputElement;
-    const transactionId = document.getElementById(
-        "transactionId",
-    ) as HTMLInputElement;
-    const submitText = document.getElementById("submitBtnText");
-    const form = document.getElementById("transactionForm") as HTMLFormElement;
-    const tagsDropdownRoots = document.querySelectorAll(
-        "[data-tags-dropdown-root]",
-    ) as NodeListOf<HTMLDivElement>;
-
-    async function resetForm() {
-        if (formTitle) formTitle.textContent = "Add Transaction";
-        if (formAction) formAction.value = "create";
-        if (transactionId) transactionId.value = "";
-        if (submitText) submitText.textContent = "Add Transaction";
-        if (form) form.reset();
-        if (dateInput) {
-            dateInput.value = getCurrentDateTimeLocal();
+        interface Transaction {
+            id: string;
+            accountId: string;
+            type: string;
+            name: string;
+            amount: string;
+            date: string;
+            categoryId?: string;
+            tags?: TransactionTag[];
         }
 
-        // Reset tags dropdown
-        if (tagsDropdownRoots) {
-            tagsDropdownRoots.forEach((tagsDropdownRoot) => {
-                const resetTags = (tagsDropdownRoot as any).resetTags;
-                if (typeof resetTags === "function") {
-                    resetTags();
+        class TransactionModal extends HTMLElement {
+            connectedCallback() {
+                // root overlay inside the custom element
+                const modal = this.querySelector(
+                    ".modal-root",
+                ) as HTMLDivElement;
+                const closeModalButton = this.querySelector(
+                    "#closeModalButton",
+                ) as HTMLButtonElement;
+                const cancelBtn = this.querySelector(
+                    "#cancelBtn",
+                ) as HTMLButtonElement;
+
+                const dateInput = this.querySelector(
+                    "#date",
+                ) as HTMLInputElement;
+                const formTitle = this.querySelector(
+                    "#modalTitle",
+                ) as HTMLHeadingElement;
+                const formAction = this.querySelector(
+                    "#formAction",
+                ) as HTMLInputElement;
+                const transactionId = this.querySelector(
+                    "#transactionId",
+                ) as HTMLInputElement;
+                const submitText = this.querySelector(
+                    "#submitBtnText",
+                ) as HTMLSpanElement;
+                const form = this.querySelector(
+                    "#transactionForm",
+                ) as HTMLFormElement;
+                const tagsDropdownRoots = this.querySelectorAll(
+                    "[data-tags-dropdown-root]",
+                ) as NodeListOf<HTMLDivElement>;
+
+                const accountId = this.querySelector(
+                    "#accountId",
+                ) as HTMLSelectElement;
+                const type = this.querySelector("#type") as HTMLSelectElement;
+                const name = this.querySelector("#name") as HTMLInputElement;
+                const amount = this.querySelector(
+                    "#amount",
+                ) as HTMLInputElement;
+                const categoryId = this.querySelector(
+                    "#categoryId",
+                ) as HTMLSelectElement;
+                const tags = this.querySelector("#tags") as HTMLInputElement;
+
+                const openModal = (opts?: any) => {
+                    // opts: { type?: string, accountId?: string }
+                    try {
+                        const savedAccount =
+                            opts && opts.accountId
+                                ? opts.accountId
+                                : window.localStorage
+                                  ? window.localStorage.getItem(
+                                        "selectedAccountId",
+                                    )
+                                  : null;
+                        if (savedAccount && accountId)
+                            accountId.value = savedAccount;
+                    } catch (e) {
+                        // ignore localStorage errors
+                    }
+
+                    // set type if provided
+                    if (opts && opts.type) {
+                        const radios = Array.from(
+                            this.querySelectorAll('input[name="type"]'),
+                        );
+                        const matching = radios.find(
+                            (r) => r.getAttribute("value") === opts.type,
+                        );
+                        if (matching && matching instanceof HTMLInputElement) {
+                            matching.checked = true;
+                            matching.dispatchEvent(new Event("change"));
+                        }
+                    }
+
+                    if (modal) {
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
+                        document.body.style.overflow = "hidden";
+                    }
+                };
+
+                const closeModal = () => {
+                    if (modal) {
+                        modal.classList.add("hidden");
+                        modal.classList.remove("flex");
+                        document.body.style.overflow = "auto";
+                        resetForm();
+                    }
+                };
+
+                const resetForm = async () => {
+                    if (formTitle) formTitle.textContent = "Add Transaction";
+                    if (formAction) formAction.value = "create";
+                    if (transactionId) transactionId.value = "";
+                    if (submitText) submitText.textContent = "Add Transaction";
+                    if (form) form.reset();
+                    if (dateInput) {
+                        dateInput.value = getCurrentDateTimeLocal();
+                    }
+
+                    // restore saved account after reset
+                    try {
+                        const saved =
+                            window.localStorage.getItem("selectedAccountId");
+                        if (saved && accountId) accountId.value = saved;
+                    } catch (e) {}
+
+                    if (tagsDropdownRoots) {
+                        tagsDropdownRoots.forEach((tagsDropdownRoot) => {
+                            const resetTags = (tagsDropdownRoot as any)
+                                .resetTags;
+                            if (typeof resetTags === "function") {
+                                resetTags();
+                            }
+                        });
+                    }
+                };
+
+                // Hook up events
+                if (closeModalButton)
+                    closeModalButton.addEventListener("click", closeModal);
+                if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+                if (modal) {
+                    let downOutside = false;
+                    modal.addEventListener("mousedown", (e) => {
+                        if (
+                            e.target === modal &&
+                            (e as MouseEvent).button === 0
+                        ) {
+                            downOutside = true;
+                        } else {
+                            downOutside = false;
+                        }
+                    });
+                    modal.addEventListener("mouseup", (e) => {
+                        if (
+                            downOutside &&
+                            e.target === modal &&
+                            (e as MouseEvent).button === 0
+                        ) {
+                            closeModal();
+                        }
+                        downOutside = false;
+                    });
                 }
-            });
-        }
-    }
 
-    // Event listeners
-    if (closeModalButton) {
-        closeModalButton.addEventListener("click", closeModal);
-    }
+                // default date
+                if (dateInput) dateInput.value = getCurrentDateTimeLocal();
 
-    if (cancelBtn) {
-        cancelBtn.addEventListener("click", closeModal);
-    }
+                // expose instance methods
+                (this as any).openModal = openModal;
+                (this as any).closeModal = closeModal;
+                (this as any).resetForm = resetForm;
+                (this as any).fillFormForEdit = async (
+                    transaction: Transaction,
+                ) => {
+                    if (formTitle) formTitle.textContent = "Edit Transaction";
+                    if (formAction) formAction.value = "update";
+                    if (transactionId) transactionId.value = transaction.id;
+                    if (submitText)
+                        submitText.textContent = "Update Transaction";
 
-    // Close modal only if the *entire* left-click starts and finishes outside the modal content
-    if (modal) {
-        let downOutside = false;
+                    if (accountId) accountId.value = transaction.accountId;
+                    // set type radio
+                    if (type) {
+                        const radio = this.querySelector(
+                            `input[name="type"][value="${transaction.type}"]`,
+                        );
+                        if (radio) (radio as HTMLInputElement).checked = true;
+                    }
+                    if (name) name.value = transaction.name;
+                    if (amount) amount.value = transaction.amount;
+                    if (dateInput) {
+                        dateInput.value = formatToDateTimeLocal(
+                            transaction.date,
+                        );
+                    }
+                    if (categoryId)
+                        categoryId.value = transaction.categoryId || "";
 
-        modal.addEventListener("mousedown", function (e) {
-            // button 0 = left mouse button
-            if (e.target === modal && e.button === 0) {
-                downOutside = true;
-            } else {
-                downOutside = false;
+                    if (tags) {
+                        const tagNames = Array.isArray(transaction.tags)
+                            ? transaction.tags.map((tag) => tag.name)
+                            : [];
+                        tags.value = tagNames.join(", ");
+                    }
+
+                    openModal();
+                };
             }
-        });
-
-        modal.addEventListener("mouseup", function (e) {
-            if (downOutside && e.target === modal && e.button === 0) {
-                closeModal();
-            }
-            downOutside = false;
-        });
-    }
-
-    // Set today's date as default
-    (() => {
-        if (dateInput) {
-            dateInput.value = getCurrentDateTimeLocal();
-        }
-    })();
-
-    const accountId = document.getElementById("accountId") as HTMLSelectElement;
-    const type = document.getElementById("type") as HTMLSelectElement;
-    const name = document.getElementById("name") as HTMLInputElement;
-    const amount = document.getElementById("amount") as HTMLInputElement;
-    const date = document.getElementById("date") as HTMLInputElement;
-    const categoryId = document.getElementById(
-        "categoryId",
-    ) as HTMLSelectElement;
-    const tags = document.getElementById("tags") as HTMLInputElement;
-
-    // Function to fill form for editing (will be called from parent page)
-    async function fillFormForEdit(transaction: Transaction) {
-        if (formTitle) formTitle.textContent = "Edit Transaction";
-        if (formAction) formAction.value = "update";
-        if (transactionId) transactionId.value = transaction.id;
-        if (submitText) submitText.textContent = "Update Transaction";
-
-        if (accountId) accountId.value = transaction.accountId;
-        if (type) type.value = transaction.type;
-        if (name) name.value = transaction.name;
-        if (amount) amount.value = transaction.amount;
-        if (date) {
-            // Convert database date string to datetime-local format
-            date.value = formatToDateTimeLocal(transaction.date);
-        }
-        if (categoryId) categoryId.value = transaction.categoryId || "";
-
-        // Fill tags with runtime check
-        if (tags) {
-            const tagNames = Array.isArray(transaction.tags)
-                ? transaction.tags.map((tag) => tag.name)
-                : [];
-            tags.value = tagNames.join(", ");
         }
 
-        openModal();
-    }
+        // Register the custom element
+        if (!customElements.get("transaction-modal")) {
+            customElements.define("transaction-modal", TransactionModal);
+        }
 
-    // Make functions available globally
-    (window as any).openTransactionModal = openModal;
-    (window as any).fillFormForEdit = fillFormForEdit;
-</script>
+        // No global helpers: prefer instance methods on <transaction-modal id="..."> elements
+    </script>
+</transaction-modal>

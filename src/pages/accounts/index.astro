@@ -195,15 +195,33 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 
             if (createAccountButton) {
                 createAccountButton.addEventListener("click", () => {
-                    if ((window as any).openAccountModal) {
-                        (window as any).openAccountModal();
+                    const modal = document.getElementById("accountModal");
+                    if (
+                        modal &&
+                        typeof (modal as any).openModal === "function"
+                    ) {
+                        try {
+                            (modal as any).openModal();
+                        } catch (e) {
+                            /* ignore */
+                        }
                     }
                 });
             }
 
             if (addAccountButton) {
                 addAccountButton.addEventListener("click", function () {
-                    (window as any).openAccountModal();
+                    const modal = document.getElementById("accountModal");
+                    if (
+                        modal &&
+                        typeof (modal as any).openModal === "function"
+                    ) {
+                        try {
+                            (modal as any).openModal();
+                        } catch (e) {
+                            /* ignore */
+                        }
+                    }
                 });
             }
 

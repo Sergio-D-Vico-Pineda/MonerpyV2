@@ -17,10 +17,10 @@ const userResult = await Astro.callAction(actions.getFamilyDetails, {});
 const userInFamily = userResult.data?.ok && userResult.data.family;
 
 const categoriesResult = userInFamily
-        ? await Astro.callAction(actions.getCategories, {
-                    includeDeleted: false,
-            })
-        : { data: { ok: false, categories: [] } };
+    ? await Astro.callAction(actions.getCategories, {
+          includeDeleted: false,
+      })
+    : { data: { ok: false, categories: [] } };
 
 // Cast to local Category[] to avoid broad union types inferred from the action result
 const allCategories: Category[] = categoriesResult.data?.ok
@@ -33,15 +33,14 @@ const parentCategories: Category[] = (allCategories || []).filter(
 );
 ---
 
-<!-- Modal Background -->
-<div
+<!-- Modal as custom element host -->
+<category-modal
     id="categoryModal"
     class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center h-screen"
 >
     <div
         class="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
     >
-        <!-- Modal Header -->
         <header
             class="flex items-end justify-between py-4.5 px-6 border-b border-gray-700"
         >
@@ -52,12 +51,10 @@ const parentCategories: Category[] = (allCategories || []).filter(
                 type="button"
                 id="closeCategoryModal"
                 class="text-gray-400 hover:text-white transition-colors"
+                ><X class="w-6 h-6" /></button
             >
-                <X class="w-6 h-6" />
-            </button>
         </header>
 
-        <!-- Modal Content -->
         <form method="POST" class="p-6 flex flex-col gap-y-4">
             <input type="hidden" name="_action" value="create" />
 
@@ -81,8 +78,9 @@ const parentCategories: Category[] = (allCategories || []).filter(
                     <option value="">Select parent category</option>
                     {
                         parentCategories.map((category: Category) => (
-                            // ensure value is a primitive type accepted by the value prop
-                            <option value={String(category.id)}>{category.name}</option>
+                            <option value={String(category.id)}>
+                                {category.name}
+                            </option>
                         ))
                     }
                 </select>
@@ -90,105 +88,101 @@ const parentCategories: Category[] = (allCategories || []).filter(
 
             <ColorPicker id="color" label="Category Color" />
 
-            <!-- Submit Buttons -->
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button
                     type="button"
                     id="cancelCategoryButton"
                     class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white transition duration-200"
+                    >Cancel</button
                 >
-                    Cancel
-                </button>
                 <button
                     type="submit"
                     class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded transition-colors"
+                    >Create Category</button
                 >
-                    Create Category
-                </button>
             </div>
         </form>
     </div>
-</div>
+</category-modal>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const modal = document.getElementById("categoryModal");
-        const closeModalBtn = document.getElementById("closeCategoryModal");
-        const cancelBtn = document.getElementById("cancelCategoryButton");
-
-        // Modal controls
-        function openModal() {
-            if (modal) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-                document.body.style.overflow = "hidden";
-
-                // Focus on name input
-                const nameInput = modal.querySelector(
-                    'input[name="name"]',
-                ) as HTMLInputElement;
-                nameInput?.focus();
-            }
+<script type="module" is:inline>
+    class CategoryModal extends HTMLElement {
+        constructor() {
+            super();
+            this._onClose = this._onClose.bind(this);
+            this._onCancel = this._onCancel.bind(this);
+            this._onMouseDown = this._onMouseDown.bind(this);
+            this._onMouseUp = this._onMouseUp.bind(this);
+            this._downOutside = false;
         }
 
-        function closeModal() {
-            if (modal) {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-                document.body.style.overflow = "auto";
+        connectedCallback() {
+            this.root = this;
+            this._closeBtn = this.root.querySelector("#closeCategoryModal");
+            this._cancelBtn = this.root.querySelector("#cancelCategoryButton");
 
-                // Reset form
-                const form = modal.querySelector("form") as HTMLFormElement;
-                if (form) {
-                    form.reset();
-                    // Reset to first color option
-                    const firstColorRadio = form.querySelector(
-                        'input[name="color"]',
-                    ) as HTMLInputElement;
-                    if (firstColorRadio) {
-                        firstColorRadio.checked = true;
-                    }
-                    // Remove any custom color hidden input
-                    const customColorHidden =
-                        document.getElementById("customColorHidden");
-                    if (customColorHidden) {
-                        customColorHidden.remove();
-                    }
-                }
-            }
+            if (this._closeBtn)
+                this._closeBtn.addEventListener("click", this._onClose);
+            if (this._cancelBtn)
+                this._cancelBtn.addEventListener("click", this._onCancel);
+
+            this.addEventListener("mousedown", this._onMouseDown);
+            this.addEventListener("mouseup", this._onMouseUp);
+
+            // Provide backward-compatible alias for older pages
+            this.showModal = this.openModal.bind(this);
         }
 
-        // Close modal events
-        if (closeModalBtn) {
-            closeModalBtn.addEventListener("click", closeModal);
+        disconnectedCallback() {
+            if (this._closeBtn)
+                this._closeBtn.removeEventListener("click", this._onClose);
+            if (this._cancelBtn)
+                this._cancelBtn.removeEventListener("click", this._onCancel);
+            this.removeEventListener("mousedown", this._onMouseDown);
+            this.removeEventListener("mouseup", this._onMouseUp);
         }
 
-        if (cancelBtn) {
-            cancelBtn.addEventListener("click", closeModal);
+        _onClose() {
+            this.closeModal();
+        }
+        _onCancel() {
+            this.closeModal();
         }
 
-        // Close modal only if the *entire* left-click starts and finishes outside the modal content
-        if (modal) {
-            let downOutside = false;
-
-            modal.addEventListener("mousedown", function (e) {
-                // button 0 = left mouse button
-                if (e.target === modal && e.button === 0) {
-                    downOutside = true;
-                } else {
-                    downOutside = false;
-                }
-            });
-
-            modal.addEventListener("mouseup", function (e) {
-                if (downOutside && e.target === modal && e.button === 0) {
-                    closeModal();
-                }
-                downOutside = false;
-            });
+        _onMouseDown(e) {
+            if (e.target === this && e.button === 0) this._downOutside = true;
+            else this._downOutside = false;
         }
 
-        // Expose showModal function globally
-        (window as any).openCategoryModal = openModal;
-    });
+        _onMouseUp(e) {
+            if (this._downOutside && e.target === this && e.button === 0)
+                this.closeModal();
+            this._downOutside = false;
+        }
+
+        openModal() {
+            this.classList.remove("hidden");
+            this.classList.add("flex");
+            document.body.style.overflow = "hidden";
+            const nameInput = this.querySelector('input[name="name"]');
+            if (nameInput && typeof nameInput.focus === "function")
+                nameInput.focus();
+        }
+
+        closeModal() {
+            this.classList.add("hidden");
+            this.classList.remove("flex");
+            document.body.style.overflow = "auto";
+            const form = this.querySelector("form");
+            if (form) form.reset();
+            const firstColor = form
+                ? form.querySelector('input[name="color"]')
+                : null;
+            if (firstColor) firstColor.checked = true;
+        }
+    }
+
+    if (!customElements.get("category-modal")) {
+        customElements.define("category-modal", CategoryModal);
+    }
 </script>

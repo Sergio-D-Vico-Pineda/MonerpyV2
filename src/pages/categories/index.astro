@@ -4,7 +4,7 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
 import CategoryItem from "@comps/categories/CategoryItem.astro";
-import DeleteConfirmModal from "@comps/categories/DeleteConfirmModal.astro";
+import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
 import ToastScript from "@comps/toast/ToastScript.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
@@ -210,7 +210,7 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
     </main>
 
     <CategoryModal />
-    <DeleteConfirmModal />
+    <DeleteConfirmModal title="Delete Category" />
     <LogoutScript />
     {toastMessage && <ToastScript message={toastMessage} type={toastType} />}
 </Layout>
@@ -308,8 +308,13 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
 
         if (addCategoryButton) {
             addCategoryButton.addEventListener("click", () => {
-                if ((window as any).openCategoryModal) {
-                    (window as any).openCategoryModal();
+                const modal = document.getElementById("categoryModal");
+                if (modal && typeof (modal as any).showModal === "function") {
+                    try {
+                        (modal as any).showModal();
+                    } catch (e) {
+                        /* ignore */
+                    }
                 }
             });
         }
@@ -319,8 +324,13 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
         ) as HTMLButtonElement;
         if (createCategoryButton) {
             createCategoryButton.addEventListener("click", () => {
-                if ((window as any).openCategoryModal) {
-                    (window as any).openCategoryModal();
+                const modal = document.getElementById("categoryModal");
+                if (modal && typeof (modal as any).showModal === "function") {
+                    try {
+                        (modal as any).showModal();
+                    } catch (e) {
+                        /* ignore */
+                    }
                 }
             });
         }

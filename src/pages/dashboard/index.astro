@@ -195,42 +195,8 @@ if (!user) {
     </section>
   </main>
 
-  <script is:inline>
-    // Helper function to open transaction modal with pre-filled type
-    function openTransactionModalWithType(type) {
-      // Wait for modal to be ready
-      setTimeout(() => {
-        if (window.openTransactionModal) {
-          window.openTransactionModal();
-
-          // Pre-fill the transaction type (capitalize first letter)
-          const typeSelect = document.getElementById("type");
-          if (typeSelect) {
-            const capitalizedType =
-              type.charAt(0).toUpperCase() + type.slice(1);
-            typeSelect.value = capitalizedType;
-          }
-        }
-      }, 100);
-    }
-
-    // Helper function to open recurring modal with pre-filled type
-    function openRecurringModalWithType(type) {
-      // Wait for modal to be ready
-      setTimeout(() => {
-        if (window.openRecurringTransactionModal) {
-          window.openRecurringTransactionModal();
-
-          // Pre-fill the transaction type (capitalize first letter)
-          const typeSelect = document.getElementById("recurringType");
-          if (typeSelect) {
-            const capitalizedType =
-              type.charAt(0).toUpperCase() + type.slice(1);
-            typeSelect.value = capitalizedType;
-          }
-        }
-      }, 100);
-    }
+  <script type="module" is:inline>
+    import { waitForModal } from "/src/lib/client/waitForModal.js";
 
     // Add event listeners for modal buttons
     const addIncomeBtn = document.getElementById("addIncomeBtn");
@@ -239,44 +205,59 @@ if (!user) {
     const recurringExpenseBtn = document.getElementById("recurringExpenseBtn");
     const newGroupBtn = document.getElementById("newGroupBtn");
 
+    // Safe opener: try the shared waiter, otherwise attempt a direct call if present
+    function safeOpenModal(id, opts) {
+      return waitForModal(id, 3000)
+        .then((modal) => modal.openModal(opts))
+        .catch(() => {
+          const modal = document.getElementById(id);
+          if (modal && typeof modal.openModal === "function") {
+            try {
+              modal.openModal(opts);
+            } catch (e) {
+              /* swallow */
+            }
+          }
+        });
+    }
+
     if (addIncomeBtn) {
       addIncomeBtn.addEventListener("click", () =>
-        openTransactionModalWithType("income"),
+        safeOpenModal("transactionModal", { type: "income" }),
       );
     }
 
     if (recurringIncomeBtn) {
       recurringIncomeBtn.addEventListener("click", () =>
-        openRecurringModalWithType("income"),
+        safeOpenModal("recurringTransactionModal", { type: "income" }),
       );
     }
 
     if (addExpenseBtn) {
       addExpenseBtn.addEventListener("click", () =>
-        openTransactionModalWithType("expense"),
+        safeOpenModal("transactionModal", { type: "expense" }),
       );
     }
 
     if (recurringExpenseBtn) {
       recurringExpenseBtn.addEventListener("click", () =>
-        openRecurringModalWithType("expense"),
+        safeOpenModal("recurringTransactionModal", { type: "expense" }),
       );
     }
 
     if (newGroupBtn) {
       newGroupBtn.addEventListener("click", () => {
-        if (window.openCategoryModal) {
-          window.openCategoryModal();
+        const modal = document.getElementById('categoryModal');
+        const fn = modal && (modal.showModal);
+        if (typeof fn === 'function') {
+          try { fn.call(modal); } catch (e) { /* ignore */ }
         }
       });
     }
-    // document.addEventListener("DOMContentLoaded", () => {
-    //   if (addIncomeBtn) addIncomeBtn.click();
-    // });
   </script>
 </Layout>
 
-<TransactionModal />
-<RecurringTransactionModal />
+<TransactionModal id="transactionModal" />
+<RecurringTransactionModal id="recurringTransactionModal" />
 <CategoryModal />
 <LogoutScript />
