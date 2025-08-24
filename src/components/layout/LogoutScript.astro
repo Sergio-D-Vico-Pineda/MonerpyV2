@@ -18,6 +18,18 @@
                 }
 
                 if (data?.ok) {
+                    // Clear all localStorage and sessionStorage on successful logout
+                    /* try {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                    } catch (storageErr) {
+                        // don't block logout/navigation if storage operations fail
+                        console.warn(
+                            "Could not clear storage during logout:",
+                            storageErr,
+                        );
+                    } */
+
                     // Navigate to login page after successful logout
                     navigate("/login");
                 }
