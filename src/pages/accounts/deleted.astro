@@ -2,6 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
+import ConfirmationModal from "@comps/ConfirmationModal.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import CSRFToken from "@comps/CSRFToken.astro";
@@ -188,6 +189,7 @@ const deletedAccounts = allAccounts
         </div>
     </main>
 
+    <ConfirmationModal variant="info" />
     <LogoutScript />
 
     <script>
@@ -205,44 +207,62 @@ const deletedAccounts = allAccounts
                     const accountName =
                         button?.getAttribute("data-account-name");
 
-                    // Confirmation dialog
-                    if (
-                        !confirm(
-                            `Are you sure you want to restore "${accountName}"?`,
-                        )
-                    ) {
+                    // Show confirmation modal
+                    const confirmationModal = document.getElementById(
+                        "confirmationModal",
+                    ) as any;
+                    if (!confirmationModal) {
+                        console.error("Confirmation modal not found");
                         return;
                     }
 
-                    const formData = new FormData(form as HTMLFormElement);
-                    const { ToastService } = await import("@lib/toast.ts");
+                    confirmationModal.show({
+                        title: "Restore Account",
+                        message: `Are you sure you want to restore "${accountName}"?`,
+                        confirmLabel: "Restore",
+                        cancelLabel: "Cancel",
+                        onConfirm: async () => {
+                            const formData = new FormData(
+                                form as HTMLFormElement,
+                            );
+                            const { ToastService } = await import(
+                                "@lib/toast.ts"
+                            );
 
-                    try {
-                        const { actions } = await import("astro:actions");
-                        const result = await actions.restoreAccount(formData);
+                            try {
+                                const { actions } = await import(
+                                    "astro:actions"
+                                );
+                                const result =
+                                    await actions.restoreAccount(formData);
 
-                        if (result.data?.ok) {
-                            ToastService.success(
-                                "Account restored successfully!",
-                            );
-                            // Reload the page to show updated data
-                            window.location.reload();
-                        } else {
-                            ToastService.error(
-                                result.data?.error ||
-                                    "Failed to restore account",
-                            );
-                            console.error(
-                                "Account restore failed:",
-                                result.error || result.data?.error,
-                            );
-                        }
-                    } catch (error) {
-                        ToastService.error(
-                            "An error occurred. Please try again.",
-                        );
-                        console.error("Error restoring account:", error);
-                    }
+                                if (result.data?.ok) {
+                                    ToastService.success(
+                                        "Account restored successfully!",
+                                    );
+                                    // Reload the page to show updated data
+                                    window.location.reload();
+                                } else {
+                                    ToastService.error(
+                                        result.data?.error ||
+                                            "Failed to restore account",
+                                    );
+                                    console.error(
+                                        "Account restore failed:",
+                                        result.error || result.data?.error,
+                                    );
+                                }
+                            } catch (error) {
+                                ToastService.error(
+                                    "An error occurred. Please try again.",
+                                );
+                                console.error(
+                                    "Error restoring account:",
+                                    error,
+                                );
+                            }
+                        },
+                    });
                 });
             });
         });
