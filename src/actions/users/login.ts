@@ -17,21 +17,21 @@ const login = defineAction({
     handler: async ({ email, password, remember }, context) => {
         try {
             console.log("Attempting login for email:", email);
-            
+
             // Get client IP for rate limiting
             const clientIP = getClientIP(context.request);
-            
+
             // Check if IP or email is currently blocked
             const blockStatus = isBlocked(clientIP, email);
             if (blockStatus.blocked) {
                 console.log(`Login blocked: ${blockStatus.reason}`);
-                return { 
-                    ok: false, 
+                return {
+                    ok: false,
                     error: blockStatus.reason,
                     blockedUntil: blockStatus.unblockTime
                 };
             }
-            
+
             // Find user by email
             const user = await prisma.user.findUnique({
                 where: { email }
@@ -53,7 +53,7 @@ const login = defineAction({
             clearFailedAttempts(clientIP, email);
 
             // Create session with fingerprint and CSRF token
-            const sessionId = createSession(user.id, user.username, user.email, context.request);
+            const sessionId = createSession(user.id, user.username, user.email, context.request, remember);
             await prisma.user.update({
                 where: { id: user.id },
                 data: { lastLogin: getCurrentDateTime() }

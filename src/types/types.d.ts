@@ -32,6 +32,7 @@ interface Session {
     created: string; // unix timestamp
     fingerprint: string; // Browser fingerprint hash
     csrfToken: string; // CSRF protection token
+    isLongTerm: boolean; // Whether this is a long-term (30d) or short-term (24h) session
 }
 
 interface Toast {

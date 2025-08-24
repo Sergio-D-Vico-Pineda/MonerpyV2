@@ -11,6 +11,10 @@ const sessions = new Map<string, Session>();
 // Path to sessions file
 const SESSIONS_FILE = join(process.cwd(), 'sessions.json');
 
+// Session duration constants
+const SHORT_SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const LONG_SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
+
 /**
  * Generate a 32-byte random hex string for session ID
  */
@@ -36,11 +40,9 @@ function cleanupExpiredSessions(): Record<string, Session> {
 
     for (const [sessionId, session] of sessions) {
         const created = parseInt(session.created);
-        // Check both 24h and 30d durations to keep any valid session
-        const shortDuration = 24 * 60 * 60 * 1000; // 24 hours
-        const longDuration = 30 * 24 * 60 * 60 * 1000; // 30 days
+        const sessionDuration = session.isLongTerm ? LONG_SESSION_DURATION : SHORT_SESSION_DURATION;
 
-        if ((now - created) <= longDuration) {
+        if ((now - created) <= sessionDuration) {
             validSessions[sessionId] = session;
         } else {
             sessions.delete(sessionId);
@@ -80,7 +82,6 @@ export function loadSessionsFromFile(): void {
 
             // Only load non-expired sessions
             const now = Date.now();
-            const longDuration = 30 * 24 * 60 * 60 * 1000; // 30 days max
 
             for (const [sessionId, session] of Object.entries(storedSessions)) {
                 // Validate session structure
@@ -95,8 +96,17 @@ export function loadSessionsFromFile(): void {
                     continue;
                 }
 
-                if ((now - created) <= longDuration) {
-                    sessions.set(sessionId, session);
+                // Handle legacy sessions without isLongTerm property (default to long-term for backward compatibility)
+                const isLongTerm = session.isLongTerm !== undefined ? session.isLongTerm : true;
+                const sessionDuration = isLongTerm ? LONG_SESSION_DURATION : SHORT_SESSION_DURATION;
+
+                if ((now - created) <= sessionDuration) {
+                    // Ensure session has all required properties
+                    const completeSession: Session = {
+                        ...session,
+                        isLongTerm
+                    };
+                    sessions.set(sessionId, completeSession);
                 }
             }
 
@@ -125,7 +135,7 @@ export function saveSessionsToFile(): void {
 /**
  * Create a new session
  */
-export function createSession(userId: number, username: string, email: string, request: Request): string {
+export function createSession(userId: number, username: string, email: string, request: Request, isLongTerm: boolean = false): string {
     const sessionId = generateSessionId();
     const session: Session = {
         userId,
@@ -133,7 +143,8 @@ export function createSession(userId: number, username: string, email: string, r
         email,
         created: Date.now().toString(),
         fingerprint: generateFingerprint(request),
-        csrfToken: generateCSRFToken()
+        csrfToken: generateCSRFToken(),
+        isLongTerm
     };
 
     sessions.set(sessionId, session);
@@ -150,13 +161,36 @@ export function getSession(sessionId: string): Session | null {
 }
 
 /**
- * Validate session and check expiration
+ * Check if a session is long-term
  */
-export function validateSession(sessionId: string, isLongTerm: boolean = false): Session | null {
+export function isLongTermSession(sessionId: string): boolean {
+    const session = sessions.get(sessionId);
+    return session ? session.isLongTerm : false;
+}
+
+/**
+ * Get the remaining time for a session in milliseconds
+ */
+export function getSessionRemainingTime(sessionId: string): number | null {
     const session = sessions.get(sessionId);
     if (!session) return null;
 
-    const duration = isLongTerm ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const created = parseInt(session.created);
+    const duration = session.isLongTerm ? LONG_SESSION_DURATION : SHORT_SESSION_DURATION;
+    const expiresAt = created + duration;
+
+    return Math.max(0, expiresAt - now);
+}
+
+/**
+ * Validate session and check expiration based on session type
+ */
+export function validateSession(sessionId: string): Session | null {
+    const session = sessions.get(sessionId);
+    if (!session) return null;
+
+    const duration = session.isLongTerm ? LONG_SESSION_DURATION : SHORT_SESSION_DURATION;
 
     if (isSessionExpired(session, duration)) {
         sessions.delete(sessionId);
@@ -180,18 +214,18 @@ export function destroySession(sessionId: string): void {
  */
 export function destroyOtherUserSessions(userId: number, currentSessionId: string): number {
     let destroyedCount = 0;
-    
+
     for (const [sessionId, session] of sessions) {
         if (session.userId === userId && sessionId !== currentSessionId) {
             sessions.delete(sessionId);
             destroyedCount++;
         }
     }
-    
+
     if (destroyedCount > 0) {
         saveSessionsToFile(); // Persist immediately
     }
-    
+
     return destroyedCount;
 }
 
@@ -200,18 +234,18 @@ export function destroyOtherUserSessions(userId: number, currentSessionId: strin
  */
 export function destroyAllUserSessions(userId: number): number {
     let destroyedCount = 0;
-    
+
     for (const [sessionId, session] of sessions) {
         if (session.userId === userId) {
             sessions.delete(sessionId);
             destroyedCount++;
         }
     }
-    
+
     if (destroyedCount > 0) {
         saveSessionsToFile(); // Persist immediately
     }
-    
+
     return destroyedCount;
 }
 

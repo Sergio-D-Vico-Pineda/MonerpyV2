@@ -25,15 +25,12 @@ const authMiddleware = defineMiddleware(async (context, next) => {
 
     // Try to validate session if cookie exists
     if (sessionId) {
-        // Check if it's a long-term session by checking cookie max-age
-        // We'll assume it's long-term if the session is older than 24 hours but still valid
-        const session = validateSession(sessionId, false); // First try short-term
-        const longSession = session ? session : validateSession(sessionId, true); // Then try long-term
+        const session = validateSession(sessionId);
 
-        if (longSession) {
+        if (session) {
             // Validate fingerprint for security
-            const fingerprintValid = validateFingerprint(request, longSession.fingerprint);
-            
+            const fingerprintValid = validateFingerprint(request, session.fingerprint);
+
             if (!fingerprintValid) {
                 console.log(`[MIDDLEWARE] Invalid fingerprint for session ${sessionId}, destroying session`);
                 destroySession(sessionId);
@@ -42,10 +39,10 @@ const authMiddleware = defineMiddleware(async (context, next) => {
             } else {
                 // Set user in locals for use in pages
                 locals.user = {
-                    id: longSession.userId,
-                    username: longSession.username,
-                    email: longSession.email,
-                    created: longSession.created
+                    id: session.userId,
+                    username: session.username,
+                    email: session.email,
+                    created: session.created
                 };
             }
         }
