@@ -335,17 +335,14 @@ const userRole = familyDetailsResult.data?.ok
 
       try {
         const formData = new FormData(createFamilyForm);
-        const { data, error } = await actions.createFamily(formData);
-
-        if (error) {
-          throw new Error(error.message || "Failed to create family");
-        }
+        const { data } = await actions.createFamily(formData);
 
         if (data?.ok) {
           ToastService.success("Family created successfully!");
           window.location.reload();
         } else {
-          throw new Error(data?.error || "Failed to create family");
+          console.error("Error creating family:", data?.error);
+          ToastService.error(data?.error || "Failed to create family");
         }
       } catch (error) {
         console.error("Error creating family:", error);
@@ -364,17 +361,14 @@ const userRole = familyDetailsResult.data?.ok
 
       try {
         const formData = new FormData(joinFamilyForm);
-        const { data, error } = await actions.joinFamily(formData);
-
-        if (error) {
-          throw new Error(error.message || "Failed to join family");
-        }
+        const { data } = await actions.joinFamily(formData);
 
         if (data?.ok) {
           ToastService.success("Successfully joined the family!");
           window.location.reload();
         } else {
-          throw new Error(data?.error || "Failed to join family");
+          console.error("Error joining family:", data?.error);
+          ToastService.error(data?.error || "Failed to join family");
         }
       } catch (error) {
         console.error("Error joining family:", error);
@@ -424,17 +418,14 @@ const userRole = familyDetailsResult.data?.ok
           onConfirm: async () => {
             try {
               const formData = new FormData(leaveFamilyForm);
-              const { data, error } = await actions.leaveFamily(formData);
-
-              if (error) {
-                throw new Error(error.message || "Failed to leave family");
-              }
+              const { data } = await actions.leaveFamily(formData);
 
               if (data?.ok) {
                 ToastService.success("Successfully left the family!");
                 window.location.reload();
               } else {
-                throw new Error(data?.error || "Failed to leave family");
+                console.error("Error leaving family:", data?.error);
+                ToastService.error(data?.error || "Failed to leave family");
               }
             } catch (error) {
               console.error("Error leaving family:", error);
@@ -448,18 +439,14 @@ const userRole = familyDetailsResult.data?.ok
           onSecondary: async () => {
             try {
               const formData = new FormData(leaveFamilyForm);
-              const { data, error } =
-                await actions.leaveAndDeleteFamily(formData);
-
-              if (error) {
-                throw new Error(error.message || "Failed to delete family");
-              }
+              const { data } = await actions.leaveAndDeleteFamily(formData);
 
               if (data?.ok) {
                 ToastService.success("Family deleted successfully!");
                 window.location.reload();
               } else {
-                throw new Error(data?.error || "Failed to delete family");
+                console.error("Error deleting family:", data?.error);
+                ToastService.error(data?.error || "Failed to delete family");
               }
             } catch (error) {
               console.error("Error deleting family:", error);
@@ -481,17 +468,14 @@ const userRole = familyDetailsResult.data?.ok
           onConfirm: async () => {
             try {
               const formData = new FormData(leaveFamilyForm);
-              const { data, error } = await actions.leaveFamily(formData);
-
-              if (error) {
-                throw new Error(error.message || "Failed to leave family");
-              }
+              const { data } = await actions.leaveFamily(formData);
 
               if (data?.ok) {
                 ToastService.success("Successfully left the family!");
                 window.location.reload();
               } else {
-                throw new Error(data?.error || "Failed to leave family");
+                console.error("Error leaving family:", data?.error);
+                ToastService.error(data?.error || "Failed to leave family");
               }
             } catch (error) {
               console.error("Error leaving family:", error);
@@ -519,17 +503,14 @@ const userRole = familyDetailsResult.data?.ok
 
         try {
           const formData = new FormData(form);
-          const { data, error } = await actions.updateUserRole(formData);
-
-          if (error) {
-            throw new Error(error.message || "Failed to update user role");
-          }
+          const { data } = await actions.updateUserRole(formData);
 
           if (data?.ok) {
             ToastService.success("User role updated successfully!");
             window.location.reload();
           } else {
-            throw new Error(data?.error || "Failed to update user role");
+            console.error("Error updating user role:", data?.error);
+            ToastService.error(data?.error || "Failed to update user role");
           }
         } catch (error) {
           console.error("Error updating user role:", error);
@@ -563,14 +544,7 @@ const userRole = familyDetailsResult.data?.ok
           onConfirm: async () => {
             try {
               const formData = new FormData(form);
-              const { data, error } =
-                await actions.removeUserFromFamily(formData);
-
-              if (error) {
-                throw new Error(
-                  error.message || "Failed to remove user from family",
-                );
-              }
+              const { data } = await actions.removeUserFromFamily(formData);
 
               if (data?.ok) {
                 ToastService.success("User removed from family successfully!");

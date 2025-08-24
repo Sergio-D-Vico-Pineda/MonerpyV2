@@ -72,6 +72,7 @@ if (Astro.locals.user) {
 </Layout>
 
 <script>
+  import { ToastService } from "@/lib/toast";
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
 
@@ -98,17 +99,14 @@ if (Astro.locals.user) {
       try {
         const formData = new FormData(form);
 
-        const { data, error } = await actions.login(formData);
-
-        if (error) {
-          throw new Error(error.message || "Login failed");
-        }
+        const { data } = await actions.login(formData);
 
         if (data?.ok) {
           // Use Astro's navigate for client-side routing
           navigate(redirectTo);
         } else {
-          throw new Error(data?.error || "Login failed");
+          console.error("Error logging in:", data?.error);
+          ToastService.error(data?.error || "Login failed");
         }
       } catch (error) {
         // Display error message to user

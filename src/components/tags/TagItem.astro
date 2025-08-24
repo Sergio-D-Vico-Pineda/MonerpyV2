@@ -471,15 +471,9 @@ const { tag } = Astro.props as Props;
 
                     const formData = new FormData();
                     formData.append("id", tagId.toString());
-                    const { data, error } = await actions.deleteTag(formData);
+                    const { data } = await actions.deleteTag(formData);
 
-                    if (error) {
-                        console.error("Delete tag error:", error);
-                        ToastService.showToast({
-                            message: "Failed to delete tag: " + error.message,
-                            type: "error",
-                        });
-                    } else if (data?.ok) {
+                    if (data?.ok) {
                         ToastService.showToast({
                             message: "Tag deleted successfully!",
                             type: "success",
@@ -493,6 +487,7 @@ const { tag } = Astro.props as Props;
                             tagItem.remove();
                         }
                     } else {
+                        console.error("Error deleting tag:", data?.error);
                         ToastService.showToast({
                             message: data?.error || "Failed to delete tag",
                             type: "error",

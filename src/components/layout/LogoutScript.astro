@@ -14,13 +14,7 @@
                 const formData = new FormData(form);
 
                 // Call logout action with CSRF token included in the form data
-                const { data, error } = await actions.logout(formData);
-
-                if (error) {
-                    console.error("Logout error:", error);
-                    alert("Logout failed: " + error.message);
-                    return;
-                }
+                const { data } = await actions.logout(formData);
 
                 if (data?.ok) {
                     // Clear all localStorage and sessionStorage on successful logout
@@ -37,6 +31,10 @@
 
                     // Navigate to login page after successful logout
                     navigate("/login");
+                } else {
+                    console.error("Logout error:", data?.error);
+                    alert("Logout failed: " + data?.error);
+                    return;
                 }
             } catch (error) {
                 console.error("Logout error:", error);

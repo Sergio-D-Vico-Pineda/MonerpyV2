@@ -583,18 +583,9 @@ function isDescendantOf(
 
                         const formData = new FormData();
                         formData.append("id", categoryId.toString());
-                        const { data, error } =
-                            await actions.deleteCategory(formData);
+                        const { data } = await actions.deleteCategory(formData);
 
-                        if (error) {
-                            console.error("Delete category error:", error);
-                            ToastService.showToast({
-                                message:
-                                    "Failed to delete category: " +
-                                    error.message,
-                                type: "error",
-                            });
-                        } else if (data?.ok) {
+                        if (data?.ok) {
                             // Emit deletion event before removing from DOM (toast will be shown after page refresh)
                             emitCategoryEvent("category-deleted", {
                                 categoryName,
