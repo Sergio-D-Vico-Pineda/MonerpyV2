@@ -99,13 +99,13 @@ if (Astro.locals.user) {
       try {
         const formData = new FormData(form);
 
-        const { data } = await actions.login(formData);
+        const { data, error } = await actions.login(formData);
 
         if (data?.ok) {
           // Use Astro's navigate for client-side routing
           navigate(redirectTo);
         } else {
-          console.error("Error logging in:", data?.error);
+          console.error("Error logging in:", error || data?.error);
           ToastService.error(data?.error || "Login failed");
         }
       } catch (error) {
