@@ -1,12 +1,12 @@
 ---
+import { transactionTypes } from "@arrays.d.ts";
+import Asterisk from "@comps/Asterisk.astro";
+
 interface Props {
     classes?: string;
 }
 
 const { classes }: Props = Astro.props;
-
-import { transactionTypes } from "@arrays.d.ts";
-import Asterisk from "@comps/Asterisk.astro";
 ---
 
 <div class={classes}>
