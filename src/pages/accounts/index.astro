@@ -3,15 +3,16 @@ import Layout from "@layouts/Layout.astro";
 import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import AccountModal from "@comps/modal/AccountModal.astro";
+import CSRFToken from "@comps/CSRFToken.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import { formatCurrency } from "@lib/date-utils.ts";
 import { accountTypes } from "@arrays.d.ts";
-import SelectAccount from "@/components/accounts/SelectAccount.astro";
-import PlusButton from "@/components/PlusButton.astro";
-import TextButton from "@/components/TextButton.astro";
+import SelectAccount from "@comps/accounts/SelectAccount.astro";
+import PlusButton from "@comps/PlusButton.astro";
+import TextButton from "@comps/TextButton.astro";
 
 const user = Astro.locals.user;
 
@@ -140,13 +141,15 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 
         <!-- Account Modal Component -->
         <AccountModal />
+
+        <CSRFToken id="delAccount" />
     </main>
 
     <LogoutScript />
 
     <script>
-        import { actions } from 'astro:actions';
-        import { ToastService } from '@lib/toast.ts';
+        import { actions } from "astro:actions";
+        import { ToastService } from "@lib/toast.ts";
 
         document.addEventListener("DOMContentLoaded", () => {
             const addAccountButton = document.getElementById(
@@ -159,32 +162,58 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 
             // Delete functionality
             document.querySelectorAll(".delete-account-btn").forEach((btn) => {
-                btn.addEventListener("click", async function (this: HTMLElement) {
-                    const accountId = this.dataset.accountId;
-                    if (!accountId) return;
+                btn.addEventListener(
+                    "click",
+                    async function (this: HTMLElement) {
+                        const accountId = this.dataset.accountId;
+                        if (!accountId) return;
 
-                    const confirmed = confirm('Are you sure you want to delete this account?');
-                    if (!confirmed) return;
+                        const confirmed = confirm(
+                            "Are you sure you want to delete this account?",
+                        );
+                        if (!confirmed) return;
 
-                    try {
-                        const formData = new FormData();
-                        formData.append('id', accountId);
-                        
-                        const result = await actions.deleteAccount(formData);
+                        try {
+                            const formData = new FormData();
+                            formData.append("id", accountId);
 
-                        if (result.data?.ok) {
-                            ToastService.success('Account deleted successfully!');
-                            // Reload the page to show updated data
-                            window.location.reload();
-                        } else {
-                            console.error('Account deletion failed:', result.error || result.data?.error);
-                            ToastService.error('Failed to delete account. Please try again.');
+                            const csrfInput = document.getElementById(
+                                "delAccount",
+                            ) as HTMLInputElement;
+                            if (csrfInput && csrfInput.value) {
+                                formData.append("_csrf_token", csrfInput.value);
+                            }
+
+                            const result =
+                                await actions.deleteAccount(formData);
+
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    "Account deleted successfully!",
+                                );
+                                // Reload the page to show updated data
+                                window.location.reload();
+                            } else {
+                                console.error(
+                                    "Account deletion failed:",
+                                    result.error || result.data?.error,
+                                );
+                                ToastService.showToast({
+                                    message:
+                                        "Failed to delete account. Please try again.",
+                                    type: "error",
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error deleting account:", error);
+                            ToastService.showToast({
+                                message:
+                                    "Failed to delete account. Please try again.",
+                                type: "error",
+                            });
                         }
-                    } catch (error) {
-                        console.error('Error deleting account:', error);
-                        ToastService.error('Failed to delete account. Please try again.');
-                    }
-                });
+                    },
+                );
             });
 
             if (createAccountButton) {
