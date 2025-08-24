@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 
 // Check if user is already authenticated via middleware
 if (Astro.locals.user) {
@@ -18,7 +17,6 @@ if (Astro.locals.user) {
                 Join Monerpy
             </h1>
             <form id="registerForm" class="flex flex-col gap-y-4">
-                <CSRFToken />
                 <div>
                     <label for="username" class="block text-purple-300 mb-2"
                         >Username</label
