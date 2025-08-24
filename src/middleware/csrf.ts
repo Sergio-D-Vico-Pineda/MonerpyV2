@@ -118,7 +118,7 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
     // console.log(`[CSRF] Expected CSRF token: ${session.csrfToken ? 'present' : 'missing'}`);
 
     if (!validateCSRFToken(csrfToken, session.csrfToken)) {
-        console.log(`CSRF validation failed for action: ${actionName}`);
+        // console.log(`[CSRF] validation failed for action: ${actionName}`);
         return new Response(JSON.stringify({
             ok: false,
             error: 'Security validation failed. Please refresh the page and try again.'
