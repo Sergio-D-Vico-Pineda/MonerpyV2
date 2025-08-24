@@ -10,7 +10,11 @@ if (Astro.locals.user) {
 }
 ---
 
-<Layout title="Register" description="Create a new Monerpy account" showFooter={false}>
+<Layout
+    title="Register"
+    description="Create a new Monerpy account"
+    showFooter={false}
+>
     <main class="min-h-screen flex items-center justify-center bg-gray-900">
         <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
             <h1 class="text-3xl font-bold text-purple-500 mb-6 text-center">
@@ -187,11 +191,11 @@ if (Astro.locals.user) {
                 cleanFormData.append("username", username.trim());
                 cleanFormData.append("password", password);
 
-                const { data, error } = await actions.create(cleanFormData);
+                const { data } = await actions.create(cleanFormData);
 
-                if (error && error.message) {
-                    console.log("Registration error:", error.message);
-                    const arrayError = error.message.replace(
+                if (data?.error) {
+                    console.log("Registration error:", data.error);
+                    const arrayError = data.error.replace(
                         /^Failed to validate:\s*/,
                         "",
                     );

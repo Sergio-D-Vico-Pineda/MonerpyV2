@@ -279,11 +279,7 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                 try {
                     const formData = new FormData(passwordForm);
-                    const { data, error } =
-                        await actions.changePassword(formData);
-
-                    console.log(data);
-                    console.log(error);
+                    const { data } = await actions.changePassword(formData);
 
                     if (data?.ok) {
                         ToastService.success(
