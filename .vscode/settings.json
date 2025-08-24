@@ -9,5 +9,6 @@
                 "copilot/gpt-5-mini"
             ]
         }
-    }
+    },
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }
