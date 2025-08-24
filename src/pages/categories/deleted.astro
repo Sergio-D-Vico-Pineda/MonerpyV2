@@ -4,10 +4,9 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ConfirmationModal from "@comps/ConfirmationModal.astro";
 import { actions } from "astro:actions";
-import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
+import { formatDateForDisplay } from "@lib/date-utils.ts";
 import Bin from "@comps/svgs/mono/Bin.astro";
-import CreditCard from "@comps/svgs/mono/CreditCard.astro";
-import { accountTypes } from "@arrays.d.ts";
+import Folder from "@comps/svgs/mono/Folder.astro";
 
 const user = Astro.locals.user;
 
@@ -20,23 +19,39 @@ const userResult = await Astro.callAction(actions.getFamilyDetails, {});
 const userInFamily = userResult.data?.ok && userResult.data.family;
 
 if (!userInFamily) {
-    return Astro.redirect("/accounts");
+    return Astro.redirect("/categories");
 }
 
-// Get deleted accounts
-const accountsResult = await Astro.callAction(actions.getAccountsList, {
+// Get deleted categories
+const categoriesResult = await Astro.callAction(actions.getCategories, {
     includeDeleted: true,
 });
-const allAccounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
-const deletedAccounts = allAccounts
-    ? allAccounts.filter((account: any) => account.deletedAt !== null)
+const rawCategories = categoriesResult.data?.ok
+    ? categoriesResult.data.categories
+    : [];
+
+// Normalize categories into a flat array
+let normalizedCategories: any[] = [];
+if (Array.isArray(rawCategories)) {
+    normalizedCategories = rawCategories;
+} else if (rawCategories && typeof rawCategories === "object") {
+    const vals = Object.values(rawCategories) as any[];
+    normalizedCategories = vals.flatMap((v) => (Array.isArray(v) ? v : [v]));
+} else {
+    normalizedCategories = [];
+}
+
+const deletedCategories = normalizedCategories
+    ? normalizedCategories.filter(
+          (category: any) => category.deletedAt !== null,
+      )
     : [];
 ---
 
-<Layout title="Deleted Accounts" description="Manage deleted accounts">
+<Layout title="Deleted Categories" description="Manage deleted categories">
     <main class="bg-gray-900 p-8 text-white">
-        <Header currentPage="accounts" user={user} />
-        <!-- Deleted Accounts List -->
+        <Header currentPage="categories" user={user} />
+        <!-- Deleted Categories List -->
         <div
             class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg mx-auto max-w-7xl"
         >
@@ -46,66 +61,55 @@ const deletedAccounts = allAccounts
                         class="font-semibold text-purple-400 text-xl flex items-center gap-x-2"
                     >
                         <Bin />
-                        Deleted Accounts
+                        Deleted Categories
                     </h1>
                     <a
-                        href="/accounts"
+                        href="/categories"
                         class="text-purple-400 hover:text-purple-300 flex items-center gap-x-2"
                     >
-                        <CreditCard class="w-4 h-4" />
-                        <span>Accounts</span>
+                        <Folder class="w-4 h-4" />
+                        <span>Categories</span>
                     </a>
-                </div>
-                <div class="flex items-center gap-x-4">
-                    <button
-                        type="button"
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-[6.5px] px-4 rounded-lg transition-colors text-sm"
-                        title="Create a new account"
-                    >
-                        A button
-                    </button>
                 </div>
             </div>
 
             {
-                deletedAccounts.length === 0 ? (
+                deletedCategories.length === 0 ? (
                     <div class="text-center py-10 text-gray-400">
                         <div class="mb-4 flex justify-center">
                             <Bin class="w-14 h-14" />
                         </div>
                         <p class="text-xl font-semibold text-gray-300 mb-2">
-                            No deleted accounts
+                            No deleted categories
                         </p>
-                        <p>All your accounts are active!</p>
+                        <p>All your categories are active!</p>
                     </div>
                 ) : (
                     <div class="flex flex-col gap-y-4">
-                        {deletedAccounts.map((account: any) => (
+                        {deletedCategories.map((category: any) => (
                             <div class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-x-4">
                                         <div
                                             class="w-4 h-4 rounded-full opacity-50"
-                                            style={`background-color: ${account.color}`}
+                                            style={`background-color: ${category.color}`}
                                         />
                                         <div>
                                             <h3 class="font-semibold text-white">
-                                                {account.name}
+                                                {category.name}
                                                 <span class="text-red-400 text-sm ml-2">
                                                     (Deleted)
                                                 </span>
                                             </h3>
-                                            <p class="text-sm text-gray-400">
-                                                {accountTypes.find(
-                                                    (t) =>
-                                                        t.value ===
-                                                        account.accountType,
-                                                )?.label || account.accountType}
-                                            </p>
+                                            {category.parentId && (
+                                                <p class="text-sm text-gray-400">
+                                                    Subcategory
+                                                </p>
+                                            )}
                                             <p class="text-xs text-gray-500 mt-1">
                                                 Deleted on:
                                                 {formatDateForDisplay(
-                                                    account.deletedAt,
+                                                    category.deletedAt,
                                                     {
                                                         includeTime: true,
                                                         dateStyle: "long",
@@ -115,54 +119,39 @@ const deletedAccounts = allAccounts
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center gap-x-4">
-                                        <div class="text-right">
-                                            <p
-                                                class={`font-semibold ${account.balance >= 0 ? "text-green-400" : "text-red-400"} opacity-75`}
+                                    <div class="flex items-center gap-x-2">
+                                        <form class="restore-category-form inline">
+                                            <input
+                                                type="hidden"
+                                                name="id"
+                                                value={category.id}
+                                            />
+                                            <button
+                                                type="submit"
+                                                data-category-name={
+                                                    category.name
+                                                }
+                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
                                             >
-                                                {formatCurrency(
-                                                    account.balance,
-                                                )}
-                                            </p>
-                                            <p class="text-xs text-gray-500">
-                                                Last balance
-                                            </p>
-                                        </div>
-
-                                        <div class="flex items-center gap-x-2">
-                                            <form class="restore-account-form inline">
-                                                <input
-                                                    type="hidden"
-                                                    name="id"
-                                                    value={account.id}
-                                                />
-                                                <button
-                                                    type="submit"
-                                                    data-account-name={
-                                                        account.name
-                                                    }
-                                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                                >
-                                                    Restore
-                                                </button>
-                                            </form>
-                                            <form class="purge-account-form inline">
-                                                <input
-                                                    type="hidden"
-                                                    name="id"
-                                                    value={account.id}
-                                                />
-                                                <button
-                                                    type="submit"
-                                                    data-account-name={
-                                                        account.name
-                                                    }
-                                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                                >
-                                                    Purge
-                                                </button>
-                                            </form>
-                                        </div>
+                                                Restore
+                                            </button>
+                                        </form>
+                                        <form class="purge-category-form inline">
+                                            <input
+                                                type="hidden"
+                                                name="id"
+                                                value={category.id}
+                                            />
+                                            <button
+                                                type="submit"
+                                                data-category-name={
+                                                    category.name
+                                                }
+                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                            >
+                                                Purge
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -173,25 +162,25 @@ const deletedAccounts = allAccounts
                                 <div class="text-yellow-400 text-xl">⚠️</div>
                                 <div>
                                     <h3 class="text-yellow-400 font-semibold mb-2">
-                                        About Deleted Accounts
+                                        About Deleted Categories
                                     </h3>
                                     <ul class="text-yellow-200 text-sm flex flex-col gap-y-1">
                                         <li>
-                                            • Deleted accounts are hidden from
+                                            • Deleted categories are hidden from
                                             the main interface but their data is
                                             preserved
                                         </li>
                                         <li>
-                                            • All transactions and balance
-                                            history remain intact
+                                            • All associated transactions remain
+                                            intact
                                         </li>
                                         <li>
-                                            • You can restore deleted accounts
+                                            • You can restore deleted categories
                                             at any time
                                         </li>
                                         <li>
-                                            • Restored accounts will reappear in
-                                            your account lists
+                                            • Restored categories will reappear
+                                            in your category lists
                                         </li>
                                     </ul>
                                 </div>
@@ -207,10 +196,10 @@ const deletedAccounts = allAccounts
     <LogoutScript />
 
     <script>
-        // Handle restore account forms
+        // Handle restore category forms
         document.addEventListener("DOMContentLoaded", function () {
             const restoreForms = document.querySelectorAll(
-                ".restore-account-form",
+                ".restore-category-form",
             );
 
             restoreForms.forEach((form) => {
@@ -218,8 +207,8 @@ const deletedAccounts = allAccounts
                     e.preventDefault();
 
                     const button = form.querySelector("button");
-                    const accountName =
-                        button?.getAttribute("data-account-name");
+                    const categoryName =
+                        button?.getAttribute("data-category-name");
 
                     // Show confirmation modal
                     const confirmationModal = document.getElementById(
@@ -231,8 +220,8 @@ const deletedAccounts = allAccounts
                     }
 
                     confirmationModal.show({
-                        title: "Restore Account",
-                        message: `Are you sure you want to restore "${accountName}"?`,
+                        title: "Restore Category",
+                        message: `Are you sure you want to restore "${categoryName}"?`,
                         confirmLabel: "Restore",
                         cancelLabel: "Cancel",
                         onConfirm: async () => {
@@ -257,21 +246,21 @@ const deletedAccounts = allAccounts
                                     "astro:actions"
                                 );
                                 const result =
-                                    await actions.restoreAccount(formData);
+                                    await actions.restoreCategory(formData);
 
                                 if (result.data?.ok) {
                                     ToastService.success(
-                                        "Account restored successfully!",
+                                        "Category restored successfully!",
                                     );
                                     // Reload the page to show updated data
                                     window.location.reload();
                                 } else {
                                     ToastService.error(
                                         result.data?.error ||
-                                            "Failed to restore account",
+                                            "Failed to restore category",
                                     );
                                     console.error(
-                                        "Account restore failed:",
+                                        "Category restore failed:",
                                         result.error || result.data?.error,
                                     );
                                 }
@@ -280,7 +269,7 @@ const deletedAccounts = allAccounts
                                     "An error occurred. Please try again.",
                                 );
                                 console.error(
-                                    "Error restoring account:",
+                                    "Error restoring category:",
                                     error,
                                 );
                             }
@@ -289,16 +278,18 @@ const deletedAccounts = allAccounts
                 });
             });
 
-            // Handle purge account forms
-            const purgeForms = document.querySelectorAll(".purge-account-form");
+            // Handle purge category forms
+            const purgeForms = document.querySelectorAll(
+                ".purge-category-form",
+            );
 
             purgeForms.forEach((form) => {
                 form.addEventListener("submit", async function (e) {
                     e.preventDefault();
 
                     const button = form.querySelector("button");
-                    const accountName =
-                        button?.getAttribute("data-account-name");
+                    const categoryName =
+                        button?.getAttribute("data-category-name");
 
                     // Show confirmation modal
                     const confirmationModal = document.getElementById(
@@ -310,8 +301,8 @@ const deletedAccounts = allAccounts
                     }
 
                     confirmationModal.show({
-                        title: "Permanently Delete Account",
-                        message: `Are you sure you want to permanently delete "${accountName}"? This action cannot be undone and will also delete all associated transactions and balance history.`,
+                        title: "Permanently Delete Category",
+                        message: `Are you sure you want to permanently delete "${categoryName}"? This action cannot be undone and will remove this category from all transactions and subcategories.`,
                         confirmLabel: "Purge",
                         cancelLabel: "Cancel",
                         onConfirm: async () => {
@@ -324,6 +315,7 @@ const deletedAccounts = allAccounts
                             );
 
                             if (csrfInput && csrfInput.value) {
+                                // Ensure the CSRF field is included/overwritten
                                 formData.set("_csrf_token", csrfInput.value);
                             }
 
@@ -336,21 +328,21 @@ const deletedAccounts = allAccounts
                                     "astro:actions"
                                 );
                                 const result =
-                                    await actions.purgeAccount(formData);
+                                    await actions.purgeCategory(formData);
 
                                 if (result.data?.ok) {
                                     ToastService.success(
-                                        "Account permanently deleted!",
+                                        "Category permanently deleted!",
                                     );
                                     // Reload the page to show updated data
                                     window.location.reload();
                                 } else {
                                     ToastService.error(
                                         result.data?.error ||
-                                            "Failed to permanently delete account",
+                                            "Failed to permanently delete category",
                                     );
                                     console.error(
-                                        "Account purge failed:",
+                                        "Category purge failed:",
                                         result.error || result.data?.error,
                                     );
                                 }
@@ -358,7 +350,7 @@ const deletedAccounts = allAccounts
                                 ToastService.error(
                                     "An error occurred. Please try again.",
                                 );
-                                console.error("Error purging account:", error);
+                                console.error("Error purging category:", error);
                             }
                         },
                     });
