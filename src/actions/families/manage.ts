@@ -87,12 +87,23 @@ const joinFamily = defineAction({
                 return { ok: false, error: "Family not found" };
             }
 
-            // Update user to belong to this family as member
+            // Check if family has any existing members
+            const existingMembersCount = await prisma.user.count({
+                where: {
+                    familyId: family.id,
+                    deletedAt: null
+                }
+            });
+
+            // If no existing members, make this user an admin, otherwise make them a member
+            const userRole = existingMembersCount === 0 ? 'Admin' : 'Member';
+
+            // Update user to belong to this family
             await prisma.user.update({
                 where: { id: user.id },
                 data: {
                     familyId: family.id,
-                    role: 'Member'
+                    role: userRole
                 }
             });
 
@@ -142,7 +153,7 @@ const leaveFamily = defineAction({
                     }
                 });
 
-                if (memberCount <= 1) {
+                if (memberCount > 1) {
                     return { ok: false, error: "Cannot leave family: You are the only admin. Promote another member to admin first." };
                 }
             }
@@ -165,8 +176,150 @@ const leaveFamily = defineAction({
     }
 });
 
+const leaveAndDeleteFamily = defineAction({
+    accept: 'form',
+    input: z.object({}),
+    handler: async (_, context) => {
+        try {
+            const user = context.locals.user;
+            if (!user) {
+                return { ok: false, error: "Authentication required" };
+            }
+
+            // Get user with family info
+            const userWithFamily = await prisma.user.findUnique({
+                where: { id: user.id },
+                include: { family: true }
+            });
+
+            if (!userWithFamily?.familyId) {
+                return { ok: false, error: "You don't belong to any family" };
+            }
+
+            // Only admins can delete the family
+            if (userWithFamily.role !== 'Admin') {
+                return { ok: false, error: "Only administrators can delete the family" };
+            }
+
+            // Check if user is the only member
+            const memberCount = await prisma.user.count({
+                where: {
+                    familyId: userWithFamily.familyId,
+                    deletedAt: null
+                }
+            });
+
+            if (memberCount > 1) {
+                return { ok: false, error: "Cannot delete family: There are other members in the family" };
+            }
+
+            const currentDateTime = getCurrentDateTime();
+            const familyId = userWithFamily.familyId;
+
+            // Soft delete all family-related data in a transaction
+            await prisma.$transaction(async (tx) => {
+                // Soft delete all accounts and their balances
+                await tx.account.updateMany({
+                    where: {
+                        familyId: familyId,
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                await tx.accountBalance.updateMany({
+                    where: {
+                        account: {
+                            familyId: familyId
+                        },
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                // Soft delete all categories
+                await tx.category.updateMany({
+                    where: {
+                        familyId: familyId,
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                // Soft delete all tags
+                await tx.tag.updateMany({
+                    where: {
+                        familyId: familyId,
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                // Soft delete all transactions
+                await tx.transaction.updateMany({
+                    where: {
+                        account: {
+                            familyId: familyId
+                        },
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                // Soft delete all recurring transactions
+                await tx.recurringTransaction.updateMany({
+                    where: {
+                        account: {
+                            familyId: familyId
+                        },
+                        deletedAt: null
+                    },
+                    data: {
+                        deletedAt: currentDateTime
+                    }
+                });
+
+                // Remove user from family
+                await tx.user.update({
+                    where: { id: user.id },
+                    data: {
+                        familyId: null,
+                        role: 'Member'
+                    }
+                });
+
+                // Soft delete the family itself
+                await tx.family.update({
+                    where: { id: familyId },
+                    data: {
+                        deletedAt: currentDateTime,
+                        updatedAt: currentDateTime
+                    }
+                });
+            });
+
+            return { ok: true };
+
+        } catch (error) {
+            console.error("Error deleting family:", error);
+            return { ok: false, error: "Failed to delete family" };
+        }
+    }
+});
+
 export {
     createFamily,
     joinFamily,
-    leaveFamily
+    leaveFamily,
+    leaveAndDeleteFamily
 };

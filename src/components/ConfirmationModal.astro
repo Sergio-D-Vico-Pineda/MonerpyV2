@@ -1,0 +1,311 @@
+---
+import Warning from "@comps/svgs/mono/Warning.astro";
+
+interface Props {
+    title?: string;
+    message?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    variant?: "warning" | "danger" | "info";
+}
+
+const {
+    title = "Confirm Action",
+    message = "Are you sure you want to proceed?",
+    confirmLabel = "Confirm",
+    cancelLabel = "Cancel",
+    variant = "warning",
+} = Astro.props as Props;
+
+const variantStyles = {
+    warning: {
+        iconBg: "bg-yellow-100",
+        iconColor: "text-yellow-600",
+        confirmButton: "bg-yellow-600 hover:bg-yellow-700",
+    },
+    danger: {
+        iconBg: "bg-red-100",
+        iconColor: "text-red-600",
+        confirmButton: "bg-red-600 hover:bg-red-700",
+    },
+    info: {
+        iconBg: "bg-blue-100",
+        iconColor: "text-blue-600",
+        confirmButton: "bg-blue-600 hover:bg-blue-700",
+    },
+};
+
+const styles = variantStyles[variant];
+---
+
+<!-- Generic confirmation modal component -->
+<confirmation-modal
+    id="confirmationModal"
+    class="fixed inset-0 bg-black/50 z-50 items-center justify-center hidden"
+>
+    <div class="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 shadow-xl">
+        <div class="flex items-center mb-4">
+            <div
+                class={`w-9 h-9 ${styles.iconBg} ${styles.iconColor} rounded-lg grid place-items-center mr-3`}
+            >
+                <Warning class="w-7 h-7" />
+            </div>
+            <h3
+                id="confirmationTitle"
+                class="text-lg font-semibold text-white text-pretty"
+            >
+                {title}
+            </h3>
+        </div>
+
+        <p id="confirmationMessage" class="text-gray-300 mb-6">
+            {message}
+        </p>
+
+        <div class="flex justify-end gap-x-3">
+            <button
+                id="cancelConfirmationButton"
+                type="button"
+                class="px-4 py-2 text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >{cancelLabel}</button
+            >
+            <button
+                id="confirmConfirmationButton"
+                type="button"
+                class={`px-4 py-2 ${styles.confirmButton} text-white rounded-lg transition-colors`}
+                >{confirmLabel}</button
+            >
+            <button
+                id="secondaryConfirmationButton"
+                type="button"
+                class="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg transition-colors hidden"
+                >Secondary Action</button
+            >
+        </div>
+    </div>
+</confirmation-modal>
+
+<script>
+    class ConfirmationModal extends HTMLElement {
+        private _titleEl: HTMLElement | null = null;
+        private _messageEl: HTMLElement | null = null;
+        private _confirmButton: HTMLButtonElement | null = null;
+        private _cancelButton: HTMLButtonElement | null = null;
+        private _secondaryButton: HTMLButtonElement | null = null;
+        private _currentCallback: (() => void | Promise<void>) | null = null;
+        private _currentSecondaryCallback: (() => void | Promise<void>) | null =
+            null;
+
+        constructor() {
+            super();
+            this._onBackgroundClick = this._onBackgroundClick.bind(this);
+            this._onCancel = this._onCancel.bind(this);
+            this._onConfirm = this._onConfirm.bind(this);
+            this._onSecondary = this._onSecondary.bind(this);
+            this._onKeyDown = this._onKeyDown.bind(this);
+        }
+
+        connectedCallback() {
+            this._titleEl = this.querySelector("#confirmationTitle");
+            this._messageEl = this.querySelector("#confirmationMessage");
+            this._confirmButton = this.querySelector(
+                "#confirmConfirmationButton",
+            );
+            this._cancelButton = this.querySelector(
+                "#cancelConfirmationButton",
+            );
+            this._secondaryButton = this.querySelector(
+                "#secondaryConfirmationButton",
+            );
+
+            this.addEventListener("click", this._onBackgroundClick);
+            if (this._cancelButton)
+                this._cancelButton.addEventListener("click", this._onCancel);
+            if (this._confirmButton)
+                this._confirmButton.addEventListener("click", this._onConfirm);
+            if (this._secondaryButton)
+                this._secondaryButton.addEventListener(
+                    "click",
+                    this._onSecondary,
+                );
+            document.addEventListener("keydown", this._onKeyDown);
+        }
+
+        disconnectedCallback() {
+            this.removeEventListener("click", this._onBackgroundClick);
+            if (this._cancelButton)
+                this._cancelButton.removeEventListener("click", this._onCancel);
+            if (this._confirmButton)
+                this._confirmButton.removeEventListener(
+                    "click",
+                    this._onConfirm,
+                );
+            if (this._secondaryButton)
+                this._secondaryButton.removeEventListener(
+                    "click",
+                    this._onSecondary,
+                );
+            document.removeEventListener("keydown", this._onKeyDown);
+        }
+
+        _onBackgroundClick(e: MouseEvent) {
+            if (e.target === this) this.hide();
+        }
+
+        _onCancel() {
+            this.hide();
+        }
+
+        async _onConfirm() {
+            if (this._currentCallback) {
+                try {
+                    const res = this._currentCallback();
+                    if (res && typeof res.then === "function") {
+                        // disable buttons while awaiting
+                        this._setDisabled(true);
+                        await res;
+                    }
+                } catch (err) {
+                    // swallow; allow caller to handle
+                    console.error("Confirmation callback error:", err);
+                }
+            }
+            this.hide();
+        }
+
+        async _onSecondary() {
+            if (this._currentSecondaryCallback) {
+                try {
+                    const res = this._currentSecondaryCallback();
+                    if (res && typeof res.then === "function") {
+                        // disable buttons while awaiting
+                        this._setDisabled(true);
+                        await res;
+                    }
+                } catch (err) {
+                    // swallow; allow caller to handle
+                    console.error("Secondary callback error:", err);
+                }
+            }
+            this.hide();
+        }
+
+        _onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape" && !this.classList.contains("hidden"))
+                this.hide();
+        }
+
+        _setDisabled(disabled: boolean) {
+            if (this._confirmButton) this._confirmButton.disabled = disabled;
+            if (this._cancelButton) this._cancelButton.disabled = disabled;
+            if (this._secondaryButton)
+                this._secondaryButton.disabled = disabled;
+            if (disabled) {
+                this._confirmButton?.classList.add(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                this._cancelButton?.classList.add(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                this._secondaryButton?.classList.add(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+            } else {
+                this._confirmButton?.classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                this._cancelButton?.classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                this._secondaryButton?.classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+            }
+        }
+
+        /**
+         * Show the modal.
+         * @param {Object} options - Configuration object
+         * @param {string} options.title - Modal title
+         * @param {string} options.message - Modal message
+         * @param {string} options.confirmLabel - Confirm button label
+         * @param {string} options.cancelLabel - Cancel button label
+         * @param {Function} options.onConfirm - Callback invoked when confirmed (may return a Promise)
+         * @param {boolean} options.showSecondaryAction - Whether to show secondary button
+         * @param {string} options.secondaryLabel - Secondary button label
+         * @param {Function} options.onSecondary - Callback invoked when secondary action is clicked (may return a Promise)
+         */
+        show(
+            options: {
+                title?: string;
+                message?: string;
+                confirmLabel?: string;
+                cancelLabel?: string;
+                onConfirm?: () => void | Promise<void>;
+                showSecondaryAction?: boolean;
+                secondaryLabel?: string;
+                onSecondary?: () => void | Promise<void>;
+            } = {},
+        ) {
+            const {
+                title = "Confirm Action",
+                message = "Are you sure you want to proceed?",
+                confirmLabel = "Confirm",
+                cancelLabel = "Cancel",
+                onConfirm,
+                showSecondaryAction = false,
+                secondaryLabel = "Secondary Action",
+                onSecondary,
+            } = options;
+
+            if (this._titleEl) this._titleEl.textContent = title;
+            if (this._messageEl) this._messageEl.textContent = message;
+            if (this._confirmButton)
+                this._confirmButton.textContent = confirmLabel;
+            if (this._cancelButton)
+                this._cancelButton.textContent = cancelLabel;
+            if (this._secondaryButton) {
+                this._secondaryButton.textContent = secondaryLabel;
+                if (showSecondaryAction) {
+                    this._secondaryButton.classList.remove("hidden");
+                } else {
+                    this._secondaryButton.classList.add("hidden");
+                }
+            }
+
+            this._currentCallback =
+                typeof onConfirm === "function" ? onConfirm : null;
+            this._currentSecondaryCallback =
+                typeof onSecondary === "function" ? onSecondary : null;
+
+            this.classList.remove("hidden");
+            this.classList.add("flex");
+            this._setDisabled(false);
+
+            setTimeout(() => {
+                if (
+                    this._confirmButton &&
+                    typeof this._confirmButton.focus === "function"
+                )
+                    this._confirmButton.focus();
+            }, 100);
+        }
+
+        hide() {
+            this.classList.add("hidden");
+            this.classList.remove("flex");
+            this._currentCallback = null;
+            this._currentSecondaryCallback = null;
+        }
+    }
+
+    if (!customElements.get("confirmation-modal")) {
+        customElements.define("confirmation-modal", ConfirmationModal);
+    }
+</script>
