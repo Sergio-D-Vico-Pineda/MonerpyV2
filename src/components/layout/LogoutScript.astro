@@ -18,7 +18,7 @@
 
                 if (data?.ok) {
                     // Clear all localStorage and sessionStorage on successful logout
-                    /* try {
+                    try {
                         localStorage.clear();
                         sessionStorage.clear();
                     } catch (storageErr) {
@@ -27,7 +27,7 @@
                             "Could not clear storage during logout:",
                             storageErr,
                         );
-                    } */
+                    }
 
                     // Navigate to login page after successful logout
                     navigate("/login");
