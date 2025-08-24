@@ -548,27 +548,24 @@ function isDescendantOf(
 
                 // Delete category
                 async function deleteCategory(categoryName: string) {
-                    // Use the modal if available, otherwise fallback to confirm
-                    if ((window as any).deleteConfirmModal) {
-                        (window as any).deleteConfirmModal.show(
-                            categoryName,
-                            () => {
-                                performCategoryDeletion(categoryName);
-                            },
-                        );
-                        return;
+                    try {
+                        const modal =
+                            document.getElementById("deleteConfirmModal");
+                        if (
+                            modal &&
+                            typeof (modal as any).show === "function"
+                        ) {
+                            (modal as any).show(categoryName, () =>
+                                performCategoryDeletion(categoryName),
+                            );
+                        } else {
+                            console.warn(
+                                "DeleteConfirmModal instance not found; cannot delete category without confirmation modal.",
+                            );
+                        }
+                    } catch (err) {
+                        console.warn("DeleteConfirmModal not available:", err);
                     }
-
-                    // Fallback to confirm dialog
-                    if (
-                        !confirm(
-                            `Are you sure you want to delete the category "${categoryName}"?`,
-                        )
-                    ) {
-                        return;
-                    }
-
-                    performCategoryDeletion(categoryName);
                 }
 
                 // Perform the actual deletion

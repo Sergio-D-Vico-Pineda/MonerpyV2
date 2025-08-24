@@ -1,0 +1,208 @@
+---
+import Warning from "@comps/svgs/mono/Warning.astro";
+
+interface Props {
+    title?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+}
+// Reusable delete confirmation modal component
+const {
+    title = "Delete",
+    confirmLabel = "Delete",
+    cancelLabel = "Cancel",
+} = Astro.props as Props;
+---
+
+<!-- Host custom element -->
+<delete-confirm-modal
+    id="deleteConfirmModal"
+    class="fixed inset-0 bg-black/50 z-50 items-center justify-center hidden"
+>
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <div class="flex items-center mb-4">
+            <div
+                class="w-9 h-9 bg-red-100 text-red-600 rounded-lg grid place-items-center mr-3"
+            >
+                <Warning class="w-7 h-7" />
+            </div>
+            <h3 id="deleteTitle" class="text-lg font-semibold text-white">
+                {title}
+            </h3>
+        </div>
+
+        <p class="text-gray-300 mb-6">
+            Are you sure you want to delete "<span
+                id="deleteItemName"
+                class="font-semibold text-purple-400"></span>"? This action
+            cannot be undone.
+        </p>
+
+        <div class="flex justify-end gap-x-3">
+            <button
+                id="cancelDeleteButton"
+                type="button"
+                class="px-4 py-2 text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >{cancelLabel}</button
+            >
+            <button
+                id="confirmDeleteButton"
+                type="button"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >{confirmLabel}</button
+            >
+        </div>
+    </div>
+</delete-confirm-modal>
+
+<script type="module" is:inline>
+    class DeleteConfirmModal extends HTMLElement {
+        constructor() {
+            super();
+            this._onBackgroundClick = this._onBackgroundClick.bind(this);
+            this._onCancel = this._onCancel.bind(this);
+            this._onConfirm = this._onConfirm.bind(this);
+            this._onKeyDown = this._onKeyDown.bind(this);
+            this._currentCallback = null;
+            this._opts = {};
+        }
+
+        connectedCallback() {
+            this._titleEl = this.querySelector("#deleteTitle");
+            this._nameSpan = this.querySelector("#deleteItemName");
+            this._confirmButton = this.querySelector("#confirmDeleteButton");
+            this._cancelButton = this.querySelector("#cancelDeleteButton");
+
+            this.addEventListener("click", this._onBackgroundClick);
+            if (this._cancelButton)
+                this._cancelButton.addEventListener("click", this._onCancel);
+            if (this._confirmButton)
+                this._confirmButton.addEventListener("click", this._onConfirm);
+            document.addEventListener("keydown", this._onKeyDown);
+
+            // Backwards compatibility: provide reference on element
+            try {
+                this.deleteConfirmModal = this;
+            } catch (e) {
+                /* ignore */
+            }
+        }
+
+        disconnectedCallback() {
+            this.removeEventListener("click", this._onBackgroundClick);
+            if (this._cancelButton)
+                this._cancelButton.removeEventListener("click", this._onCancel);
+            if (this._confirmButton)
+                this._confirmButton.removeEventListener(
+                    "click",
+                    this._onConfirm,
+                );
+            document.removeEventListener("keydown", this._onKeyDown);
+        }
+
+        _onBackgroundClick(e) {
+            if (e.target === this) this.hide();
+        }
+
+        _onCancel() {
+            this.hide();
+        }
+
+        async _onConfirm() {
+            if (this._currentCallback) {
+                try {
+                    const res = this._currentCallback();
+                    if (res && typeof res.then === "function") {
+                        // disable buttons while awaiting
+                        this._setDisabled(true);
+                        await res;
+                    }
+                } catch (err) {
+                    // swallow; allow caller to handle
+                }
+            }
+            this.hide();
+        }
+
+        _onKeyDown(e) {
+            if (e.key === "Escape" && !this.classList.contains("hidden"))
+                this.hide();
+        }
+
+        _setDisabled(disabled) {
+            if (this._confirmButton) this._confirmButton.disabled = disabled;
+            if (this._cancelButton) this._cancelButton.disabled = disabled;
+            if (disabled) {
+                this._confirmButton?.classList.add(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+            } else {
+                this._confirmButton?.classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+            }
+        }
+
+        /**
+         * Show the modal.
+         * @param {string} itemName - name of the item to display
+         * @param {Function} onConfirm - callback invoked when confirmed (may return a Promise)
+         * @param {Object} opts - optional labels: { title, confirmLabel, cancelLabel }
+         */
+        show(itemName, onConfirm, opts = {}) {
+            this._nameSpan && (this._nameSpan.textContent = itemName || "");
+            this._currentCallback =
+                typeof onConfirm === "function" ? onConfirm : null;
+            this._opts = opts || {};
+
+            // apply optional labels
+            if (this._titleEl && this._opts.title)
+                this._titleEl.textContent = this._opts.title;
+            if (this._confirmButton && this._opts.confirmLabel)
+                this._confirmButton.textContent = this._opts.confirmLabel;
+            if (this._cancelButton && this._opts.cancelLabel)
+                this._cancelButton.textContent = this._opts.cancelLabel;
+
+            this.classList.remove("hidden");
+            this.classList.add("flex");
+            this._setDisabled(false);
+
+            setTimeout(() => {
+                if (
+                    this._confirmButton &&
+                    typeof this._confirmButton.focus === "function"
+                )
+                    this._confirmButton.focus();
+            }, 100);
+        }
+
+        // alias used in some places
+        openModal(itemName, onConfirm, opts) {
+            this.show(itemName, onConfirm, opts);
+        }
+
+        hide() {
+            this.classList.add("hidden");
+            this.classList.remove("flex");
+            this._currentCallback = null;
+            this._opts = {};
+        }
+    }
+
+    if (!customElements.get("delete-confirm-modal")) {
+        customElements.define("delete-confirm-modal", DeleteConfirmModal);
+    }
+
+    // Provide compatibility aliases used across codebase
+    if (!customElements.get("delete-tag-confirm-modal")) {
+        customElements.define("delete-tag-confirm-modal", DeleteConfirmModal);
+    }
+    if (!customElements.get("delete-category-confirm-modal")) {
+        customElements.define(
+            "delete-category-confirm-modal",
+            DeleteConfirmModal,
+        );
+    }
+</script>

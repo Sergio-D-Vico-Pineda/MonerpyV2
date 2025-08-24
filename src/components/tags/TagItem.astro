@@ -436,24 +436,18 @@ const { tag } = Astro.props as Props;
 
             // Delete tag
             async function deleteTag(tagName: string) {
-                // Use the modal if available, otherwise fallback to confirm
-                if ((window as any).deleteTagConfirmModal) {
-                    (window as any).deleteTagConfirmModal.show(tagName, () => {
-                        performTagDeletion(tagName);
-                    });
-                    return;
+                try {
+                    const modal = document.getElementById("deleteConfirmModal");
+                    if (modal && typeof (modal as any).show === "function") {
+                        (modal as any).show(tagName, () => performTagDeletion(tagName));
+                    } else {
+                        console.warn(
+                            "DeleteConfirmModal instance not found; cannot delete tag without confirmation modal.",
+                        );
+                    }
+                } catch (err) {
+                    console.warn("DeleteConfirmModal not available:", err);
                 }
-
-                // Fallback to confirm dialog
-                if (
-                    !confirm(
-                        `Are you sure you want to delete the tag "${tagName}"?`,
-                    )
-                ) {
-                    return;
-                }
-
-                performTagDeletion(tagName);
             }
 
             // Perform the actual deletion
