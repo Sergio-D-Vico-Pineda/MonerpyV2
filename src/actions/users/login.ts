@@ -4,6 +4,8 @@ import { prisma } from '@prisma/index.js';
 import { createSession } from '@lib/session-manager.ts';
 import { verifyPassword } from '@lib/password.ts';
 import { getCurrentDateTime } from "@/lib/date-utils";
+import { isBlocked, recordFailedAttempt, clearFailedAttempts } from '@lib/rate-limiter.ts';
+import { getClientIP } from '@lib/fingerprint.ts';
 
 const login = defineAction({
     accept: 'form',
@@ -15,23 +17,43 @@ const login = defineAction({
     handler: async ({ email, password, remember }, context) => {
         try {
             console.log("Attempting login for email:", email);
+            
+            // Get client IP for rate limiting
+            const clientIP = getClientIP(context.request);
+            
+            // Check if IP or email is currently blocked
+            const blockStatus = isBlocked(clientIP, email);
+            if (blockStatus.blocked) {
+                console.log(`Login blocked: ${blockStatus.reason}`);
+                return { 
+                    ok: false, 
+                    error: blockStatus.reason,
+                    blockedUntil: blockStatus.unblockTime
+                };
+            }
+            
             // Find user by email
             const user = await prisma.user.findUnique({
                 where: { email }
             });
 
             if (!user) {
+                recordFailedAttempt(clientIP, email);
                 return { ok: false, error: "Invalid email or password" };
             }
 
             // Verify password using secure hashing
             const isPasswordValid = await verifyPassword(password, user.passwordHash);
             if (!isPasswordValid) {
+                recordFailedAttempt(clientIP, email);
                 return { ok: false, error: "Invalid email or password" };
             }
 
-            // Create session
-            const sessionId = createSession(user.id, user.username, user.email);
+            // Clear failed attempts on successful login
+            clearFailedAttempts(clientIP, email);
+
+            // Create session with fingerprint and CSRF token
+            const sessionId = createSession(user.id, user.username, user.email, context.request);
             await prisma.user.update({
                 where: { id: user.id },
                 data: { lastLogin: getCurrentDateTime() }

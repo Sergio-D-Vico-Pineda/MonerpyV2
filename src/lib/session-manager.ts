@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
 import type { Session } from '@types.d.ts';
+import { generateCSRFToken } from './csrf.ts';
+import { generateFingerprint } from './fingerprint.ts';
 
 // In-memory session storage
 const sessions = new Map<string, Session>();
@@ -123,13 +125,15 @@ export function saveSessionsToFile(): void {
 /**
  * Create a new session
  */
-export function createSession(userId: number, username: string, email: string): string {
+export function createSession(userId: number, username: string, email: string, request: Request): string {
     const sessionId = generateSessionId();
     const session: Session = {
         userId,
         username,
         email,
-        created: Date.now().toString()
+        created: Date.now().toString(),
+        fingerprint: generateFingerprint(request),
+        csrfToken: generateCSRFToken()
     };
 
     sessions.set(sessionId, session);
@@ -169,6 +173,46 @@ export function validateSession(sessionId: string, isLongTerm: boolean = false):
 export function destroySession(sessionId: string): void {
     sessions.delete(sessionId);
     saveSessionsToFile(); // Persist immediately
+}
+
+/**
+ * Destroy all sessions for a specific user except the current one
+ */
+export function destroyOtherUserSessions(userId: number, currentSessionId: string): number {
+    let destroyedCount = 0;
+    
+    for (const [sessionId, session] of sessions) {
+        if (session.userId === userId && sessionId !== currentSessionId) {
+            sessions.delete(sessionId);
+            destroyedCount++;
+        }
+    }
+    
+    if (destroyedCount > 0) {
+        saveSessionsToFile(); // Persist immediately
+    }
+    
+    return destroyedCount;
+}
+
+/**
+ * Destroy all sessions for a specific user
+ */
+export function destroyAllUserSessions(userId: number): number {
+    let destroyedCount = 0;
+    
+    for (const [sessionId, session] of sessions) {
+        if (session.userId === userId) {
+            sessions.delete(sessionId);
+            destroyedCount++;
+        }
+    }
+    
+    if (destroyedCount > 0) {
+        saveSessionsToFile(); // Persist immediately
+    }
+    
+    return destroyedCount;
 }
 
 // Load sessions when module is imported

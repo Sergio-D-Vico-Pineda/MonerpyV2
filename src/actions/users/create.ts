@@ -39,7 +39,7 @@ const create = defineAction({
             });
 
             // Create session (default 24 hours)
-            const sessionId = createSession(user.id, user.username, user.email);
+            const sessionId = createSession(user.id, user.username, user.email, context.request);
 
             const isSecureEnvironment = context.request.url.startsWith('https://');
 
