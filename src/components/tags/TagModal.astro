@@ -2,6 +2,7 @@
 import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 import CSRFToken from "@comps/CSRFToken.astro";
+import Input from "@comps/Input.astro";
 ---
 
 <!-- Render as custom element host -->
@@ -27,19 +28,15 @@ import CSRFToken from "@comps/CSRFToken.astro";
         <form id="tagForm" class="p-6 flex flex-col gap-y-4">
             <CSRFToken />
 
-            <label for="tagName">
-                <p class="text-sm font-medium text-gray-200 mb-2">Tag Name</p>
-                <input
-                    type="text"
-                    id="tagName"
-                    name="name"
-                    required
-                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter tag name"
-                />
-            </label>
+            <Input
+                id="tagName"
+                label="Tag Name"
+                name="name"
+                required={true}
+                placeholder="Enter tag name"
+            />
 
-            <ColorPicker id="color" label="Tag Color" />
+            <ColorPicker required={true} id="color" label="Tag Color" />
 
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button
@@ -133,16 +130,28 @@ import CSRFToken from "@comps/CSRFToken.astro";
                     // Reload the page to show updated data
                     window.location.reload();
                 } else {
-                    ToastService.error(
-                        result.data?.error || "Failed to create tag",
+                    // Handle validation errors and other errors using utility
+                    const { ActionErrorMessages } = await import(
+                        "@lib/action-error-handler.ts"
                     );
+                    const errorMessage = ActionErrorMessages.tag(result);
+
+                    // Show error toast immediately
+                    ToastService.showToast({
+                        message: errorMessage,
+                        type: "error",
+                    });
                     console.error(
                         "Tag creation failed:",
                         result.error || result.data?.error,
                     );
                 }
             } catch (error) {
-                ToastService.error("An error occurred. Please try again.");
+                // Show error toast immediately
+                ToastService.showToast({
+                    message: "An error occurred. Please try again.",
+                    type: "error",
+                });
                 console.error("Error creating tag:", error);
             }
         }

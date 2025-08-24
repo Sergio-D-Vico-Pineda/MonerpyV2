@@ -37,10 +37,7 @@ const modalId = Astro.props.id ?? null;
                 </button>
             </header>
 
-            <form
-                id="transactionForm"
-                class="p-6 flex flex-col gap-y-4"
-            >
+            <form id="transactionForm" class="p-6 flex flex-col gap-y-4">
                 <CSRFToken />
 
                 <input type="hidden" name="id" id="transactionId" />
@@ -73,12 +70,8 @@ const modalId = Astro.props.id ?? null;
                 </div>
 
                 <!-- Tags -->
-                <TagsDropdownSelect
-                    id="tags"
-                    name="tags"
-                    label="Tags (custom dropdown)"
-                />
-                <!-- <TagsPicker id="tags" name="tags" /> -->
+                <TagsDropdownSelect id="tags" name="tags" label="Tags" />
+
                 <!-- Form Buttons -->
                 <div class="flex gap-3 pt-4">
                     <div class="flex-3 text-right">
@@ -255,41 +248,63 @@ const modalId = Astro.props.id ?? null;
                 if (form) {
                     form.addEventListener("submit", async (e) => {
                         e.preventDefault();
-                        
+
                         const formData = new FormData(form);
                         const action = formData.get("_action") as string;
-                        
+
                         try {
                             let result;
                             if (action === "create") {
-                                const { actions } = await import('astro:actions');
-                                result = await actions.createTransaction(formData);
+                                const { actions } = await import(
+                                    "astro:actions"
+                                );
+                                result =
+                                    await actions.createTransaction(formData);
                             } else if (action === "update") {
-                                const { actions } = await import('astro:actions');
-                                result = await actions.updateTransaction(formData);
+                                const { actions } = await import(
+                                    "astro:actions"
+                                );
+                                result =
+                                    await actions.updateTransaction(formData);
                             }
-                            
+
                             if (result?.data?.ok) {
-                                const { ToastService } = await import('@lib/toast.ts');
-                                const message = action === "create" 
-                                    ? "Transaction created successfully!" 
-                                    : "Transaction updated successfully!";
+                                const { ToastService } = await import(
+                                    "@lib/toast.ts"
+                                );
+                                const message =
+                                    action === "create"
+                                        ? "Transaction created successfully!"
+                                        : "Transaction updated successfully!";
                                 ToastService.success(message);
                                 closeModal();
                                 // Reload the page to show updated data
                                 window.location.reload();
                             } else {
-                                const { ToastService } = await import('@lib/toast.ts');
-                                const message = action === "create" 
-                                    ? "Failed to create transaction. Please try again." 
-                                    : "Failed to update transaction. Please try again.";
+                                const { ToastService } = await import(
+                                    "@lib/toast.ts"
+                                );
+                                const message =
+                                    action === "create"
+                                        ? "Failed to create transaction. Please try again."
+                                        : "Failed to update transaction. Please try again.";
                                 ToastService.error(message);
-                                console.error('Transaction operation failed:', result?.error || result?.data?.error);
+                                console.error(
+                                    "Transaction operation failed:",
+                                    result?.error || result?.data?.error,
+                                );
                             }
                         } catch (error) {
-                            const { ToastService } = await import('@lib/toast.ts');
-                            ToastService.error('An error occurred. Please try again.');
-                            console.error('Error submitting transaction:', error);
+                            const { ToastService } = await import(
+                                "@lib/toast.ts"
+                            );
+                            ToastService.error(
+                                "An error occurred. Please try again.",
+                            );
+                            console.error(
+                                "Error submitting transaction:",
+                                error,
+                            );
                         }
                     });
                 }

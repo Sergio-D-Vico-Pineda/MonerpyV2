@@ -63,13 +63,13 @@ const parentCategories: Category[] = (allCategories || []).filter(
                 id="categoryName"
                 label="Category Name"
                 name="name"
-                required={false}
+                required={true}
                 placeholder="Enter category name"
             />
 
             <label for="parentCategory">
                 <p class="text-sm font-medium text-gray-200 mb-2">
-                    Parent Category (Optional)
+                    Parent Category
                 </p>
                 <select
                     id="parentCategory"
@@ -87,7 +87,7 @@ const parentCategories: Category[] = (allCategories || []).filter(
                 </select>
             </label>
 
-            <ColorPicker id="color" label="Category Color" />
+            <ColorPicker required={true} id="color" label="Category Color" />
 
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button
@@ -179,22 +179,35 @@ const parentCategories: Category[] = (allCategories || []).filter(
                 const { actions } = await import("astro:actions");
                 const result = await actions.createCategory(formData);
 
+                console.log(result.data);
+                console.log(result);
+
                 if (result.data?.ok) {
                     ToastService.success("Category created successfully!");
                     this.closeModal();
                     // Reload the page to show updated data
                     window.location.reload();
                 } else {
-                    ToastService.error(
-                        result.data?.error || "Failed to create category",
+                    // Handle validation errors and other errors using utility
+                    const { ActionErrorMessages } = await import(
+                        "@lib/action-error-handler.ts"
                     );
+                    const errorMessage = ActionErrorMessages.category(result);
+
+                    ToastService.showToast({
+                        message: errorMessage,
+                        type: "error",
+                    });
                     console.error(
                         "Category creation failed:",
                         result.error || result.data?.error,
                     );
                 }
             } catch (error) {
-                ToastService.error("An error occurred. Please try again.");
+                ToastService.showToast({
+                    message: "An error occurred. Please try again.",
+                    type: "error",
+                });
                 console.error("Error creating category:", error);
             }
         }

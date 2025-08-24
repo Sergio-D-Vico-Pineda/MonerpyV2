@@ -22,7 +22,7 @@ const categories: Category[] = typedResult?.ok ? typedResult.categories : [];
         name="categoryId"
         class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
     >
-        <option value="">Select a category (optional)</option>
+        <option value="">Select a category</option>
         {
             categories &&
                 categories.map((category) => {

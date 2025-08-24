@@ -1,19 +1,22 @@
 ---
 import { colors } from "@arrays.d.ts";
+import Asterisk from "@comps/Asterisk.astro";
 
 interface Props {
     id: string;
     label: string;
     checkedColor?: string;
+    required?: boolean;
 }
 
-const { id, label, checkedColor = "#6172f3" } = Astro.props;
+const { id, label, checkedColor = "#6172f3", required = false } = Astro.props;
 ---
 
 <div>
     <label
         for="colorPicker"
-        class="block text-sm font-medium text-gray-300 mb-2">{label}</label
+        class="block text-sm font-medium text-gray-300 mb-2"
+        >{label} {required && <Asterisk id={id} />}</label
     >
     <div class="flex items-center gap-x-3 mb-3">
         <input
@@ -22,6 +25,7 @@ const { id, label, checkedColor = "#6172f3" } = Astro.props;
             name="colorPicker"
             value={checkedColor}
             class="w-10 h-10 border border-gray-600 rounded cursor-pointer"
+            required={required}
         />
         <input
             data-id="create"
@@ -29,6 +33,7 @@ const { id, label, checkedColor = "#6172f3" } = Astro.props;
             id={id}
             name="color"
             value={checkedColor}
+            required={required}
             pattern="^#[0-9A-Fa-f]{6}$"
             class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             placeholder="#6172f3"
