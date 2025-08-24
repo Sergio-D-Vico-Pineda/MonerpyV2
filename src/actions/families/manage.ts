@@ -108,7 +108,7 @@ const joinFamily = defineAction({
 const leaveFamily = defineAction({
     accept: 'form',
     input: z.object({}),
-    handler: async (input, context) => {
+    handler: async (_, context) => {
         try {
             const user = context.locals.user;
             if (!user) {

@@ -5,7 +5,7 @@ import { prisma } from '@prisma/index.js';
 const getAccounts = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
-    handler: async (input, context) => {
+    handler: async (_, context) => {
         try {
             const user = context.locals.user;
             if (!user) {

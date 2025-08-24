@@ -7,7 +7,7 @@ const logout = defineAction({
     input: z.object({
         _csrf_token: z.string().optional(), // CSRF token will be handled by middleware
     }).optional(),
-    handler: async (input, context) => {
+    handler: async (_, context) => {
         try {
             // Get session ID from cookie
             const sessionId = context.cookies.get('astro-auth')?.value;

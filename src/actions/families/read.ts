@@ -5,7 +5,7 @@ import { prisma } from '@prisma/index.js';
 const getFamilies = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
-    handler: async (input, context) => {
+    handler: async (_, context) => {
         try {
             const user = context.locals.user;
             if (!user) {
@@ -45,7 +45,7 @@ const getFamilies = defineAction({
 const getFamilyDetails = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
-    handler: async (input, context) => {
+    handler: async (_, context) => {
         try {
             const user = context.locals.user;
             if (!user) {

@@ -7,7 +7,7 @@ const getUser = defineAction({
     input: z.object({
         id: z.number().int().positive()
     }),
-    handler: async (input, context) => {
+    handler: async (input, _) => {
         const user = await prisma.user.findUnique({
             where: { id: input.id },
             select: {
