@@ -1,3 +1,0 @@
-revisar e:\Lgit\MonerpyV2\src\pages\accounts\deleted.astro
-hay dos getAccounts
-hacer el actions de updateProfile en e:\Lgit\MonerpyV2\src\pages\profile\index.astro
