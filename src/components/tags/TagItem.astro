@@ -15,11 +15,11 @@ const { tag } = Astro.props as Props;
 ---
 
 <div
-    class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors w-[296px] h-[76px] flex items-center"
+    class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors grow w-max min-h-[60px] max-h-[76px] flex items-center"
     data-tag-id={tag.id}
 >
     <!-- Display Mode -->
-    <div class="tag-display flex items-center justify-between">
+    <div class="tag-display flex items-center justify-between grow">
         <div class="flex items-center gap-x-3 flex-1 justify-center">
             <div
                 class="tag-color-display w-4 h-4 rounded-full flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
@@ -29,7 +29,7 @@ const { tag } = Astro.props as Props;
             </div>
             <div class="min-w-0 flex-1">
                 <h3
-                    class="tag-name-display font-semibold text-white cursor-pointer hover:text-purple-300 transition-colors w-[164px] truncate"
+                    class="tag-name-display font-semibold text-white cursor-pointer hover:text-purple-300 transition-colors truncate"
                     title={tag.name}
                 >
                     {tag.name}
@@ -66,26 +66,27 @@ const { tag } = Astro.props as Props;
 
     <!-- Edit Mode -->
     <form
-        class="tag-edit py-1 hidden edit-tag-form items-center gap-x-3 w-full"
+        class="tag-edit py-1 hidden edit-tag-form items-center justify-between gap-x-3 w-full"
     >
         <CSRFToken />
         <input type="hidden" name="tagId" value={tag.id} />
+        <div class="min-w-0 flex-1 flex flex-row items-center gap-4">
+            <CompactColorPicker
+                id={`categoryColor-${tag.id}`}
+                label="Edit Tag Color"
+                checkedColor={tag.color}
+            />
 
-        <CompactColorPicker
-            id={`categoryColor-${tag.id}`}
-            label="Edit Tag Color"
-            checkedColor={tag.color}
-        />
-
-        <input
-            autocomplete="off"
-            type="text"
-            name="name"
-            value={tag.name}
-            class="tag-name-input min-w-0 bg-gray-600 text-white border border-gray-500 rounded px-1.5 py-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="Tag name"
-            required
-        />
+            <input
+                autocomplete="off"
+                type="text"
+                name="name"
+                value={tag.name}
+                class="tag-name-input min-w-0 bg-gray-600 text-white border border-gray-500 rounded px-1.5 py-1 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Tag name"
+                required
+            />
+        </div>
 
         <div class="tag-edit-actions flex items-center gap-x-2">
             <button
