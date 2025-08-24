@@ -143,7 +143,78 @@ const restoreCategory = defineAction({
     }
 });
 
+const purgeCategory = defineAction({
+    accept: 'form',
+    input: z.object({
+        id: z.string().transform(val => parseInt(val))
+    }),
+    handler: async (input, context) => {
+        try {
+            const user = context.locals.user;
+            if (!user) {
+                return { ok: false, error: "Authentication required" };
+            }
+
+            // Get user with family info
+            const userWithFamily = await prisma.user.findUnique({
+                where: { id: user.id },
+                include: { family: true }
+            });
+
+            if (!userWithFamily?.familyId) {
+                return { ok: false, error: "User must belong to a family" };
+            }
+
+            // Check if category exists and belongs to the family
+            const category = await prisma.category.findFirst({
+                where: {
+                    id: input.id,
+                    familyId: userWithFamily.familyId,
+                    deletedAt: { not: null }
+                }
+            });
+
+            if (!category) {
+                return { ok: false, error: "Deleted category not found" };
+            }
+
+            // Start transaction to ensure data consistency
+            await prisma.$transaction(async (tx) => {
+                // Set categoryId to null in all transactions that reference this category
+                await tx.transaction.updateMany({
+                    where: { categoryId: input.id },
+                    data: { categoryId: null }
+                });
+
+                // Set categoryId to null in all recurring transactions that reference this category
+                await tx.recurringTransaction.updateMany({
+                    where: { categoryId: input.id },
+                    data: { categoryId: null }
+                });
+
+                // Set parentId to null for all child categories
+                await tx.category.updateMany({
+                    where: { parentId: input.id },
+                    data: { parentId: null }
+                });
+
+                // Permanently delete the category
+                await tx.category.delete({
+                    where: { id: input.id }
+                });
+            });
+
+            return { ok: true };
+
+        } catch (error) {
+            console.error('Error purging category:', error);
+            return { ok: false, error: "Failed to permanently delete category" };
+        }
+    }
+});
+
 export {
     deleteCategory,
-    restoreCategory
+    restoreCategory,
+    purgeCategory
 };

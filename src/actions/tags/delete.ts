@@ -134,7 +134,84 @@ const restoreTag = defineAction({
     }
 });
 
+const purgeTag = defineAction({
+    accept: 'form',
+    input: z.object({
+        id: z.string().transform(val => parseInt(val))
+    }),
+    handler: async (input, context) => {
+        try {
+            const user = context.locals.user;
+            if (!user) {
+                return { ok: false, error: "Authentication required" };
+            }
+
+            // Get user with family info
+            const userWithFamily = await prisma.user.findUnique({
+                where: { id: user.id },
+                include: { family: true }
+            });
+
+            if (!userWithFamily?.familyId) {
+                return { ok: false, error: "User must belong to a family" };
+            }
+
+            // Check if tag exists and belongs to the family
+            const tag = await prisma.tag.findFirst({
+                where: {
+                    id: input.id,
+                    familyId: userWithFamily.familyId,
+                    deletedAt: { not: null }
+                }
+            });
+
+            if (!tag) {
+                return { ok: false, error: "Deleted tag not found" };
+            }
+
+            // Start transaction to ensure data consistency
+            await prisma.$transaction(async (tx) => {
+                // Remove tag associations from all transactions
+                // Since it's a many-to-many relationship, we need to disconnect the tag
+                await tx.transaction.updateMany({
+                    where: {
+                        tags: {
+                            some: { id: input.id }
+                        }
+                    },
+                    data: {}
+                });
+
+                // For many-to-many relationships, we need to delete the connection records
+                // This is handled automatically by Prisma when we delete the tag
+
+                // Remove tag associations from all recurring transactions
+                await tx.recurringTransaction.updateMany({
+                    where: {
+                        tags: {
+                            some: { id: input.id }
+                        }
+                    },
+                    data: {}
+                });
+
+                // Permanently delete the tag
+                await tx.tag.delete({
+                    where: { id: input.id }
+                });
+            });
+
+            return { ok: true };
+
+        } catch (error) {
+            console.error('Error purging tag:', error);
+            return { ok: false, error: "Failed to permanently delete tag" };
+        }
+    }
+});
+
 export {
     deleteTag,
-    restoreTag
+    restoreTag,
+    purgeTag
 };

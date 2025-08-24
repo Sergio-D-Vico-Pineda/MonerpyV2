@@ -40,6 +40,7 @@ import {
     updateAccount,
     deleteAccount,
     restoreAccount,
+    purgeAccount,
     updateDailyBalance,
     recalculateAccountBalance
 } from "./accounts/index.ts";
@@ -49,7 +50,8 @@ import {
     getCategory,
     updateCategory,
     deleteCategory,
-    restoreCategory
+    restoreCategory,
+    purgeCategory
 } from "./categories/index.ts";
 import {
     createTag,
@@ -57,7 +59,8 @@ import {
     getTag,
     updateTag,
     deleteTag,
-    restoreTag
+    restoreTag,
+    purgeTag
 } from "./tags/index.ts";
 
 const server = {
@@ -95,6 +98,7 @@ const server = {
     updateAccount,
     deleteAccount,
     restoreAccount,
+    purgeAccount,
     updateDailyBalance,
     recalculateAccountBalance,
     createCategory,
@@ -102,12 +106,14 @@ const server = {
     updateCategory,
     deleteCategory,
     restoreCategory,
+    purgeCategory,
     createTag,
     getTags,
     getTag,
     updateTag,
     deleteTag,
-    restoreTag
+    restoreTag,
+    purgeTag
 };
 
 export { server };

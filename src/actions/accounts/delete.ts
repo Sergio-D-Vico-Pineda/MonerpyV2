@@ -123,7 +123,75 @@ const restoreAccount = defineAction({
     }
 });
 
+const purgeAccount = defineAction({
+    accept: 'form',
+    input: z.object({
+        id: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account ID is required")
+    }),
+    handler: async (input, context) => {
+        try {
+            const user = context.locals.user;
+            if (!user) {
+                return { ok: false, error: "Authentication required" };
+            }
+
+            // Get user with family info
+            const userWithFamily = await prisma.user.findUnique({
+                where: { id: user.id },
+                include: { family: true }
+            });
+
+            if (!userWithFamily?.familyId) {
+                return { ok: false, error: "User must belong to a family" };
+            }
+
+            // Verify account belongs to user's family and is deleted
+            const existingAccount = await prisma.account.findFirst({
+                where: {
+                    id: input.id,
+                    familyId: userWithFamily.familyId,
+                    deletedAt: { not: null }
+                }
+            });
+
+            if (!existingAccount) {
+                return { ok: false, error: "Account not found or not deleted" };
+            }
+
+            // Start transaction to ensure data consistency
+            await prisma.$transaction(async (tx) => {
+                // Delete all account balances first
+                await tx.accountBalance.deleteMany({
+                    where: { accountId: input.id }
+                });
+
+                // Delete all transactions that reference this account
+                await tx.transaction.deleteMany({
+                    where: { accountId: input.id }
+                });
+
+                // Delete all recurring transactions that reference this account
+                await tx.recurringTransaction.deleteMany({
+                    where: { accountId: input.id }
+                });
+
+                // Permanently delete the account
+                await tx.account.delete({
+                    where: { id: input.id }
+                });
+            });
+
+            return { ok: true };
+
+        } catch (error) {
+            console.error("Error purging account:", error);
+            return { ok: false, error: "Failed to permanently delete account" };
+        }
+    }
+});
+
 export {
     deleteAccount,
-    restoreAccount
+    restoreAccount,
+    purgeAccount
 };
