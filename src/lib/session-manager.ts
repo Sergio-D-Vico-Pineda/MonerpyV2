@@ -230,6 +230,19 @@ export function destroyOtherUserSessions(userId: number, currentSessionId: strin
 }
 
 /**
+ * Update session user data
+ */
+export function updateSessionUserData(sessionId: string, username: string, email: string): void {
+    const session = sessions.get(sessionId);
+    if (session) {
+        session.username = username;
+        session.email = email;
+        sessions.set(sessionId, session);
+        saveSessionsToFile(); // Persist immediately
+    }
+}
+
+/**
  * Destroy all sessions for a specific user
  */
 export function destroyAllUserSessions(userId: number): number {

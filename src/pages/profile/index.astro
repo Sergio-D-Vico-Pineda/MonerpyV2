@@ -247,7 +247,7 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
     <script>
         import { actions } from "astro:actions";
         import { ToastService } from "@/lib/toast";
-        import Toast from "@/components/toast/Toast.astro";
+        import { UserManager } from "@/lib/client/user-manager";
 
         // Password form handler
         const passwordForm = document.getElementById(
@@ -326,35 +326,51 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
         profileForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const formData = new FormData(e.target as HTMLFormElement);
-            const data = {
-                username: formData.get("username"),
-                email: formData.get("email"),
-            };
-
             try {
-                const response = await fetch("/api/user/profile", {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
+                const formData = new FormData(e.target as HTMLFormElement);
+                const { data, error } = await actions.updateProfile(formData);
 
-                if (response.ok) {
-                    ToastService.showToast({
-                        message: "Profile updated successfully.",
-                        type: "success",
-                    });
+                console.log(data);
+                console.log(error);
+
+                if (data?.ok) {
+                    ToastService.success(
+                        data.message || "Profile updated successfully.",
+                    );
+
+                    // Update user data in client-side cache and UI
+                    if (data.user) {
+                        UserManager.handleProfileUpdate({
+                            id: data.user.id,
+                            username: data.user.username,
+                            email: data.user.email,
+                            created:
+                                data.user.updatedAt || new Date().toISOString(),
+                        });
+                    }
+
+                    // Reload after a short delay to get updated user info from server
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1500);
+                    }, 500);
                 } else {
-                    const error = await response.json();
+                    let newError = error?.toString();
+                    if (newError?.includes("invalid_string")) {
+                        newError = "Email must be a valid email address.";
+                    } else if (newError?.includes("too_big")) {
+                        newError =
+                            "The username must be at most 50 characters long.";
+                    }
                     ToastService.showToast({
-                        message: error.error || "Failed to update profile.",
+                        message:
+                            newError ||
+                            data?.error ||
+                            "Failed to update profile.",
                         type: "error",
                     });
+                    console.error(
+                        error || data?.error || "Failed to update profile",
+                    );
                 }
             } catch (error) {
                 console.error("Error:", error);
