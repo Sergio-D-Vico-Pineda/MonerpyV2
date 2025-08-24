@@ -12,7 +12,7 @@ Monerpy is a personal finance management web application built with Astro, focus
 - Styles use TailwindCSS utility classes
 
 ### Backend (TypeScript + Prisma)
-- API routes in `src/pages/api/` handle data operations
+- Instead of API routes, use client-side actions
 - Database access through Prisma ORM with Turso (SQLite-compatible)
 - Authentication uses custom email/password system
 
@@ -47,7 +47,7 @@ Focus on:
 ## Project-Specific Patterns
 
 ### API Structure
-- Routes grouped by domain (`/api/transactions`, `/api/auth`, etc.)
+- Client-side actions replace traditional API routes
 - Dynamic routes use `[id]` parameter format
 - Role checking in middleware layer
 
@@ -69,8 +69,7 @@ Focus on:
 - Account balances depend on transaction timing
 
 ## Key Files
-- `src/pages/api/auth/` - Authentication logic
-- `src/lib/services/` - Core business logic
+- `src/lib/` - Authentication logic
 - `prisma/schema.prisma` - Data model definition
 - `src/components/` - Reusable UI components
 
