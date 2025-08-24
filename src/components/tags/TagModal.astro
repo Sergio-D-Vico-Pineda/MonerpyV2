@@ -1,7 +1,6 @@
 ---
 import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 import Input from "@comps/Input.astro";
 ---
 
@@ -26,8 +25,6 @@ import Input from "@comps/Input.astro";
         </header>
 
         <form id="tagForm" class="p-6 flex flex-col gap-y-4">
-            <CSRFToken />
-
             <Input
                 id="tagName"
                 label="Tag Name"
@@ -118,6 +115,13 @@ import Input from "@comps/Input.astro";
 
             if (!this._form) return;
             const formData = new FormData(this._form);
+            const csrfInput = document.querySelector(
+                'input[name="_csrf_token"]',
+            ) as HTMLInputElement;
+
+            if (csrfInput && csrfInput.value) {
+                formData.set("_csrf_token", csrfInput.value);
+            }
 
             const { ToastService } = await import("@lib/toast.ts");
             try {

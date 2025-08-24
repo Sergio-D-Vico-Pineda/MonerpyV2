@@ -9,7 +9,6 @@ import Category from "@comps/transaction/Category.astro";
 import { getCurrentDate } from "@lib/date-utils";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 const modalId = Astro.props.id ?? null;
 ---
 
@@ -42,7 +41,6 @@ const modalId = Astro.props.id ?? null;
                 id="recurringTransactionForm"
                 class="p-6 flex flex-col gap-y-6"
             >
-                <CSRFToken />
                 <input
                     type="hidden"
                     name="_action"
@@ -567,41 +565,63 @@ const modalId = Astro.props.id ?? null;
             if (form) {
                 form.addEventListener("submit", async (e) => {
                     e.preventDefault();
-                    
+
                     const formData = new FormData(form);
+                    const csrfInput = document.querySelector(
+                        'input[name="_csrf_token"]',
+                    ) as HTMLInputElement;
+
+                    if (csrfInput && csrfInput.value) {
+                        formData.set("_csrf_token", csrfInput.value);
+                    }
                     const action = formData.get("_action") as string;
-                    
+                    const { actions } = await import("astro:actions");
+
                     try {
                         let result;
                         if (action === "create") {
-                            const { actions } = await import('astro:actions');
-                            result = await actions.createRecurringTransaction(formData);
+                            result =
+                                await actions.createRecurringTransaction(
+                                    formData,
+                                );
                         } else if (action === "update") {
-                            const { actions } = await import('astro:actions');
-                            result = await actions.updateRecurringTransaction(formData);
+                            result =
+                                await actions.updateRecurringTransaction(
+                                    formData,
+                                );
                         }
-                        
+
                         if (result?.data?.ok) {
-                            const { ToastService } = await import('@lib/toast.ts');
-                            const message = action === "create" 
-                                ? "Recurring transaction created successfully!" 
-                                : "Recurring transaction updated successfully!";
+                            const { ToastService } = await import(
+                                "@lib/toast.ts"
+                            );
+                            const message =
+                                "Recurring transaction updated successfully!";
                             ToastService.success(message);
                             closeModal();
                             // Reload the page to show updated data
                             window.location.reload();
                         } else {
-                            const { ToastService } = await import('@lib/toast.ts');
-                            const message = action === "create" 
-                                ? "Failed to create recurring transaction. Please try again." 
-                                : "Failed to update recurring transaction. Please try again.";
+                            const { ToastService } = await import(
+                                "@lib/toast.ts"
+                            );
+                            const message =
+                                "Failed to update recurring transaction. Please try again.";
                             ToastService.error(message);
-                            console.error('Recurring transaction operation failed:', result?.error || result?.data?.error);
+                            console.error(
+                                "Recurring transaction operation failed:",
+                                result?.error || result?.data?.error,
+                            );
                         }
                     } catch (error) {
-                        const { ToastService } = await import('@lib/toast.ts');
-                        ToastService.error('An error occurred. Please try again.');
-                        console.error('Error submitting recurring transaction:', error);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        ToastService.error(
+                            "An error occurred. Please try again.",
+                        );
+                        console.error(
+                            "Error submitting recurring transaction:",
+                            error,
+                        );
                     }
                 });
             }

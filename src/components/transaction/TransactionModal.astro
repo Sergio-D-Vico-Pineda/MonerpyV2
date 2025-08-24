@@ -8,7 +8,6 @@ import Date from "@comps/transaction/Date.astro";
 import Category from "@comps/transaction/Category.astro";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 const modalId = Astro.props.id ?? null;
 ---
 
@@ -38,8 +37,6 @@ const modalId = Astro.props.id ?? null;
             </header>
 
             <form id="transactionForm" class="p-6 flex flex-col gap-y-4">
-                <CSRFToken />
-
                 <input type="hidden" name="id" id="transactionId" />
 
                 <!-- Account and Name -->
@@ -250,6 +247,13 @@ const modalId = Astro.props.id ?? null;
                         e.preventDefault();
 
                         const formData = new FormData(form);
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+
+                        if (csrfInput && csrfInput.value) {
+                            formData.set("_csrf_token", csrfInput.value);
+                        }
                         const action = formData.get("_action") as string;
 
                         try {

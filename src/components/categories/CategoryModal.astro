@@ -3,7 +3,6 @@ import { actions } from "astro:actions";
 import X from "@svg/mono/X.astro";
 import Input from "@comps/Input.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 
 // Categories for parent selection
 interface Category {
@@ -57,8 +56,6 @@ const parentCategories: Category[] = (allCategories || []).filter(
         </header>
 
         <form id="categoryForm" class="p-6 flex flex-col gap-y-4">
-            <CSRFToken />
-
             <Input
                 id="categoryName"
                 label="Category Name"
@@ -173,6 +170,13 @@ const parentCategories: Category[] = (allCategories || []).filter(
 
             if (!this._form) return;
             const formData = new FormData(this._form);
+            const csrfInput = document.querySelector(
+                'input[name="_csrf_token"]',
+            ) as HTMLInputElement;
+
+            if (csrfInput && csrfInput.value) {
+                formData.set("_csrf_token", csrfInput.value);
+            }
             const { ToastService } = await import("@lib/toast.ts");
 
             try {

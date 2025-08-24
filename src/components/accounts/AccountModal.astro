@@ -3,7 +3,6 @@ import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 import Input from "@comps/Input.astro";
 import AccountTypeSelect from "@comps/accounts/AccountTypeSelect.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 ---
 
 <!-- Modal as a Custom Element host -->
@@ -32,8 +31,6 @@ import CSRFToken from "@comps/CSRFToken.astro";
 
         <!-- Modal Content -->
         <form id="accountForm" class="p-6 flex flex-col gap-y-4">
-            <CSRFToken />
-
             <Input
                 id="accountName"
                 label="Account Name"
@@ -148,6 +145,13 @@ import CSRFToken from "@comps/CSRFToken.astro";
 
             if (!this._form) return;
             const formData = new FormData(this._form);
+            const csrfInput = document.querySelector(
+                'input[name="_csrf_token"]',
+            ) as HTMLInputElement;
+
+            if (csrfInput && csrfInput.value) {
+                formData.set("_csrf_token", csrfInput.value);
+            }
             const { ToastService } = await import("@lib/toast.ts");
 
             try {

@@ -3,7 +3,6 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 import Header from "@comps/layout/Header.astro";
 import ConfirmationModal from "@comps/ConfirmationModal.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 import { actions } from "astro:actions";
 import {
     formatDateForDisplay,
@@ -30,7 +29,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                     Account Information
                 </h2>
                 <form id="profileForm" class="flex flex-col gap-y-6">
-                    <CSRFToken />
                     <label for="username">
                         <p class="text-sm font-medium text-purple-300 mb-2">
                             Username
@@ -172,7 +170,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                 </h2>
 
                 <form id="passwordForm" class="flex flex-col gap-y-6">
-                    <CSRFToken />
                     <label for="currentPassword">
                         <p class="text-sm font-medium text-purple-300 mb-2">
                             Current Password
@@ -279,6 +276,13 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                 try {
                     const formData = new FormData(passwordForm);
+                    const csrfInput = document.querySelector(
+                        'input[name="_csrf_token"]',
+                    ) as HTMLInputElement;
+
+                    if (csrfInput && csrfInput.value) {
+                        formData.set("_csrf_token", csrfInput.value);
+                    }
                     const { data, error } =
                         await actions.changePassword(formData);
 
@@ -328,6 +332,13 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
             try {
                 const formData = new FormData(e.target as HTMLFormElement);
+                const csrfInput = document.querySelector(
+                    'input[name="_csrf_token"]',
+                ) as HTMLInputElement;
+
+                if (csrfInput && csrfInput.value) {
+                    formData.set("_csrf_token", csrfInput.value);
+                }
                 const { data, error } = await actions.updateProfile(formData);
 
                 console.log(data);

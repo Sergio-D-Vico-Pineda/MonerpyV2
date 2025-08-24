@@ -7,7 +7,6 @@ import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import { accountTypes } from "@arrays.d.ts";
 import Input from "@comps/Input.astro";
 import AccountTypeSelect from "@comps/accounts/AccountTypeSelect.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 
 const user = Astro.locals.user;
@@ -119,7 +118,6 @@ const account = accountResult.data.account;
                             id="updateAccountForm"
                             class="flex flex-col gap-y-4"
                         >
-                            <CSRFToken />
                             <input type="hidden" name="id" value={account.id} />
 
                             <!-- Account Name -->
@@ -313,6 +311,13 @@ const account = accountResult.data.account;
                 e.preventDefault();
 
                 const formData = new FormData(updateForm);
+                const csrfInput = document.querySelector(
+                    'input[name="_csrf_token"]',
+                ) as HTMLInputElement;
+
+                if (csrfInput && csrfInput.value) {
+                    formData.set("_csrf_token", csrfInput.value);
+                }
 
                 const { ToastService } = await import("@lib/toast.ts");
                 try {
