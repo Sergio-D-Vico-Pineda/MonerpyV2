@@ -271,7 +271,7 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                     newPassword.value !== confirmPassword.value
                 ) {
                     ToastService.showToast({
-                        message: "New passwords do not match",
+                        message: "New passwords do not match.",
                         type: "error",
                     });
                     return false;
@@ -279,7 +279,8 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                 try {
                     const formData = new FormData(passwordForm);
-                    const { data } = await actions.changePassword(formData);
+                    const { data, error } =
+                        await actions.changePassword(formData);
 
                     if (data?.ok) {
                         ToastService.success(
@@ -289,12 +290,20 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                         window.location.reload();
                     } else {
+                        let newError = error?.toString();
+                        if (newError?.includes("too_small")) {
+                            newError =
+                                "New password must be at least 6 characters long.";
+                        }
                         ToastService.showToast({
-                            message: data?.error || "Failed to change password",
+                            message:
+                                newError ||
+                                data?.error ||
+                                "Failed to change password.",
                             type: "error",
                         });
                         console.error(
-                            data?.error || "Failed to change password",
+                            error || data?.error || "Failed to change password",
                         );
                     }
                 } catch (error) {
@@ -302,7 +311,7 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                     ToastService.showToast({
                         message:
-                            "There was an unknown error changing the password",
+                            "There was an unknown error changing the password.",
                         type: "error",
                     });
                 }
@@ -334,9 +343,8 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
 
                 if (response.ok) {
                     ToastService.showToast({
-                        message: "Profile updated successfully",
+                        message: "Profile updated successfully.",
                         type: "success",
-                        duration: 3000,
                     });
                     setTimeout(() => {
                         window.location.reload();
@@ -344,17 +352,15 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                 } else {
                     const error = await response.json();
                     ToastService.showToast({
-                        message: error.error || "Failed to update profile",
+                        message: error.error || "Failed to update profile.",
                         type: "error",
-                        duration: 5000,
                     });
                 }
             } catch (error) {
                 console.error("Error:", error);
                 ToastService.showToast({
-                    message: "Failed to update profile",
+                    message: "Failed to update profile.",
                     type: "error",
-                    duration: 5000,
                 });
             }
         });

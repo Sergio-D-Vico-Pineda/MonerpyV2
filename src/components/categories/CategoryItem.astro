@@ -463,7 +463,7 @@ function isDescendantOf(
                     const name = formData.get("name") as string;
                     if (!name || name.trim() === "") {
                         ToastService.showToast({
-                            message: "Category name is required",
+                            message: "Category name is required.",
                             type: "error",
                         });
                         return;
@@ -523,14 +523,14 @@ function isDescendantOf(
                             ToastService.showToast({
                                 message:
                                     result.data?.error ||
-                                    "Failed to update category",
+                                    "Failed to update category.",
                                 type: "error",
                             });
                         }
                     } catch (err) {
                         console.error("Error updating category:", err);
                         ToastService.showToast({
-                            message: "An unexpected error occurred",
+                            message: "An unexpected error occurred.",
                             type: "error",
                         });
                     } finally {
@@ -601,14 +601,14 @@ function isDescendantOf(
                         } else {
                             ToastService.showToast({
                                 message:
-                                    data?.error || "Failed to delete category",
+                                    data?.error || "Failed to delete category.",
                                 type: "error",
                             });
                         }
                     } catch (err) {
                         console.error("Unexpected error:", err);
                         ToastService.showToast({
-                            message: "An unexpected error occurred",
+                            message: "An unexpected error occurred.",
                             type: "error",
                         });
                     } finally {

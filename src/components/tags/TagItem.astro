@@ -358,7 +358,7 @@ const { tag } = Astro.props as Props;
                 const name = formData.get("name") as string;
                 if (!name || name.trim() === "") {
                     ToastService.showToast({
-                        message: "Tag name is required",
+                        message: "Tag name is required.",
                         type: "error",
                     });
                     return;
@@ -415,14 +415,14 @@ const { tag } = Astro.props as Props;
                     } else {
                         ToastService.showToast({
                             message:
-                                result.data?.error || "Failed to update tag",
+                                result.data?.error || "Failed to update tag.",
                             type: "error",
                         });
                     }
                 } catch (err) {
                     console.error("Error updating tag:", err);
                     ToastService.showToast({
-                        message: "An unexpected error occurred",
+                        message: "An unexpected error occurred.",
                         type: "error",
                     });
                 } finally {
@@ -489,14 +489,14 @@ const { tag } = Astro.props as Props;
                     } else {
                         console.error("Error deleting tag:", data?.error);
                         ToastService.showToast({
-                            message: data?.error || "Failed to delete tag",
+                            message: data?.error || "Failed to delete tag.",
                             type: "error",
                         });
                     }
                 } catch (err) {
                     console.error("Unexpected error:", err);
                     ToastService.showToast({
-                        message: "An unexpected error occurred",
+                        message: "An unexpected error occurred.",
                         type: "error",
                     });
                 } finally {

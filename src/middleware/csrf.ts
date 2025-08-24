@@ -53,28 +53,28 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
     // Extract action name from URL (handle trailing slash)
     const pathParts = url.pathname.split('/').filter(part => part.length > 0);
     const actionName = pathParts[pathParts.length - 1];
-    console.log(`[CSRF] Processing action: ${actionName} at ${url.pathname}`);
+    // console.log(`[CSRF] Processing action: ${actionName} at ${url.pathname}`);
 
     // Only apply CSRF protection to specified actions
     if (!actionName || !CSRF_PROTECTED_ACTIONS.includes(actionName)) {
-        console.log(`[CSRF] Action ${actionName} not in protected list, skipping CSRF validation`);
+        // console.log(`[CSRF] Action ${actionName} not in protected list, skipping CSRF validation`);
         return next();
     }
 
-    console.log(`[CSRF] Action ${actionName} requires CSRF protection`);
+    // console.log(`[CSRF] Action ${actionName} requires CSRF protection`);
 
     // Skip CSRF for GET requests (they shouldn't modify data anyway)
     if (request.method !== 'POST') {
-        console.log(`[CSRF] Skipping CSRF for ${request.method} request`);
+        // console.log(`[CSRF] Skipping CSRF for ${request.method} request`);
         return next();
     }
 
-    console.log(`[CSRF] Validating CSRF for POST request to ${actionName}`);
+    // console.log(`[CSRF] Validating CSRF for POST request to ${actionName}`);
 
     // Get session
     const sessionId = cookies.get('astro-auth')?.value;
     if (!sessionId) {
-        console.log(`[CSRF] No session ID found`);
+        // console.log(`[CSRF] No session ID found`);
         return new Response(JSON.stringify({
             ok: false,
             error: 'Authentication required'
@@ -86,7 +86,7 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
 
     const session = getSession(sessionId);
     if (!session) {
-        console.log(`[CSRF] Invalid session for ID: ${sessionId}`);
+        // console.log(`[CSRF] Invalid session for ID: ${sessionId}`);
         return new Response(JSON.stringify({
             ok: false,
             error: 'Invalid session'
@@ -96,7 +96,7 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
         });
     }
 
-    console.log(`[CSRF] Session found, extracting CSRF token`);
+    // console.log(`[CSRF] Session found, extracting CSRF token`);
 
     // Extract and validate CSRF token
     let formData: FormData | undefined;
@@ -113,11 +113,11 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
     }
 
     const csrfToken = extractCSRFToken(request, formData);
-    console.log(`[CSRF] Extracted CSRF token: ${csrfToken ? 'present' : 'missing'}`);
-    console.log(`[CSRF] Expected CSRF token: ${session.csrfToken ? 'present' : 'missing'}`);
+    // console.log(`[CSRF] Extracted CSRF token: ${csrfToken ? 'present' : 'missing'}`);
+    // console.log(`[CSRF] Expected CSRF token: ${session.csrfToken ? 'present' : 'missing'}`);
 
     if (!validateCSRFToken(csrfToken, session.csrfToken)) {
-        console.log(`[CSRF] validation failed for action: ${actionName}`);
+        // console.log(`[CSRF] validation failed for action: ${actionName}`);
         return new Response(JSON.stringify({
             ok: false,
             error: 'Security validation failed. Please refresh the page and try again.'
@@ -127,7 +127,7 @@ export const csrfMiddleware = defineMiddleware(async (context, next) => {
         });
     }
 
-    console.log(`[CSRF] CSRF validation passed for action: ${actionName}`);
+    // console.log(`[CSRF] CSRF validation passed for action: ${actionName}`);
     // CSRF validation passed, continue with request
     return next();
 });
