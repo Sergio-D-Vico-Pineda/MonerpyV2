@@ -8,6 +8,7 @@ import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Folder from "@comps/svgs/mono/Folder.astro";
+import Bin from "@comps/svgs/mono/Bin.astro";
 import PlusButton from "@comps/PlusButton.astro";
 import TextButton from "@comps/TextButton.astro";
 
@@ -66,10 +67,19 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
             ) : (
                 <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg mx-auto max-w-7xl">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
-                            <Folder />
-                            Categories
-                        </h2>
+                        <div class="flex items-baseline-last gap-4">
+                            <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
+                                <Folder />
+                                Categories
+                            </h2>
+                            <a
+                                href="/categories/deleted"
+                                class="text-purple-400 hover:text-purple-300 flex items-center gap-2"
+                            >
+                                <Bin class="w-4 h-4" />
+                                <span>Deleted Categories</span>
+                            </a>
+                        </div>
 
                         <PlusButton
                             id="addCategoryButton"
@@ -151,7 +161,6 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
     <CategoryModal />
     <DeleteConfirmModal title="Delete Category" />
     <LogoutScript />
-
 </Layout>
 
 <script>

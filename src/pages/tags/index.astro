@@ -8,6 +8,7 @@ import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import Tag from "@comps/svgs/mono/Tag.astro";
+import Bin from "@comps/svgs/mono/Bin.astro";
 import PlusButton from "@comps/PlusButton.astro";
 import TextButton from "@comps/TextButton.astro";
 import type { Tag as TagModel, GetTagsResult } from "@types.d.ts";
@@ -42,10 +43,19 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
             ) : (
                 <div class="bg-gray-800 shadow-lg px-6 py-6 rounded-lg mx-auto max-w-7xl">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
-                            <Tag />
-                            Tags
-                        </h2>
+                        <div class="flex items-baseline-last gap-4">
+                            <h2 class="font-semibold text-purple-400 text-xl flex items-center gap-x-2">
+                                <Tag />
+                                Tags
+                            </h2>
+                            <a
+                                href="/tags/deleted"
+                                class="text-purple-400 hover:text-purple-300 flex items-center gap-2"
+                            >
+                                <Bin class="w-4 h-4" />
+                                <span>Deleted Tags</span>
+                            </a>
+                        </div>
                         <PlusButton id="addTagButton" title="Add a new Tag" />
                     </div>
 

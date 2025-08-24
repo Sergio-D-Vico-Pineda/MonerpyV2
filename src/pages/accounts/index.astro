@@ -4,7 +4,6 @@ import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import AccountModal from "@comps/accounts/AccountModal.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
-import CSRFToken from "@comps/CSRFToken.astro";
 import { actions } from "astro:actions";
 import JoinFamily from "@comps/layout/JoinFamily.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
@@ -146,8 +145,6 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
         <!-- Account Modal Component -->
         <AccountModal />
         <DeleteConfirmModal title="Delete Account" />
-
-        <CSRFToken id="delAccount" />
     </main>
 
     <LogoutScript />
@@ -192,8 +189,8 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
                                     const formData = new FormData();
                                     formData.append("id", accountId);
 
-                                    const csrfInput = document.getElementById(
-                                        "delAccount",
+                                    const csrfInput = document.querySelector(
+                                        'input[name="_csrf_token"]',
                                     ) as HTMLInputElement;
                                     if (csrfInput && csrfInput.value) {
                                         formData.append(
