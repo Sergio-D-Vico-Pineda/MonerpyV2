@@ -2,8 +2,8 @@
 import X from "@svg/mono/X.astro";
 import ColorPicker from "@comps/ColorPicker.astro";
 import Input from "@comps/Input.astro";
+import AccountTypeSelect from "@comps/AccountTypeSelect.astro";
 import CSRFToken from "@comps/CSRFToken.astro";
-import { accountTypes } from "@arrays.d.ts";
 ---
 
 <!-- Modal as a Custom Element host -->
@@ -42,30 +42,11 @@ import { accountTypes } from "@arrays.d.ts";
                 placeholder="Enter account name"
             />
 
-            <label for="accountType">
-                <p class="text-sm font-medium text-gray-200 mb-2">
-                    Account Type *
-                </p>
-                <select
-                    id="accountType"
-                    name="accountType"
-                    required
-                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                    <option value="">Select account type</option>
-                    {
-                        accountTypes.map((type) => (
-                            <option value={type.value}>
-                                {type.icon} {type.label}
-                            </option>
-                        ))
-                    }
-                </select>
-            </label>
+            <AccountTypeSelect required />
 
             <label for="initialBalance">
                 <p class="text-sm font-medium text-gray-200 mb-2">
-                    Initial Balance
+                    Initial Balance *
                 </p>
                 <input
                     type="number"
@@ -78,7 +59,7 @@ import { accountTypes } from "@arrays.d.ts";
                 />
             </label>
 
-            <ColorPicker id="color" label="Account Color" />
+            <ColorPicker required={true} id="color" label="Account Color" />
 
             <div class="flex items-center justify-end gap-x-3 pt-4">
                 <button
