@@ -441,7 +441,9 @@ const { tag } = Astro.props as Props;
                 try {
                     const modal = document.getElementById("deleteConfirmModal");
                     if (modal && typeof (modal as any).show === "function") {
-                        (modal as any).show(tagName, () => performTagDeletion(tagName));
+                        (modal as any).show(tagName, () =>
+                            performTagDeletion(tagName),
+                        );
                     } else {
                         console.warn(
                             "DeleteConfirmModal instance not found; cannot delete tag without confirmation modal.",
