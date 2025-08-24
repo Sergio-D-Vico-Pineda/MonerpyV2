@@ -8,6 +8,7 @@ const CSRF_PROTECTED_ACTIONS = [
     // Note: 'create' (user registration) and 'login' are excluded - they don't need CSRF protection as there's no session yet
     'logout',                      // User logout
     'changePassword',              // Password change
+    'updateProfile',               // Profile update
     // Transaction actions
     'createTransaction',
     'updateTransaction',
