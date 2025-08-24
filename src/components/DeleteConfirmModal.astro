@@ -55,8 +55,16 @@ const {
     </div>
 </delete-confirm-modal>
 
-<script type="module" is:inline>
+<script>
     class DeleteConfirmModal extends HTMLElement {
+        private _titleEl: HTMLElement | null = null;
+        private _nameSpan: HTMLElement | null = null;
+        private _confirmButton: HTMLButtonElement | null = null;
+        private _cancelButton: HTMLButtonElement | null = null;
+        private _currentCallback: (() => void | Promise<void>) | null;
+        private _opts: { title?: string; confirmLabel?: string; cancelLabel?: string };
+        public deleteConfirmModal?: DeleteConfirmModal;
+
         constructor() {
             super();
             this._onBackgroundClick = this._onBackgroundClick.bind(this);
@@ -100,7 +108,7 @@ const {
             document.removeEventListener("keydown", this._onKeyDown);
         }
 
-        _onBackgroundClick(e) {
+        _onBackgroundClick(e: MouseEvent) {
             if (e.target === this) this.hide();
         }
 
@@ -124,12 +132,12 @@ const {
             this.hide();
         }
 
-        _onKeyDown(e) {
+        _onKeyDown(e: KeyboardEvent) {
             if (e.key === "Escape" && !this.classList.contains("hidden"))
                 this.hide();
         }
 
-        _setDisabled(disabled) {
+        _setDisabled(disabled: boolean) {
             if (this._confirmButton) this._confirmButton.disabled = disabled;
             if (this._cancelButton) this._cancelButton.disabled = disabled;
             if (disabled) {
@@ -151,7 +159,7 @@ const {
          * @param {Function} onConfirm - callback invoked when confirmed (may return a Promise)
          * @param {Object} opts - optional labels: { title, confirmLabel, cancelLabel }
          */
-        show(itemName, onConfirm, opts = {}) {
+        show(itemName: string, onConfirm?: () => void | Promise<void>, opts: { title?: string; confirmLabel?: string; cancelLabel?: string } = {}) {
             this._nameSpan && (this._nameSpan.textContent = itemName || "");
             this._currentCallback =
                 typeof onConfirm === "function" ? onConfirm : null;
@@ -179,7 +187,7 @@ const {
         }
 
         // alias used in some places
-        openModal(itemName, onConfirm, opts) {
+        openModal(itemName: string, onConfirm?: () => void | Promise<void>, opts: { title?: string; confirmLabel?: string; cancelLabel?: string } = {}) {
             this.show(itemName, onConfirm, opts);
         }
 
@@ -195,14 +203,22 @@ const {
         customElements.define("delete-confirm-modal", DeleteConfirmModal);
     }
 
-    // Provide compatibility aliases used across codebase
+    // For compatibility, create aliases that point to the same element type
+    // but don't register the same class multiple times
     if (!customElements.get("delete-tag-confirm-modal")) {
-        customElements.define("delete-tag-confirm-modal", DeleteConfirmModal);
+        // Create a wrapper class that extends the original
+        class DeleteTagConfirmModal extends DeleteConfirmModal {}
+        customElements.define(
+            "delete-tag-confirm-modal",
+            DeleteTagConfirmModal,
+        );
     }
     if (!customElements.get("delete-category-confirm-modal")) {
+        // Create a wrapper class that extends the original
+        class DeleteCategoryConfirmModal extends DeleteConfirmModal {}
         customElements.define(
             "delete-category-confirm-modal",
-            DeleteConfirmModal,
+            DeleteCategoryConfirmModal,
         );
     }
 </script>
