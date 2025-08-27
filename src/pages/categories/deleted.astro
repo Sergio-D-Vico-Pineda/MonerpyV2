@@ -348,6 +348,30 @@ const deletedMsgs: string[] = [
             }
         });
 
+        // Direct checkbox click (without needing shift)
+        document.addEventListener("change", (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("selection-checkbox")) {
+                const cb = target as HTMLInputElement;
+                const id = parseInt(cb.value || "0");
+                if (!id) return;
+                if (!selectionMode) {
+                    enterSelectionMode();
+                }
+                if (cb.checked) {
+                    if (selection.size >= MAX_BULK && !selection.has(id)) {
+                        // Revert if over limit
+                        cb.checked = false;
+                        return;
+                    }
+                    selection.add(id);
+                } else {
+                    selection.delete(id);
+                }
+                updateBulkBar();
+            }
+        });
+
         document
             .getElementById("clearSelectionBtn")
             ?.addEventListener("click", () => {

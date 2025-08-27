@@ -7,6 +7,7 @@ import { actions } from "astro:actions";
 import { formatDateForDisplay } from "@lib/date-utils.ts";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import Tag from "@comps/svgs/mono/Tag.astro";
+import DeletedInfo from "@/components/DeletedInfo.astro";
 
 const user = Astro.locals.user;
 
@@ -30,6 +31,13 @@ const allTags = tagsResult.data?.ok ? tagsResult.data.tags : [];
 const deletedTags = allTags
     ? allTags.filter((tag: any) => tag.deletedAt !== null)
     : [];
+
+const deletedInfoItems = [
+    "Deleted tags are hidden from the main interface but their data is preserved",
+    "All associated transactions remain intact",
+    "You can restore deleted tags at any time",
+    "Restored tags will reappear in your tag lists",
+];
 ---
 
 <Layout title="Deleted Tags" description="Manage deleted tags">
@@ -55,6 +63,33 @@ const deletedTags = allTags
                         <span>Tags</span>
                     </a>
                 </div>
+                <div id="bulkHeaderBar" class="hidden items-center gap-x-4">
+                    <div class="text-sm text-gray-300">
+                        <span id="selectedCount">0</span> selected (max 10)
+                    </div>
+                    <div class="flex items-center gap-x-2">
+                        <button
+                            id="bulkRestoreBtn"
+                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Restore Selected</button
+                        >
+                        <button
+                            id="bulkPurgeBtn"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Purge Selected</button
+                        >
+                        <button
+                            id="clearSelectionBtn"
+                            class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                            >Clear</button
+                        >
+                        <button
+                            id="selectAllBtn"
+                            class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Select All</button
+                        >
+                    </div>
+                </div>
             </div>
 
             {
@@ -69,15 +104,27 @@ const deletedTags = allTags
                         <p>All your tags are active!</p>
                     </div>
                 ) : (
-                    <div class="flex flex-col gap-y-4">
+                    <div class="flex flex-col gap-y-4" id="deletedTagsList">
                         {deletedTags.map((tag: any) => (
-                            <div class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500">
+                            <div
+                                class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500 tag-item"
+                                data-tag-id={tag.id}
+                                data-tag-name={tag.name}
+                            >
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-x-4">
-                                        <div
-                                            class="w-4 h-4 rounded-full opacity-50"
-                                            style={`background-color: ${tag.color}`}
-                                        />
+                                        <div class="w-4 h-4 rounded-sm opacity-50 selection-checkbox-wrapper relative">
+                                            <input
+                                                type="checkbox"
+                                                class="hidden selection-checkbox"
+                                                value={tag.id}
+                                                data-name={tag.name}
+                                            />
+                                            <div
+                                                class="w-4 h-4 rounded-full color-indicator"
+                                                style={`background-color: ${tag.color}`}
+                                            />
+                                        </div>
                                         <div>
                                             <h3 class="font-semibold text-white">
                                                 {tag.name}
@@ -97,8 +144,7 @@ const deletedTags = allTags
                                             </p>
                                         </div>
                                     </div>
-
-                                    <div class="flex items-center gap-x-2">
+                                    <div class="flex items-center gap-x-2 per-item-actions">
                                         <form class="restore-tag-form inline">
                                             <input
                                                 type="hidden"
@@ -131,46 +177,299 @@ const deletedTags = allTags
                                 </div>
                             </div>
                         ))}
-
-                        <div class="mt-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg">
-                            <div class="flex items-start gap-x-3">
-                                <div class="text-yellow-400 text-xl">⚠️</div>
-                                <div>
-                                    <h3 class="text-yellow-400 font-semibold mb-2">
-                                        About Deleted Tags
-                                    </h3>
-                                    <ul class="text-yellow-200 text-sm flex flex-col gap-y-1">
-                                        <li>
-                                            • Deleted tags are hidden from the
-                                            main interface but their data is
-                                            preserved
-                                        </li>
-                                        <li>
-                                            • All associated transactions remain
-                                            intact
-                                        </li>
-                                        <li>
-                                            • You can restore deleted tags at
-                                            any time
-                                        </li>
-                                        <li>
-                                            • Restored tags will reappear in
-                                            your tag lists
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 )
             }
         </div>
+        <DeletedInfo
+            classes="mx-auto max-w-7xl"
+            title="Deleted Tags Information"
+            listItems={deletedInfoItems}
+        />
     </main>
 
     <ConfirmationModal variant="info" />
     <LogoutScript />
 
     <script>
+        // Multi-select state for tags
+        const selection = new Set<number>();
+        let selectionMode = false;
+        const MAX_BULK = 10;
+
+        function updateBulkBar() {
+            const bulkHeaderBar = document.getElementById("bulkHeaderBar");
+            if (!bulkHeaderBar) return;
+            const countEl = document.getElementById("selectedCount");
+            if (countEl) countEl.textContent = String(selection.size);
+            if (selection.size > 0) {
+                bulkHeaderBar.classList.remove("hidden");
+                bulkHeaderBar.classList.add("flex");
+            } else {
+                bulkHeaderBar.classList.add("hidden");
+                bulkHeaderBar.classList.remove("flex");
+                exitSelectionMode();
+            }
+            (
+                document.getElementById("bulkRestoreBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            (
+                document.getElementById("bulkPurgeBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            const selectAllBtn = document.getElementById(
+                "selectAllBtn",
+            ) as HTMLButtonElement | null;
+            if (selectAllBtn) {
+                const total = document.querySelectorAll(".tag-item").length;
+                selectAllBtn.toggleAttribute(
+                    "disabled",
+                    selection.size === 0 ||
+                        selection.size >= Math.min(total, MAX_BULK),
+                );
+            }
+        }
+
+        function enterSelectionMode() {
+            if (selectionMode) return;
+            selectionMode = true;
+            document
+                .querySelectorAll(".selection-checkbox")
+                .forEach((el) =>
+                    (el as HTMLInputElement).classList.remove("hidden"),
+                );
+            document
+                .querySelectorAll(".color-indicator")
+                .forEach((el) => el.classList.add("hidden"));
+            document
+                .querySelectorAll(".per-item-actions")
+                .forEach((el) => (el as HTMLElement).classList.add("hidden"));
+            document
+                .getElementById("deletedTagsList")
+                ?.classList.add("select-none");
+        }
+
+        function clearSelection() {
+            selection.clear();
+            document
+                .querySelectorAll(".selection-checkbox")
+                .forEach((el) => ((el as HTMLInputElement).checked = false));
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+            updateBulkBar();
+        }
+
+        function exitSelectionMode() {
+            if (!selectionMode) return;
+            selectionMode = false;
+            document
+                .querySelectorAll(".selection-checkbox")
+                .forEach((el) => el.classList.add("hidden"));
+            document
+                .querySelectorAll(".color-indicator")
+                .forEach((el) => el.classList.remove("hidden"));
+            document
+                .querySelectorAll(".per-item-actions")
+                .forEach((el) =>
+                    (el as HTMLElement).classList.remove("hidden"),
+                );
+            document
+                .getElementById("deletedTagsList")
+                ?.classList.remove("select-none");
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+        }
+
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && selectionMode) {
+                clearSelection();
+                exitSelectionMode();
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            const target = e.target as HTMLElement;
+            const container = target.closest(".tag-item") as HTMLElement | null;
+            if (!container) return;
+            const id = parseInt(container.getAttribute("data-tag-id") || "0");
+            const checkbox = container.querySelector(
+                ".selection-checkbox",
+            ) as HTMLInputElement | null;
+            if (e.shiftKey && id && checkbox) {
+                e.preventDefault();
+                enterSelectionMode();
+                if (selection.has(id)) {
+                    selection.delete(id);
+                    checkbox.checked = false;
+
+        // Direct checkbox click (without shift)
+        document.addEventListener('change', (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('selection-checkbox')) {
+                const cb = target as HTMLInputElement;
+                const id = parseInt(cb.value || '0');
+                if (!id) return;
+                if (!selectionMode) enterSelectionMode();
+                if (cb.checked) {
+                    if (selection.size >= MAX_BULK && !selection.has(id)) {
+                        cb.checked = false; // exceed limit
+                        return;
+                    }
+                    selection.add(id);
+                } else {
+                    selection.delete(id);
+                }
+                updateBulkBar();
+            }
+        });
+                } else if (selection.size < MAX_BULK) {
+                    selection.add(id);
+                    checkbox.checked = true;
+                }
+                updateBulkBar();
+            }
+        });
+
+        document
+            .getElementById("clearSelectionBtn")
+            ?.addEventListener("click", () => {
+                clearSelection();
+            });
+        document
+            .getElementById("selectAllBtn")
+            ?.addEventListener("click", () => {
+                const items = Array.from(
+                    document.querySelectorAll(".tag-item"),
+                ) as HTMLElement[];
+                let changed = false;
+                for (const el of items) {
+                    if (selection.size >= MAX_BULK) break;
+                    const id = parseInt(el.getAttribute("data-tag-id") || "0");
+                    if (id && !selection.has(id)) {
+                        selection.add(id);
+                        const cb = el.querySelector(
+                            ".selection-checkbox",
+                        ) as HTMLInputElement | null;
+                        if (cb) cb.checked = true;
+                        changed = true;
+                    }
+                }
+                if (changed) updateBulkBar();
+            });
+
+        document
+            .getElementById("bulkRestoreBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.tag-item[data-tag-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-tag-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                confirmationModal?.show({
+                    title: "Restore Tags",
+                    message: `Restore these tags?\n\n${names.join("\n")}`,
+                    confirmLabel: "Restore",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkRestoreTags(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Restored ${result.data.restored} tags.`,
+                                );
+                                if (result.data.skipped?.length)
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
+                                    );
+                                window.location.reload();
+                            } else {
+                                ToastService.error(
+                                    result.data?.error || "Bulk restore failed",
+                                );
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
+                });
+            });
+
+        document
+            .getElementById("bulkPurgeBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.tag-item[data-tag-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-tag-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                confirmationModal?.show({
+                    title: "Permanently Delete Tags",
+                    message: `Permanently delete these tags? This cannot be undone.\n\n${names.join("\n")}`,
+                    confirmLabel: "Purge",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkPurgeTags(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Purged ${result.data.purged} tags.`,
+                                );
+                                if (result.data.skipped?.length)
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
+                                    );
+                                window.location.reload();
+                            } else {
+                                ToastService.error(
+                                    result.data?.error || "Bulk purge failed",
+                                );
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
+                });
+            });
+
         // Handle restore tag forms
         document.addEventListener("DOMContentLoaded", function () {
             const restoreForms = document.querySelectorAll(".restore-tag-form");
