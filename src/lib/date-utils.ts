@@ -106,7 +106,7 @@ function formatDateForDisplay(
         includeTime = true,
         includeSeconds = false,
         dateStyle = 'normal',
-        pm = false,
+        pm = true,
     } = options;
 
     // Accept either "YYYY-MM-DD HH:mm[:ss]" or "YYYY-MM-DD" (date-only).

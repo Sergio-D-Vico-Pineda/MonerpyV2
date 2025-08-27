@@ -112,7 +112,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                                               userInfo.createdAt,
                                               {
                                                   includeTime: true,
-                                                  pm: true,
                                               },
                                           )
                                         : "Unknown"
@@ -129,7 +128,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                                               userInfo.lastLogin,
                                               {
                                                   includeTime: true,
-                                                  pm: true,
                                               },
                                           )
                                         : "Never logged in"
@@ -146,7 +144,6 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
                                               userInfo.updatedAt,
                                               {
                                                   includeTime: true,
-                                                  pm: true,
                                               },
                                           )
                                         : "Unknown"
