@@ -41,8 +41,11 @@ const { id } = Astro.props as Props;
                 </button>
             </header>
 
-            <form id="transactionForm" class="p-6 flex flex-col gap-y-4" novalidate>
-
+            <form
+                id="transactionForm"
+                class="p-6 flex flex-col gap-y-4"
+                novalidate
+            >
                 <!-- Account and Name -->
                 <div class="flex items-center gap-x-4 justify-center">
                     <Account id="accountId" classes="flex-1" />
@@ -51,7 +54,7 @@ const { id } = Astro.props as Props;
                         id="name"
                         label="Transaction Name"
                         name="name"
-                        required
+                        required={true}
                         placeholder="Enter transaction name"
                         classes="flex-1/3"
                     />
@@ -90,7 +93,10 @@ const { id } = Astro.props as Props;
                         class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         <span id="submitBtnText">Add Transaction</span>
-                        <span id="submitSpinner" class="hidden w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin"></span>
+                        <span
+                            id="submitSpinner"
+                            class="hidden w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin"
+                        ></span>
                     </button>
                 </div>
             </form>
@@ -99,25 +105,7 @@ const { id } = Astro.props as Props;
 
     <script>
         // Import date utility functions once
-        import {
-            getCurrentDateTimeLocal,
-            formatToDateTimeLocal,
-        } from "@lib/date-utils.ts";
-
-        // Define a TypeScript interface for transaction
-        interface TransactionTag {
-            name: string;
-        }
-        interface Transaction {
-            id: string;
-            accountId: string;
-            type: string;
-            name: string;
-            amount: string;
-            date: string;
-            categoryId?: string;
-            tags?: TransactionTag[];
-        }
+        import { getCurrentDateTimeLocal } from "@lib/date-utils.ts";
 
         class TransactionModal extends HTMLElement {
             connectedCallback() {
@@ -138,9 +126,15 @@ const { id } = Astro.props as Props;
                 const formTitle = this.querySelector(
                     "#modalTitle",
                 ) as HTMLHeadingElement;
-                const submitText = this.querySelector("#submitBtnText") as HTMLSpanElement;
-                const submitBtn = this.querySelector("#submitBtn") as HTMLButtonElement;
-                const submitSpinner = this.querySelector("#submitSpinner") as HTMLSpanElement;
+                const submitText = this.querySelector(
+                    "#submitBtnText",
+                ) as HTMLSpanElement;
+                const submitBtn = this.querySelector(
+                    "#submitBtn",
+                ) as HTMLButtonElement;
+                const submitSpinner = this.querySelector(
+                    "#submitSpinner",
+                ) as HTMLSpanElement;
                 const form = this.querySelector(
                     "#transactionForm",
                 ) as HTMLFormElement;
@@ -154,22 +148,25 @@ const { id } = Astro.props as Props;
                 ) as HTMLSelectElement;
                 // radios inside TypePicker handle type
                 const name = this.querySelector("#name") as HTMLInputElement;
-                const amount = this.querySelector(
-                    "#amount",
-                ) as HTMLInputElement;
-                const categoryId = this.querySelector(
-                    "#categoryId",
-                ) as HTMLSelectElement;
                 const tags = this.querySelector("#tags") as HTMLInputElement;
+                const tagsDropdownRoots = this.querySelectorAll(
+                    "[data-tags-dropdown-root]",
+                ) as NodeListOf<HTMLDivElement>;
 
                 const computeFocusables = () => {
-                    const dialogPanel = this.querySelector('[role="dialog"]') as HTMLElement;
+                    const dialogPanel = this.querySelector(
+                        '[role="dialog"]',
+                    ) as HTMLElement;
                     if (!dialogPanel) return;
                     focusable = Array.from(
                         dialogPanel.querySelectorAll<HTMLElement>(
-                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                        )
-                    ).filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                        ),
+                    ).filter(
+                        (el) =>
+                            !el.hasAttribute("disabled") &&
+                            !el.getAttribute("aria-hidden"),
+                    );
                     firstFocusable = focusable[0] || null;
                     lastFocusable = focusable[focusable.length - 1] || null;
                 };
@@ -211,7 +208,8 @@ const { id } = Astro.props as Props;
                         document.body.style.overflow = "hidden";
                         computeFocusables();
                         // focus name input
-                        if (name && typeof name.focus === 'function') name.focus();
+                        if (name && typeof name.focus === "function")
+                            name.focus();
                     }
                 };
 
@@ -233,9 +231,24 @@ const { id } = Astro.props as Props;
                     }
                     // restore saved account after reset
                     try {
-                        const saved = window.localStorage.getItem("selectedAccountId");
+                        const saved =
+                            window.localStorage.getItem("selectedAccountId");
                         if (saved && accountId) accountId.value = saved;
                     } catch (e) {}
+
+                    // reset tags input value
+                    if (tags) tags.value = "";
+                    // invoke component-level reset if exposed
+                    if (tagsDropdownRoots && tagsDropdownRoots.length > 0) {
+                        tagsDropdownRoots.forEach((root) => {
+                            const anyRoot: any = root;
+                            if (typeof anyRoot.resetTags === "function") {
+                                try {
+                                    anyRoot.resetTags();
+                                } catch (_) {}
+                            }
+                        });
+                    }
                 };
 
                 // Hook up events
@@ -259,18 +272,21 @@ const { id } = Astro.props as Props;
                         // Submit create only
                         if (submitBtn) {
                             submitBtn.disabled = true;
-                            submitSpinner?.classList.remove('hidden');
+                            submitSpinner?.classList.remove("hidden");
                         }
 
                         try {
                             const { actions } = await import("astro:actions");
-                            const result = await actions.createTransaction(formData);
+                            const result =
+                                await actions.createTransaction(formData);
 
                             if (result?.data?.ok) {
                                 const { ToastService } = await import(
                                     "@lib/toast.ts"
                                 );
-                                ToastService.success("Transaction created successfully!");
+                                ToastService.success(
+                                    "Transaction created successfully!",
+                                );
                                 closeModal();
                                 // Reload the page to show updated data
                                 window.location.reload();
@@ -279,7 +295,8 @@ const { id } = Astro.props as Props;
                                     "@lib/toast.ts"
                                 );
                                 ToastService.showToast({
-                                    message: "Failed to create transaction. Please try again.",
+                                    message:
+                                        "Failed to create transaction. Please try again.",
                                     type: "error",
                                 });
                                 console.error(
@@ -301,7 +318,7 @@ const { id } = Astro.props as Props;
                         } finally {
                             if (submitBtn) {
                                 submitBtn.disabled = false;
-                                submitSpinner?.classList.add('hidden');
+                                submitSpinner?.classList.add("hidden");
                             }
                         }
                     });
@@ -340,19 +357,24 @@ const { id } = Astro.props as Props;
                 (this as any).resetForm = resetForm;
                 // Persist account selection when user changes it
                 if (accountId) {
-                    accountId.addEventListener('change', () => {
-                        try { window.localStorage.setItem('selectedAccountId', accountId.value); } catch(e) {}
+                    accountId.addEventListener("change", () => {
+                        try {
+                            window.localStorage.setItem(
+                                "selectedAccountId",
+                                accountId.value,
+                            );
+                        } catch (e) {}
                     });
                 }
 
                 // Focus trap & ESC handling at root
-                this.addEventListener('keydown', (e: KeyboardEvent) => {
-                    if (e.key === 'Escape') {
+                this.addEventListener("keydown", (e: KeyboardEvent) => {
+                    if (e.key === "Escape") {
                         e.stopPropagation();
                         closeModal();
                         return;
                     }
-                    if (e.key === 'Tab') {
+                    if (e.key === "Tab") {
                         computeFocusables();
                         if (!firstFocusable || !lastFocusable) return;
                         if (e.shiftKey) {
