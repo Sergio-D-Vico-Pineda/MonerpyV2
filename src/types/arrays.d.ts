@@ -1,6 +1,6 @@
 const transactionTypes = [
-    "income",
-    "expense",
+    "Income",
+    "Expense",
 ];
 
 const accountTypes = [

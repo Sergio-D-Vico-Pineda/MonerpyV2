@@ -24,7 +24,7 @@ const { classes }: Props = Astro.props;
                         value={type}
                         class={
                             `form-radio peer ` +
-                            (type === "income"
+                            (type === "Income"
                                 ? "accent-green-500"
                                 : "accent-red-500")
                         }
@@ -33,12 +33,12 @@ const { classes }: Props = Astro.props;
                     <span
                         class={
                             `ml-2 ` +
-                            (type === "income"
+                            (type === "Income"
                                 ? "peer-checked:text-green-500"
                                 : "peer-checked:text-red-500")
                         }
                     >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                        {type}
                     </span>
                 </label>
             ))
