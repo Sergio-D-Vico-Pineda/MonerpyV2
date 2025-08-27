@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
@@ -324,6 +323,4 @@ const balanceChangePercent =
             </div>
         </div>
     </main>
-
-    <LogoutScript />
 </Layout>

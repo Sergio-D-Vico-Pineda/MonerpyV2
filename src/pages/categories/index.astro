@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import CategoryModal from "@comps/categories/CategoryModal.astro";
 import CategoryItem from "@comps/categories/CategoryItem.astro";
@@ -160,129 +159,134 @@ const childCategories = categories.filter((cat) => cat.parentId) || [];
 
     <CategoryModal />
     <DeleteConfirmModal title="Delete Category" />
-    <LogoutScript />
-</Layout>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Check for stored toast messages from previous operations
-        const storedToast = sessionStorage.getItem("categoryToast");
-        if (storedToast) {
-            try {
-                const toastData = JSON.parse(storedToast);
-                // Import and show toast
-                import("@lib/toast.ts").then(({ ToastService }) => {
-                    ToastService.showToast({
-                        message: toastData.message,
-                        type: toastData.type,
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check for stored toast messages from previous operations
+            const storedToast = sessionStorage.getItem("categoryToast");
+            if (storedToast) {
+                try {
+                    const toastData = JSON.parse(storedToast);
+                    // Import and show toast
+                    import("@lib/toast.ts").then(({ ToastService }) => {
+                        ToastService.showToast({
+                            message: toastData.message,
+                            type: toastData.type,
+                        });
                     });
-                });
-                // Clear the stored message
-                sessionStorage.removeItem("categoryToast");
-            } catch (e) {
-                console.error("Error parsing stored toast:", e);
-                sessionStorage.removeItem("categoryToast");
+                    // Clear the stored message
+                    sessionStorage.removeItem("categoryToast");
+                } catch (e) {
+                    console.error("Error parsing stored toast:", e);
+                    sessionStorage.removeItem("categoryToast");
+                }
             }
-        }
 
-        // Listen for custom events from CategoryItem components
-        document.addEventListener("category-updated", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Category updated:", customEvent.detail);
+            // Listen for custom events from CategoryItem components
+            document.addEventListener("category-updated", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Category updated:", customEvent.detail);
 
-            // Store success message in sessionStorage to show after refresh
-            sessionStorage.setItem(
-                "categoryToast",
-                JSON.stringify({
-                    message: "Category updated successfully!",
-                    type: "success",
-                }),
-            );
+                // Store success message in sessionStorage to show after refresh
+                sessionStorage.setItem(
+                    "categoryToast",
+                    JSON.stringify({
+                        message: "Category updated successfully!",
+                        type: "success",
+                    }),
+                );
 
-            // Refresh immediately to show changes
-            location.reload();
-        });
-
-        document.addEventListener("category-created", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Category created:", customEvent.detail);
-
-            // Store success message in sessionStorage to show after refresh
-            sessionStorage.setItem(
-                "categoryToast",
-                JSON.stringify({
-                    message: "Category created successfully!",
-                    type: "success",
-                }),
-            );
-
-            // Refresh immediately to show changes
-            location.reload();
-        });
-
-        document.addEventListener("category-deleted", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Category deleted:", customEvent.detail);
-
-            // Store success message in sessionStorage to show after refresh
-            sessionStorage.setItem(
-                "categoryToast",
-                JSON.stringify({
-                    message: "Category deleted successfully!",
-                    type: "success",
-                }),
-            );
-
-            // Refresh immediately to show changes
-            location.reload();
-        });
-
-        document.addEventListener("category-edit-started", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Category edit started:", customEvent.detail);
-            // Optionally handle any page-level state changes
-        });
-
-        document.addEventListener("category-edit-cancelled", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Category edit cancelled:", customEvent.detail);
-            // Optionally handle any page-level state changes
-        });
-
-        // Handle add category button clicks
-        const addCategoryButton = document.getElementById(
-            "addCategoryButton",
-        ) as HTMLButtonElement;
-
-        if (addCategoryButton) {
-            addCategoryButton.addEventListener("click", () => {
-                const modal = document.getElementById("categoryModal");
-                if (modal && typeof (modal as any).showModal === "function") {
-                    try {
-                        (modal as any).showModal();
-                    } catch (e) {
-                        /* ignore */
-                    }
-                }
+                // Refresh immediately to show changes
+                location.reload();
             });
-        }
 
-        const createCategoryButton = document.getElementById(
-            "addFirstCategoryButton",
-        ) as HTMLButtonElement;
-        if (createCategoryButton) {
-            createCategoryButton.addEventListener("click", () => {
-                const modal = document.getElementById("categoryModal");
-                if (modal && typeof (modal as any).showModal === "function") {
-                    try {
-                        (modal as any).showModal();
-                    } catch (e) {
-                        /* ignore */
-                    }
-                }
+            document.addEventListener("category-created", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Category created:", customEvent.detail);
+
+                // Store success message in sessionStorage to show after refresh
+                sessionStorage.setItem(
+                    "categoryToast",
+                    JSON.stringify({
+                        message: "Category created successfully!",
+                        type: "success",
+                    }),
+                );
+
+                // Refresh immediately to show changes
+                location.reload();
             });
-        }
 
-        // addCategoryButton.click();
-    });
-</script>
+            document.addEventListener("category-deleted", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Category deleted:", customEvent.detail);
+
+                // Store success message in sessionStorage to show after refresh
+                sessionStorage.setItem(
+                    "categoryToast",
+                    JSON.stringify({
+                        message: "Category deleted successfully!",
+                        type: "success",
+                    }),
+                );
+
+                // Refresh immediately to show changes
+                location.reload();
+            });
+
+            document.addEventListener("category-edit-started", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Category edit started:", customEvent.detail);
+                // Optionally handle any page-level state changes
+            });
+
+            document.addEventListener("category-edit-cancelled", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Category edit cancelled:", customEvent.detail);
+                // Optionally handle any page-level state changes
+            });
+
+            // Handle add category button clicks
+            const addCategoryButton = document.getElementById(
+                "addCategoryButton",
+            ) as HTMLButtonElement;
+
+            if (addCategoryButton) {
+                addCategoryButton.addEventListener("click", () => {
+                    const modal = document.getElementById("categoryModal");
+                    if (
+                        modal &&
+                        typeof (modal as any).showModal === "function"
+                    ) {
+                        try {
+                            (modal as any).showModal();
+                        } catch (e) {
+                            /* ignore */
+                        }
+                    }
+                });
+            }
+
+            const createCategoryButton = document.getElementById(
+                "addFirstCategoryButton",
+            ) as HTMLButtonElement;
+            if (createCategoryButton) {
+                createCategoryButton.addEventListener("click", () => {
+                    const modal = document.getElementById("categoryModal");
+                    if (
+                        modal &&
+                        typeof (modal as any).showModal === "function"
+                    ) {
+                        try {
+                            (modal as any).showModal();
+                        } catch (e) {
+                            /* ignore */
+                        }
+                    }
+                });
+            }
+
+            // addCategoryButton.click();
+        });
+    </script>
+</Layout>

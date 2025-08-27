@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ALeft from "@comps/svgs/mono/ALeft.astro";
 import ARight from "@comps/svgs/mono/ARight.astro";
@@ -195,6 +194,10 @@ if (!user) {
     </section>
   </main>
 
+  <TransactionModal id="transactionModal" />
+  <RecurringTransactionModal id="recurringTransactionModal" />
+  <CategoryModal />
+
   <script type="module" is:inline>
     import { waitForModal } from "/src/lib/client/waitForModal.js";
 
@@ -247,17 +250,16 @@ if (!user) {
 
     if (newGroupBtn) {
       newGroupBtn.addEventListener("click", () => {
-        const modal = document.getElementById('categoryModal');
-        const fn = modal && (modal.showModal);
-        if (typeof fn === 'function') {
-          try { fn.call(modal); } catch (e) { /* ignore */ }
+        const modal = document.getElementById("categoryModal");
+        const fn = modal && modal.showModal;
+        if (typeof fn === "function") {
+          try {
+            fn.call(modal);
+          } catch (e) {
+            /* ignore */
+          }
         }
       });
     }
   </script>
 </Layout>
-
-<TransactionModal id="transactionModal" />
-<RecurringTransactionModal id="recurringTransactionModal" />
-<CategoryModal />
-<LogoutScript />

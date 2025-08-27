@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import AccountModal from "@comps/accounts/AccountModal.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
@@ -146,8 +145,6 @@ const accounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
         <AccountModal />
         <DeleteConfirmModal title="Delete Account" />
     </main>
-
-    <LogoutScript />
 
     <script>
         import { actions } from "astro:actions";

@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ConfirmationModal from "@comps/ConfirmationModal.astro";
 import { actions } from "astro:actions";
@@ -218,7 +217,6 @@ const deletedMsg = [
     </main>
 
     <ConfirmationModal variant="info" />
-    <LogoutScript />
 
     <script>
         // Mirror categories multi-select behavior

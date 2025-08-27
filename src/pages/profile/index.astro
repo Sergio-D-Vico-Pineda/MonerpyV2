@@ -1,5 +1,4 @@
 ---
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Layout from "@layouts/Layout.astro";
 import Header from "@comps/layout/Header.astro";
 import ConfirmationModal from "@comps/ConfirmationModal.astro";
@@ -390,5 +389,3 @@ const userInfo = userInfoResult.data?.ok && userInfoResult.data.user;
         });
     </script>
 </Layout>
-
-<LogoutScript />

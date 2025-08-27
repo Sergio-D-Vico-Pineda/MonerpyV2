@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import RecurringTransactionModal from "@comps/recurring/RecurringTransactionModal.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
@@ -512,8 +511,6 @@ function getStatusText(status: string): string {
     <RecurringTransactionModal id="recurringTransactionModal" />
     <DeleteConfirmModal title="Delete Recurring Transaction" />
     <ConfirmationModal variant="info" />
-
-    <LogoutScript />
 
     <script>
         import { actions } from "astro:actions";

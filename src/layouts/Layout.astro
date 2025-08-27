@@ -2,12 +2,14 @@
 import "../styles/global.css";
 import Toast from "@comps/toast/Toast.astro";
 import Footer from "@comps/layout/Footer.astro";
+import LogoutScript from "@comps/layout/LogoutScript.astro";
 
 interface Props {
 	title?: string;
 	description?: string;
 	classes?: string;
 	showFooter?: boolean;
+	includeLogout?: boolean;
 }
 
 const {
@@ -15,6 +17,7 @@ const {
 	description,
 	classes = "bg-gray-900",
 	showFooter = true,
+	includeLogout = true,
 }: Props = Astro.props;
 ---
 
@@ -31,6 +34,7 @@ const {
 	<body class={`flex flex-col min-h-screen ${classes || ""}`}>
 		<slot />
 		{showFooter && <Footer />}
+		{includeLogout && <LogoutScript />}
 		<Toast />
 		<script is:inline>
 			document.addEventListener("DOMContentLoaded", function () {

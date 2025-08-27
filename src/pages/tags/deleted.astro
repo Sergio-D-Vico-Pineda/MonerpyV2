@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import ConfirmationModal from "@comps/ConfirmationModal.astro";
 import { actions } from "astro:actions";
@@ -189,7 +188,6 @@ const deletedInfoItems = [
     </main>
 
     <ConfirmationModal variant="info" />
-    <LogoutScript />
 
     <script>
         // Multi-select state for tags
@@ -303,26 +301,29 @@ const deletedInfoItems = [
                     selection.delete(id);
                     checkbox.checked = false;
 
-        // Direct checkbox click (without shift)
-        document.addEventListener('change', (e) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains('selection-checkbox')) {
-                const cb = target as HTMLInputElement;
-                const id = parseInt(cb.value || '0');
-                if (!id) return;
-                if (!selectionMode) enterSelectionMode();
-                if (cb.checked) {
-                    if (selection.size >= MAX_BULK && !selection.has(id)) {
-                        cb.checked = false; // exceed limit
-                        return;
-                    }
-                    selection.add(id);
-                } else {
-                    selection.delete(id);
-                }
-                updateBulkBar();
-            }
-        });
+                    // Direct checkbox click (without shift)
+                    document.addEventListener("change", (e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.classList.contains("selection-checkbox")) {
+                            const cb = target as HTMLInputElement;
+                            const id = parseInt(cb.value || "0");
+                            if (!id) return;
+                            if (!selectionMode) enterSelectionMode();
+                            if (cb.checked) {
+                                if (
+                                    selection.size >= MAX_BULK &&
+                                    !selection.has(id)
+                                ) {
+                                    cb.checked = false; // exceed limit
+                                    return;
+                                }
+                                selection.add(id);
+                            } else {
+                                selection.delete(id);
+                            }
+                            updateBulkBar();
+                        }
+                    });
                 } else if (selection.size < MAX_BULK) {
                     selection.add(id);
                     checkbox.checked = true;

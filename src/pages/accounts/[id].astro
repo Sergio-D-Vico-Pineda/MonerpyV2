@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import { actions } from "astro:actions";
 import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
@@ -277,9 +276,6 @@ const account = accountResult.data.account;
         </div>
     </main>
 
-    <LogoutScript />
-
-    <!-- Color picker synchronization script -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const colorPicker = document.getElementById(

@@ -14,6 +14,7 @@ if (Astro.locals.user) {
   title="Login"
   description="Login to your Monerpy account"
   showFooter={false}
+  includeLogout={false}
 >
   <main class="min-h-screen flex items-center justify-center bg-gray-900">
     <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
@@ -69,62 +70,62 @@ if (Astro.locals.user) {
       <div id="errorMessage" class="mt-4 text-red-400 text-center hidden"></div>
     </div>
   </main>
-</Layout>
 
-<script>
-  import { ToastService } from "@/lib/toast";
-  import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
+  <script>
+    import { ToastService } from "@/lib/toast";
+    import { actions } from "astro:actions";
+    import { navigate } from "astro:transitions/client";
 
-  // Get redirect URL from current page URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirectTo = urlParams.get("redirectTo") || "/dashboard";
+    // Get redirect URL from current page URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get("redirectTo") || "/dashboard";
 
-  const form = document.getElementById("loginForm") as HTMLFormElement;
-  const loginButton = form?.querySelector(
-    'button[type="submit"]',
-  ) as HTMLButtonElement;
+    const form = document.getElementById("loginForm") as HTMLFormElement;
+    const loginButton = form?.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
 
-  if (form && loginButton) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    if (form && loginButton) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      loginButton.disabled = true;
-      const originalText = loginButton.textContent;
-      loginButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        loginButton.disabled = true;
+        const originalText = loginButton.textContent;
+        loginButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg> Loading...`;
 
-      try {
-        const formData = new FormData(form);
+        try {
+          const formData = new FormData(form);
 
-        const { data, error } = await actions.login(formData);
+          const { data, error } = await actions.login(formData);
 
-        if (data?.ok) {
-          // Use Astro's navigate for client-side routing
-          navigate(redirectTo);
-        } else {
-          console.error("Error logging in:", error || data?.error);
-          ToastService.error(data?.error || "Login failed");
+          if (data?.ok) {
+            // Use Astro's navigate for client-side routing
+            navigate(redirectTo);
+          } else {
+            console.error("Error logging in:", error || data?.error);
+            ToastService.error(data?.error || "Login failed");
+          }
+        } catch (error) {
+          // Display error message to user
+          const errorDiv = document.getElementById(
+            "errorMessage",
+          ) as HTMLDivElement;
+          errorDiv.classList.remove("hidden");
+          const errorMessage =
+            error instanceof Error ? error.message : "Login failed";
+          if (errorDiv) {
+            errorDiv.textContent = errorMessage;
+          }
+          console.error("Login error:", error);
+
+          // Reset button state
+          loginButton.disabled = false;
+          loginButton.textContent = originalText;
         }
-      } catch (error) {
-        // Display error message to user
-        const errorDiv = document.getElementById(
-          "errorMessage",
-        ) as HTMLDivElement;
-        errorDiv.classList.remove("hidden");
-        const errorMessage =
-          error instanceof Error ? error.message : "Login failed";
-        if (errorDiv) {
-          errorDiv.textContent = errorMessage;
-        }
-        console.error("Login error:", error);
-
-        // Reset button state
-        loginButton.disabled = false;
-        loginButton.textContent = originalText;
-      }
-    });
-  }
-</script>
+      });
+    }
+  </script>
+</Layout>

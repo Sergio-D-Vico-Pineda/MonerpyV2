@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import TagModal from "@comps/tags/TagModal.astro";
 import TagItem from "@comps/tags/TagItem.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
@@ -85,63 +84,62 @@ const tags: TagModel[] = typedTagsResult?.ok ? typedTagsResult.tags : [];
 
     <TagModal />
     <DeleteConfirmModal title="Delete Tag" />
-    <LogoutScript />
-</Layout>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Listen for custom events from TagItem components
-        document.addEventListener("tag-updated", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Tag updated:", customEvent.detail);
-            // Optionally handle any page-level updates needed
-        });
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Listen for custom events from TagItem components
+            document.addEventListener("tag-updated", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Tag updated:", customEvent.detail);
+                // Optionally handle any page-level updates needed
+            });
 
-        document.addEventListener("tag-deleted", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Tag deleted:", customEvent.detail);
+            document.addEventListener("tag-deleted", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Tag deleted:", customEvent.detail);
 
-            // Check if no tags left and reload to show empty state
-            const tagsContainer = document.querySelector(".grid");
-            if (tagsContainer && tagsContainer.children.length === 0) {
-                location.reload();
+                // Check if no tags left and reload to show empty state
+                const tagsContainer = document.querySelector(".grid");
+                if (tagsContainer && tagsContainer.children.length === 0) {
+                    location.reload();
+                }
+            });
+
+            document.addEventListener("tag-edit-started", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Tag edit started:", customEvent.detail);
+                // Optionally handle any page-level state changes
+            });
+
+            document.addEventListener("tag-edit-cancelled", (event) => {
+                const customEvent = event as CustomEvent;
+                console.log("Tag edit cancelled:", customEvent.detail);
+                // Optionally handle any page-level state changes
+            });
+
+            const addTagButton = document.getElementById(
+                "addTagButton",
+            ) as HTMLButtonElement;
+            if (addTagButton) {
+                addTagButton.addEventListener("click", async () => {
+                    const modal = document.getElementById("tagModal");
+                    if (modal && typeof (modal as any).openModal === "function")
+                        (modal as any).openModal();
+                });
             }
+
+            const addFirstTagButton = document.getElementById(
+                "addFirstTagButton",
+            ) as HTMLButtonElement;
+            if (addFirstTagButton) {
+                addFirstTagButton.addEventListener("click", async () => {
+                    const modal = document.getElementById("tagModal");
+                    if (modal && typeof (modal as any).openModal === "function")
+                        (modal as any).openModal();
+                });
+            }
+
+            // addTagButton.click();
         });
-
-        document.addEventListener("tag-edit-started", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Tag edit started:", customEvent.detail);
-            // Optionally handle any page-level state changes
-        });
-
-        document.addEventListener("tag-edit-cancelled", (event) => {
-            const customEvent = event as CustomEvent;
-            console.log("Tag edit cancelled:", customEvent.detail);
-            // Optionally handle any page-level state changes
-        });
-
-        const addTagButton = document.getElementById(
-            "addTagButton",
-        ) as HTMLButtonElement;
-        if (addTagButton) {
-            addTagButton.addEventListener("click", async () => {
-                const modal = document.getElementById("tagModal");
-                if (modal && typeof (modal as any).openModal === "function")
-                    (modal as any).openModal();
-            });
-        }
-
-        const addFirstTagButton = document.getElementById(
-            "addFirstTagButton",
-        ) as HTMLButtonElement;
-        if (addFirstTagButton) {
-            addFirstTagButton.addEventListener("click", async () => {
-                const modal = document.getElementById("tagModal");
-                if (modal && typeof (modal as any).openModal === "function")
-                    (modal as any).openModal();
-            });
-        }
-
-        // addTagButton.click();
-    });
-</script>
+    </script>
+</Layout>

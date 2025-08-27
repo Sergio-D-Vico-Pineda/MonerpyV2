@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import LogoutScript from "@comps/layout/LogoutScript.astro";
 import Header from "@comps/layout/Header.astro";
 import TransactionModal from "@comps/transaction/TransactionModal.astro";
 import DeleteConfirmModal from "@comps/DeleteConfirmModal.astro";
@@ -407,102 +406,102 @@ const sortedGroupedTransactions = Object.keys(groupedTransactions)
             )
         }
     </main>
-</Layout>
 
-<TransactionModal id="transactionModal" />
-<DeleteConfirmModal title="Delete Transaction" />
+    <TransactionModal id="transactionModal" />
+    <DeleteConfirmModal title="Delete Transaction" />
 
-<LogoutScript />
+    <script>
+        import { actions } from "astro:actions";
+        import { ToastService } from "@lib/toast.ts";
 
-<script>
-    import { actions } from "astro:actions";
-    import { ToastService } from "@lib/toast.ts";
+        // Add Transaction button functionality using the modal instance
+        const addTransactionBtn = document.getElementById(
+            "addTransactionBtn",
+        ) as HTMLButtonElement;
+        const transactionModal = document.getElementById(
+            "transactionModal",
+        ) as any;
 
-    // Add Transaction button functionality using the modal instance
-    const addTransactionBtn = document.getElementById(
-        "addTransactionBtn",
-    ) as HTMLButtonElement;
-    const transactionModal = document.getElementById("transactionModal") as any;
+        if (addTransactionBtn) {
+            addTransactionBtn.addEventListener("click", function () {
+                if (
+                    transactionModal &&
+                    typeof transactionModal.openModal === "function"
+                ) {
+                    transactionModal.openModal();
+                }
+            });
+        }
 
-    if (addTransactionBtn) {
-        addTransactionBtn.addEventListener("click", function () {
-            if (
-                transactionModal &&
-                typeof transactionModal.openModal === "function"
-            ) {
-                transactionModal.openModal();
-            }
+        // Edit functionality using the modal instance
+        document.querySelectorAll(".edit-btn").forEach((btn) => {
+            btn.addEventListener("click", function (this: HTMLElement) {
+                const transactionData = this.dataset.transaction;
+                if (!transactionData) return;
+
+                const transaction = JSON.parse(transactionData);
+                if (
+                    transactionModal &&
+                    typeof transactionModal.fillFormForEdit === "function"
+                ) {
+                    transactionModal.fillFormForEdit(transaction);
+                }
+            });
         });
-    }
 
-    // Edit functionality using the modal instance
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
-        btn.addEventListener("click", function (this: HTMLElement) {
-            const transactionData = this.dataset.transaction;
-            if (!transactionData) return;
+        // Delete functionality
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+            btn.addEventListener("click", async function (this: HTMLElement) {
+                const transactionId = this.dataset.transactionId;
+                const transactionName = this.dataset.transactionName;
+                if (!transactionId) return;
 
-            const transaction = JSON.parse(transactionData);
-            if (
-                transactionModal &&
-                typeof transactionModal.fillFormForEdit === "function"
-            ) {
-                transactionModal.fillFormForEdit(transaction);
-            }
-        });
-    });
+                const deleteModal = document.getElementById(
+                    "deleteConfirmModal",
+                ) as any;
+                if (!deleteModal) {
+                    console.error("Delete confirmation modal not found");
+                    return;
+                }
 
-    // Delete functionality
-    document.querySelectorAll(".delete-btn").forEach((btn) => {
-        btn.addEventListener("click", async function (this: HTMLElement) {
-            const transactionId = this.dataset.transactionId;
-            const transactionName = this.dataset.transactionName;
-            if (!transactionId) return;
+                // Show the modal with the transaction name and deletion logic
+                deleteModal.show(
+                    transactionName || "this transaction",
+                    async () => {
+                        try {
+                            const formData = new FormData();
+                            formData.append("id", transactionId);
 
-            const deleteModal = document.getElementById(
-                "deleteConfirmModal",
-            ) as any;
-            if (!deleteModal) {
-                console.error("Delete confirmation modal not found");
-                return;
-            }
+                            const result =
+                                await actions.deleteTransaction(formData);
 
-            // Show the modal with the transaction name and deletion logic
-            deleteModal.show(
-                transactionName || "this transaction",
-                async () => {
-                    try {
-                        const formData = new FormData();
-                        formData.append("id", transactionId);
-
-                        const result =
-                            await actions.deleteTransaction(formData);
-
-                        if (result.data?.ok) {
-                            ToastService.success(
-                                "Transaction deleted successfully!",
-                            );
-                            // Reload the page to show updated data
-                            window.location.reload();
-                        } else {
-                            console.error(
-                                "Transaction deletion failed:",
-                                result.error || result.data?.error,
-                            );
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    "Transaction deleted successfully!",
+                                );
+                                // Reload the page to show updated data
+                                window.location.reload();
+                            } else {
+                                console.error(
+                                    "Transaction deletion failed:",
+                                    result.error || result.data?.error,
+                                );
+                                ToastService.error(
+                                    "Failed to delete transaction. Please try again.",
+                                );
+                            }
+                        } catch (error) {
+                            console.error("Error deleting transaction:", error);
                             ToastService.error(
                                 "Failed to delete transaction. Please try again.",
                             );
                         }
-                    } catch (error) {
-                        console.error("Error deleting transaction:", error);
-                        ToastService.error(
-                            "Failed to delete transaction. Please try again.",
-                        );
-                    }
-                },
-            );
+                    },
+                );
+            });
         });
-    });
 
-    // optional: focus-open modal for development (previous behavior)
-    // if (addTransactionBtn) addTransactionBtn.click();
-</script>
+        // optional: focus-open modal for development (previous behavior)
+        // if (addTransactionBtn) addTransactionBtn.click();
+    </script>
+</Layout>
