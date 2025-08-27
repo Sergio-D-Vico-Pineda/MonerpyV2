@@ -30,16 +30,16 @@ interface ActionResult {
  * Field name mappings for user-friendly error messages
  */
 const FIELD_ERROR_MESSAGES: Record<string, string> = {
-    name: "Name is required",
-    color: "Please select a valid color",
-    email: "Valid email is required",
-    password: "Password is required",
-    amount: "Valid amount is required",
-    description: "Description is required",
-    categoryId: "Please select a category",
-    accountId: "Please select an account",
-    tagId: "Please select a tag",
-    date: "Valid date is required",
+    name: "Name is required.",
+    color: "Please select a valid color.",
+    email: "Valid email is required.",
+    password: "Password is required.",
+    amount: "Valid amount is required.",
+    description: "Description is required.",
+    categoryId: "Please select a category.",
+    accountId: "Please select an account.",
+    tagId: "Please select a tag.",
+    date: "Valid date is required.",
 };
 
 /**
@@ -111,8 +111,8 @@ export const ActionErrorMessages = {
      */
     tag: (result: ActionResult): string => {
         return getActionErrorMessage(result, "Failed to create tag.", {
-            name: "Tag name is required",
-            color: "Please select a valid color"
+            name: "Tag name is required.",
+            color: "Please select a valid color."
         });
     },
 
@@ -121,8 +121,8 @@ export const ActionErrorMessages = {
      */
     category: (result: ActionResult): string => {
         return getActionErrorMessage(result, "Failed to create category.", {
-            name: "Category name is required",
-            color: "Please select a valid color"
+            name: "Category name is required.",
+            color: "Please select a valid color."
         });
     },
 
@@ -131,11 +131,11 @@ export const ActionErrorMessages = {
      */
     transaction: (result: ActionResult): string => {
         return getActionErrorMessage(result, "Failed to create transaction.", {
-            amount: "Valid amount is required",
-            description: "Description is required",
-            categoryId: "Please select a category",
-            accountId: "Please select an account",
-            date: "Valid date is required"
+            amount: "Valid amount is required.",
+            description: "Description is required.",
+            categoryId: "Please select a category.",
+            accountId: "Please select an account.",
+            date: "Valid date is required."
         });
     },
 

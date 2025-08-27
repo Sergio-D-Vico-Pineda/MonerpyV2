@@ -6,11 +6,11 @@ import { formatDateTimeLocal, getCurrentDateTime } from '@lib/date-utils.ts';
 const createTransaction = defineAction({
     accept: 'form',
     input: z.object({
-        accountId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account is required"),
+        accountId: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val), "Account is required."),
         categoryId: z.string().nullable().transform(val => val && val !== '' ? parseInt(val) : undefined),
-        date: z.string().min(1, "Date is required"),
-        name: z.string().trim().min(1, "Transaction name is required"),
-        amount: z.string().transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0, "Amount must be a positive number"),
+        date: z.string().min(1, "Date is required."),
+        name: z.string().trim().min(1, "Transaction name is required."),
+        amount: z.string().transform(val => parseFloat(val)).refine(val => !isNaN(val) && val > 0, "Amount must be a positive number."),
         type: z.enum(['Income', 'Expense', 'InvestmentBuy', 'InvestmentSell', 'LoanPayment', 'LoanRepayment']),
         tags: z.string().nullable().optional().transform(val => val ? val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []),
         newCategory: z.string().nullable().optional().transform(val => val?.trim() || undefined),
@@ -22,7 +22,7 @@ const createTransaction = defineAction({
 
 
             if (!user) {
-                return { ok: false, error: "Authentication required" };
+                return { ok: false, error: "Authentication required." };
             }
 
             // Get user with family info
@@ -32,7 +32,7 @@ const createTransaction = defineAction({
             });
 
             if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family to create transactions" };
+                return { ok: false, error: "User must belong to a family to create transactions." };
             }
 
             // Verify account belongs to user's family
@@ -45,7 +45,7 @@ const createTransaction = defineAction({
             });
 
             if (!account) {
-                return { ok: false, error: "Account not found or not accessible" };
+                return { ok: false, error: "Account not found or not accessible." };
             }
 
             let categoryId = input.categoryId;
@@ -143,7 +143,7 @@ const createTransaction = defineAction({
 
         } catch (error) {
             console.error("Error creating transaction:", error);
-            return { ok: false, error: "Failed to create transaction" };
+            return { ok: false, error: "Failed to create transaction." };
         }
     }
 });

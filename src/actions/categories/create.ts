@@ -6,15 +6,15 @@ import { getCurrentDateTime } from '@lib/date-utils.ts';
 const createCategory = defineAction({
     accept: 'form',
     input: z.object({
-        name: z.string().trim().min(1, "Category name is required"),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#6172f3"),
+        name: z.string().trim().min(1, "Category name is required."),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format.").default("#6172f3"),
         parentId: z.string().nullable().transform(val => val && val !== "" ? parseInt(val) : null)
     }),
     handler: async (input, context) => {
         try {
             const user = context.locals.user;
             if (!user) {
-                return { ok: false, error: "Authentication required" };
+                return { ok: false, error: "Authentication required." };
             }
 
             // Get user with family info
@@ -24,7 +24,7 @@ const createCategory = defineAction({
             });
 
             if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family to create categories" };
+                return { ok: false, error: "User must belong to a family to create categories." };
             }
 
             // Check if category name already exists in family
@@ -37,7 +37,7 @@ const createCategory = defineAction({
             });
 
             if (existingCategory) {
-                return { ok: false, error: "A category with this name already exists" };
+                return { ok: false, error: "A category with this name already exists." };
             }
 
             // If parentId is provided, verify it exists and belongs to the same family
@@ -51,7 +51,7 @@ const createCategory = defineAction({
                 });
 
                 if (!parentCategory) {
-                    return { ok: false, error: "Parent category not found" };
+                    return { ok: false, error: "Parent category not found." };
                 }
             }
 
@@ -79,7 +79,7 @@ const createCategory = defineAction({
 
         } catch (error) {
             console.error('Error creating category:', error);
-            return { ok: false, error: "Failed to create category" };
+            return { ok: false, error: "Failed to create category." };
         }
     }
 });

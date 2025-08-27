@@ -292,7 +292,10 @@ const modalId = Astro.props.id ?? null;
                                     action === "create"
                                         ? "Failed to create transaction. Please try again."
                                         : "Failed to update transaction. Please try again.";
-                                ToastService.error(message);
+                                ToastService.showToast({
+                                    message,
+                                    type: "error",
+                                });
                                 console.error(
                                     "Transaction operation failed:",
                                     result?.error || result?.data?.error,

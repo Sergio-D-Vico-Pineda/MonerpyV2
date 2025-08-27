@@ -6,8 +6,8 @@ import { getCurrentDateTime } from '@lib/date-utils.ts';
 const createTag = defineAction({
     accept: 'form',
     input: z.object({
-        name: z.string().trim().min(1, "Tag name is required"),
-        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format").default("#e99537")
+        name: z.string().trim().min(1, "Tag name is required."),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format.").default("#e99537")
     }),
     handler: async (input, context) => {
         try {
