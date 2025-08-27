@@ -1,4 +1,6 @@
 ---
+import Warning from "@svg/mono/Warning.astro";
+
 interface Props {
     title: string;
     listItems?: string[];
@@ -11,7 +13,7 @@ const { title, listItems = [], classes = "" } = Astro.props;
 <div
     class=`mt-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg flex items-start gap-x-3 ${classes}`
 >
-    <div class="text-yellow-400 text-xl">⚠️</div>
+    <div class="text-yellow-400"><Warning /></div>
     <div>
         <h3 class="text-yellow-400 font-semibold mb-2">
             {title}

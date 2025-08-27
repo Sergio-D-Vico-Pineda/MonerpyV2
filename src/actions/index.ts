@@ -62,7 +62,9 @@ import {
     updateTag,
     deleteTag,
     restoreTag,
-    purgeTag
+    purgeTag,
+    bulkRestoreTags,
+    bulkPurgeTags
 } from "./tags/index.ts";
 
 const server = {
@@ -117,7 +119,9 @@ const server = {
     updateTag,
     deleteTag,
     restoreTag,
-    purgeTag
+    purgeTag,
+    bulkRestoreTags,
+    bulkPurgeTags
 };
 
 export { server };
