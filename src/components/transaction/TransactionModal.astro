@@ -8,10 +8,15 @@ import Date from "@comps/transaction/Date.astro";
 import Category from "@comps/transaction/Category.astro";
 import TagsDropdownSelect from "@comps/tags/TagsDropdownSelect.astro";
 import ScriptSelect from "@comps/accounts/ScriptSelect.astro";
-const modalId = Astro.props.id ?? null;
+
+interface Props {
+    id: string;
+}
+
+const { id } = Astro.props as Props;
 ---
 
-<transaction-modal id={modalId ?? undefined}>
+<transaction-modal id={id}>
     <div
         class="modal-root fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
     >
