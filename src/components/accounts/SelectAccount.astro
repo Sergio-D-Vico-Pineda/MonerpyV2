@@ -12,7 +12,7 @@ const { accounts } = Astro.props as Props;
     accounts && accounts.length !== 0 && (
         <select
             id="accountSelection"
-            class="w-full ps-1 pe-2 py-[2.5px] bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full ps-1 pe-2 py-[1.5px] bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
             <option value="">No default account</option>
             {accounts.map((account) => (
