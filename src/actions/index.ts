@@ -51,7 +51,9 @@ import {
     updateCategory,
     deleteCategory,
     restoreCategory,
-    purgeCategory
+    purgeCategory,
+    bulkPurgeCategories,
+    bulkRestoreCategories
 } from "./categories/index.ts";
 import {
     createTag,
@@ -107,6 +109,8 @@ const server = {
     deleteCategory,
     restoreCategory,
     purgeCategory,
+    bulkPurgeCategories,
+    bulkRestoreCategories,
     createTag,
     getTags,
     getTag,

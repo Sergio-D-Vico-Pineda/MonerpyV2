@@ -2,6 +2,7 @@ import { createCategory } from "./create.ts";
 import { getCategories, getCategory } from "./read.ts";
 import { updateCategory } from "./update.ts";
 import { deleteCategory, restoreCategory, purgeCategory } from "./delete.ts";
+import { bulkPurgeCategories, bulkRestoreCategories } from "./bulk.ts";
 
 export {
     createCategory,
@@ -10,5 +11,7 @@ export {
     updateCategory,
     deleteCategory,
     restoreCategory,
-    purgeCategory
+    purgeCategory,
+    bulkPurgeCategories,
+    bulkRestoreCategories
 };

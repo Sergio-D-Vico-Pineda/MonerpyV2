@@ -7,6 +7,7 @@ import { actions } from "astro:actions";
 import { formatDateForDisplay } from "@lib/date-utils.ts";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import Folder from "@comps/svgs/mono/Folder.astro";
+import DeletedInfo from "@comps/DeletedInfo.astro";
 
 const user = Astro.locals.user;
 
@@ -46,6 +47,13 @@ const deletedCategories = normalizedCategories
           (category: any) => category.deletedAt !== null,
       )
     : [];
+
+const deletedMsgs: string[] = [
+    "Deleted categories are hidden from the main interface but their data is preserved",
+    "All associated transactions remain intact",
+    "You can restore deleted categories at any time",
+    "Restored categories will reappear in your category lists",
+];
 ---
 
 <Layout title="Deleted Categories" description="Manage deleted categories">
@@ -71,6 +79,33 @@ const deletedCategories = normalizedCategories
                         <span>Categories</span>
                     </a>
                 </div>
+                <div id="bulkHeaderBar" class="hidden items-center gap-x-4">
+                    <div class="text-sm text-gray-300">
+                        <span id="selectedCount">0</span> selected (max 10)
+                    </div>
+                    <div class="flex items-center gap-x-2">
+                        <button
+                            id="bulkRestoreBtn"
+                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Restore Selected</button
+                        >
+                        <button
+                            id="bulkPurgeBtn"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Purge Selected</button
+                        >
+                        <button
+                            id="clearSelectionBtn"
+                            class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                            >Clear</button
+                        >
+                        <button
+                            id="selectAllBtn"
+                            class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Select All</button
+                        >
+                    </div>
+                </div>
             </div>
 
             {
@@ -85,15 +120,30 @@ const deletedCategories = normalizedCategories
                         <p>All your categories are active!</p>
                     </div>
                 ) : (
-                    <div class="flex flex-col gap-y-4">
+                    <div
+                        class="flex flex-col gap-y-4"
+                        id="deletedCategoriesList"
+                    >
                         {deletedCategories.map((category: any) => (
-                            <div class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500">
+                            <div
+                                class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500 category-item"
+                                data-category-id={category.id}
+                                data-category-name={category.name}
+                            >
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-x-4">
-                                        <div
-                                            class="w-4 h-4 rounded-full opacity-50"
-                                            style={`background-color: ${category.color}`}
-                                        />
+                                        <div class="w-4 h-4 rounded-sm opacity-50 selection-checkbox-wrapper relative">
+                                            <input
+                                                type="checkbox"
+                                                class="hidden selection-checkbox"
+                                                value={category.id}
+                                                data-name={category.name}
+                                            />
+                                            <div
+                                                class="w-4 h-4 rounded-full color-indicator"
+                                                style={`background-color: ${category.color}`}
+                                            />
+                                        </div>
                                         <div>
                                             <h3 class="font-semibold text-white">
                                                 {category.name}
@@ -119,7 +169,7 @@ const deletedCategories = normalizedCategories
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center gap-x-2">
+                                    <div class="flex items-center gap-x-2 per-item-actions">
                                         <form class="restore-category-form inline">
                                             <input
                                                 type="hidden"
@@ -156,46 +206,293 @@ const deletedCategories = normalizedCategories
                                 </div>
                             </div>
                         ))}
-
-                        <div class="mt-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg">
-                            <div class="flex items-start gap-x-3">
-                                <div class="text-yellow-400 text-xl">⚠️</div>
-                                <div>
-                                    <h3 class="text-yellow-400 font-semibold mb-2">
-                                        About Deleted Categories
-                                    </h3>
-                                    <ul class="text-yellow-200 text-sm flex flex-col gap-y-1">
-                                        <li>
-                                            • Deleted categories are hidden from
-                                            the main interface but their data is
-                                            preserved
-                                        </li>
-                                        <li>
-                                            • All associated transactions remain
-                                            intact
-                                        </li>
-                                        <li>
-                                            • You can restore deleted categories
-                                            at any time
-                                        </li>
-                                        <li>
-                                            • Restored categories will reappear
-                                            in your category lists
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 )
             }
         </div>
+        <DeletedInfo
+            classes="mx-auto max-w-7xl"
+            title="About Deleted Categories"
+            listItems={deletedMsgs}
+        />
     </main>
 
     <ConfirmationModal variant="info" />
     <LogoutScript />
 
     <script>
+        // Multi-select state
+        const selection = new Set<number>();
+        let selectionMode = false; // becomes true after first shift-click
+        const MAX_BULK = 10;
+
+        function updateBulkBar() {
+            const bulkHeaderBar = document.getElementById("bulkHeaderBar");
+            if (!bulkHeaderBar) return;
+            const countEl = document.getElementById("selectedCount");
+            if (countEl) countEl.textContent = String(selection.size);
+            if (selection.size > 0) {
+                bulkHeaderBar.classList.remove("hidden");
+                bulkHeaderBar.classList.add("flex");
+            } else {
+                bulkHeaderBar.classList.add("hidden");
+                bulkHeaderBar.classList.remove("flex");
+                // When nothing selected, return to default mode
+                exitSelectionMode();
+            }
+            (
+                document.getElementById("bulkRestoreBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            (
+                document.getElementById("bulkPurgeBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            const selectAllBtn = document.getElementById(
+                "selectAllBtn",
+            ) as HTMLButtonElement | null;
+            if (selectAllBtn) {
+                const total =
+                    document.querySelectorAll(".category-item").length;
+                const disableSelectAll =
+                    selection.size === 0 ||
+                    selection.size >= Math.min(total, MAX_BULK);
+                selectAllBtn.toggleAttribute("disabled", disableSelectAll);
+            }
+        }
+
+        function enterSelectionMode() {
+            if (selectionMode) return;
+            selectionMode = true;
+            document.querySelectorAll(".selection-checkbox").forEach((el) => {
+                (el as HTMLInputElement).classList.remove("hidden");
+            });
+            document.querySelectorAll(".color-indicator").forEach((el) => {
+                el.classList.add("hidden");
+            });
+            document.querySelectorAll(".per-item-actions").forEach((el) => {
+                (el as HTMLElement).classList.add("hidden");
+            });
+            document
+                .getElementById("deletedCategoriesList")
+                ?.classList.add("select-none");
+        }
+
+        function clearSelection() {
+            selection.clear();
+            document.querySelectorAll(".selection-checkbox").forEach((el) => {
+                (el as HTMLInputElement).checked = false;
+            });
+            // Clear any text selection in the browser
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+            updateBulkBar();
+        }
+
+        function exitSelectionMode() {
+            if (!selectionMode) return;
+            selectionMode = false;
+            // Hide checkboxes, show color indicators and per-item actions again
+            document.querySelectorAll(".selection-checkbox").forEach((el) => {
+                el.classList.add("hidden");
+            });
+            document.querySelectorAll(".color-indicator").forEach((el) => {
+                el.classList.remove("hidden");
+            });
+            document.querySelectorAll(".per-item-actions").forEach((el) => {
+                (el as HTMLElement).classList.remove("hidden");
+            });
+            document
+                .getElementById("deletedCategoriesList")
+                ?.classList.remove("select-none");
+            // Also clear any lingering text selection
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+        }
+
+        // ESC key support to unselect all & exit mode
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && selectionMode) {
+                clearSelection();
+                exitSelectionMode();
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest(".category-item")) {
+                const container = target.closest(
+                    ".category-item",
+                ) as HTMLElement;
+                const id = parseInt(
+                    container.getAttribute("data-category-id") || "0",
+                );
+                const checkbox = container.querySelector(
+                    ".selection-checkbox",
+                ) as HTMLInputElement | null;
+                if (e.shiftKey && id && checkbox) {
+                    // Prevent browser text selection when shift-clicking
+                    e.preventDefault();
+                    enterSelectionMode();
+                    if (selection.has(id)) {
+                        selection.delete(id);
+                        checkbox.checked = false;
+                    } else {
+                        if (selection.size < MAX_BULK) {
+                            selection.add(id);
+                            checkbox.checked = true;
+                        }
+                    }
+                    updateBulkBar();
+                }
+            }
+        });
+
+        document
+            .getElementById("clearSelectionBtn")
+            ?.addEventListener("click", () => {
+                clearSelection();
+            });
+
+        document
+            .getElementById("selectAllBtn")
+            ?.addEventListener("click", () => {
+                // Select all items up to MAX_BULK
+                const items = Array.from(
+                    document.querySelectorAll(".category-item"),
+                ) as HTMLElement[];
+                let changed = false;
+                for (const el of items) {
+                    if (selection.size >= MAX_BULK) break;
+                    const id = parseInt(
+                        el.getAttribute("data-category-id") || "0",
+                    );
+                    if (id && !selection.has(id)) {
+                        selection.add(id);
+                        const cb = el.querySelector(
+                            ".selection-checkbox",
+                        ) as HTMLInputElement | null;
+                        if (cb) cb.checked = true;
+                        changed = true;
+                    }
+                }
+                if (changed) updateBulkBar();
+            });
+
+        document
+            .getElementById("bulkRestoreBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.category-item[data-category-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-category-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                confirmationModal?.show({
+                    title: "Restore Categories",
+                    message: `Restore these categories?\n\n${names.join("\n")}`,
+                    confirmLabel: "Restore",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkRestoreCategories(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Restored ${result.data.restored} categories.`,
+                                );
+                                if (result.data.skipped?.length) {
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
+                                    );
+                                }
+                                window.location.reload();
+                            } else {
+                                ToastService.error(
+                                    result.data?.error || "Bulk restore failed",
+                                );
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
+                });
+            });
+
+        document
+            .getElementById("bulkPurgeBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.category-item[data-category-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-category-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                confirmationModal?.show({
+                    title: "Permanently Delete Categories",
+                    message: `Permanently delete these categories? This cannot be undone.\n\n${names.join("\n")}`,
+                    confirmLabel: "Purge",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkPurgeCategories(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Purged ${result.data.purged} categories.`,
+                                );
+                                if (result.data.skipped?.length) {
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
+                                    );
+                                }
+                                window.location.reload();
+                            } else {
+                                ToastService.error(
+                                    result.data?.error || "Bulk purge failed",
+                                );
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
+                });
+            });
+
         // Handle restore category forms
         document.addEventListener("DOMContentLoaded", function () {
             const restoreForms = document.querySelectorAll(
