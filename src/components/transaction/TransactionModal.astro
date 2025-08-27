@@ -41,8 +41,7 @@ const { id } = Astro.props as Props;
                 </button>
             </header>
 
-            <form id="transactionForm" class="p-6 flex flex-col gap-y-4">
-                <input type="hidden" name="id" id="transactionId" />
+            <form id="transactionForm" class="p-6 flex flex-col gap-y-4" novalidate>
 
                 <!-- Account and Name -->
                 <div class="flex items-center gap-x-4 justify-center">
@@ -87,9 +86,11 @@ const { id } = Astro.props as Props;
                     </div>
                     <button
                         type="submit"
-                        class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200"
+                        id="submitBtn"
+                        class="flex-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        <span id="submitBtnText">Save Transaction</span>
+                        <span id="submitBtnText">Add Transaction</span>
+                        <span id="submitSpinner" class="hidden w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin"></span>
                     </button>
                 </div>
             </form>
@@ -137,26 +138,21 @@ const { id } = Astro.props as Props;
                 const formTitle = this.querySelector(
                     "#modalTitle",
                 ) as HTMLHeadingElement;
-                const formAction = this.querySelector(
-                    "#formAction",
-                ) as HTMLInputElement;
-                const transactionId = this.querySelector(
-                    "#transactionId",
-                ) as HTMLInputElement;
-                const submitText = this.querySelector(
-                    "#submitBtnText",
-                ) as HTMLSpanElement;
+                const submitText = this.querySelector("#submitBtnText") as HTMLSpanElement;
+                const submitBtn = this.querySelector("#submitBtn") as HTMLButtonElement;
+                const submitSpinner = this.querySelector("#submitSpinner") as HTMLSpanElement;
                 const form = this.querySelector(
                     "#transactionForm",
                 ) as HTMLFormElement;
-                const tagsDropdownRoots = this.querySelectorAll(
-                    "[data-tags-dropdown-root]",
-                ) as NodeListOf<HTMLDivElement>;
+                // Focus trap tracking
+                let focusable: HTMLElement[] = [];
+                let firstFocusable: HTMLElement | null = null;
+                let lastFocusable: HTMLElement | null = null;
 
                 const accountId = this.querySelector(
                     "#accountId",
                 ) as HTMLSelectElement;
-                const type = this.querySelector("#type") as HTMLSelectElement;
+                // radios inside TypePicker handle type
                 const name = this.querySelector("#name") as HTMLInputElement;
                 const amount = this.querySelector(
                     "#amount",
@@ -165,6 +161,18 @@ const { id } = Astro.props as Props;
                     "#categoryId",
                 ) as HTMLSelectElement;
                 const tags = this.querySelector("#tags") as HTMLInputElement;
+
+                const computeFocusables = () => {
+                    const dialogPanel = this.querySelector('[role="dialog"]') as HTMLElement;
+                    if (!dialogPanel) return;
+                    focusable = Array.from(
+                        dialogPanel.querySelectorAll<HTMLElement>(
+                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                        )
+                    ).filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+                    firstFocusable = focusable[0] || null;
+                    lastFocusable = focusable[focusable.length - 1] || null;
+                };
 
                 const openModal = (opts?: any) => {
                     // opts: { type?: string, accountId?: string }
@@ -201,6 +209,9 @@ const { id } = Astro.props as Props;
                         modal.classList.remove("hidden");
                         modal.classList.add("flex");
                         document.body.style.overflow = "hidden";
+                        computeFocusables();
+                        // focus name input
+                        if (name && typeof name.focus === 'function') name.focus();
                     }
                 };
 
@@ -215,30 +226,16 @@ const { id } = Astro.props as Props;
 
                 const resetForm = async () => {
                     if (formTitle) formTitle.textContent = "Add Transaction";
-                    if (formAction) formAction.value = "create";
-                    if (transactionId) transactionId.value = "";
                     if (submitText) submitText.textContent = "Add Transaction";
                     if (form) form.reset();
                     if (dateInput) {
                         dateInput.value = getCurrentDateTimeLocal();
                     }
-
                     // restore saved account after reset
                     try {
-                        const saved =
-                            window.localStorage.getItem("selectedAccountId");
+                        const saved = window.localStorage.getItem("selectedAccountId");
                         if (saved && accountId) accountId.value = saved;
                     } catch (e) {}
-
-                    if (tagsDropdownRoots) {
-                        tagsDropdownRoots.forEach((tagsDropdownRoot) => {
-                            const resetTags = (tagsDropdownRoot as any)
-                                .resetTags;
-                            if (typeof resetTags === "function") {
-                                resetTags();
-                            }
-                        });
-                    }
                 };
 
                 // Hook up events
@@ -259,33 +256,21 @@ const { id } = Astro.props as Props;
                         if (csrfInput && csrfInput.value) {
                             formData.set("_csrf_token", csrfInput.value);
                         }
-                        const action = formData.get("_action") as string;
+                        // Submit create only
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitSpinner?.classList.remove('hidden');
+                        }
 
                         try {
-                            let result;
-                            if (action === "create") {
-                                const { actions } = await import(
-                                    "astro:actions"
-                                );
-                                result =
-                                    await actions.createTransaction(formData);
-                            } else if (action === "update") {
-                                const { actions } = await import(
-                                    "astro:actions"
-                                );
-                                result =
-                                    await actions.updateTransaction(formData);
-                            }
+                            const { actions } = await import("astro:actions");
+                            const result = await actions.createTransaction(formData);
 
                             if (result?.data?.ok) {
                                 const { ToastService } = await import(
                                     "@lib/toast.ts"
                                 );
-                                const message =
-                                    action === "create"
-                                        ? "Transaction created successfully!"
-                                        : "Transaction updated successfully!";
-                                ToastService.success(message);
+                                ToastService.success("Transaction created successfully!");
                                 closeModal();
                                 // Reload the page to show updated data
                                 window.location.reload();
@@ -293,12 +278,8 @@ const { id } = Astro.props as Props;
                                 const { ToastService } = await import(
                                     "@lib/toast.ts"
                                 );
-                                const message =
-                                    action === "create"
-                                        ? "Failed to create transaction. Please try again."
-                                        : "Failed to update transaction. Please try again.";
                                 ToastService.showToast({
-                                    message,
+                                    message: "Failed to create transaction. Please try again.",
                                     type: "error",
                                 });
                                 console.error(
@@ -317,6 +298,11 @@ const { id } = Astro.props as Props;
                                 "Error submitting transaction:",
                                 error,
                             );
+                        } finally {
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitSpinner?.classList.add('hidden');
+                            }
                         }
                     });
                 }
@@ -352,42 +338,36 @@ const { id } = Astro.props as Props;
                 (this as any).openModal = openModal;
                 (this as any).closeModal = closeModal;
                 (this as any).resetForm = resetForm;
-                (this as any).fillFormForEdit = async (
-                    transaction: Transaction,
-                ) => {
-                    if (formTitle) formTitle.textContent = "Edit Transaction";
-                    if (formAction) formAction.value = "update";
-                    if (transactionId) transactionId.value = transaction.id;
-                    if (submitText)
-                        submitText.textContent = "Update Transaction";
+                // Persist account selection when user changes it
+                if (accountId) {
+                    accountId.addEventListener('change', () => {
+                        try { window.localStorage.setItem('selectedAccountId', accountId.value); } catch(e) {}
+                    });
+                }
 
-                    if (accountId) accountId.value = transaction.accountId;
-                    // set type radio
-                    if (type) {
-                        const radio = this.querySelector(
-                            `input[name="type"][value="${transaction.type}"]`,
-                        );
-                        if (radio) (radio as HTMLInputElement).checked = true;
+                // Focus trap & ESC handling at root
+                this.addEventListener('keydown', (e: KeyboardEvent) => {
+                    if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        closeModal();
+                        return;
                     }
-                    if (name) name.value = transaction.name;
-                    if (amount) amount.value = transaction.amount;
-                    if (dateInput) {
-                        dateInput.value = formatToDateTimeLocal(
-                            transaction.date,
-                        );
+                    if (e.key === 'Tab') {
+                        computeFocusables();
+                        if (!firstFocusable || !lastFocusable) return;
+                        if (e.shiftKey) {
+                            if (document.activeElement === firstFocusable) {
+                                e.preventDefault();
+                                lastFocusable.focus();
+                            }
+                        } else {
+                            if (document.activeElement === lastFocusable) {
+                                e.preventDefault();
+                                firstFocusable.focus();
+                            }
+                        }
                     }
-                    if (categoryId)
-                        categoryId.value = transaction.categoryId || "";
-
-                    if (tags) {
-                        const tagNames = Array.isArray(transaction.tags)
-                            ? transaction.tags.map((tag) => tag.name)
-                            : [];
-                        tags.value = tagNames.join(", ");
-                    }
-
-                    openModal();
-                };
+                });
             }
         }
 
