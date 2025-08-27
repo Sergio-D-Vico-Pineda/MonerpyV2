@@ -41,6 +41,8 @@ import {
     deleteAccount,
     restoreAccount,
     purgeAccount,
+    bulkRestoreAccounts,
+    bulkPurgeAccounts,
     updateDailyBalance,
     recalculateAccountBalance
 } from "./accounts/index.ts";
@@ -103,6 +105,8 @@ const server = {
     deleteAccount,
     restoreAccount,
     purgeAccount,
+    bulkRestoreAccounts,
+    bulkPurgeAccounts,
     updateDailyBalance,
     recalculateAccountBalance,
     createCategory,

@@ -3,6 +3,7 @@ import { getAccounts, getAccount, getAccountBalanceHistory } from "./read.ts";
 import { updateAccount } from "./update.ts";
 import { deleteAccount, restoreAccount, purgeAccount } from "./delete.ts";
 import { updateDailyBalance, recalculateAccountBalance } from "./helpers.ts";
+import { bulkRestoreAccounts, bulkPurgeAccounts } from "./bulk.ts";
 
 export {
     createAccount,
@@ -13,6 +14,8 @@ export {
     deleteAccount,
     restoreAccount,
     purgeAccount,
+    bulkRestoreAccounts,
+    bulkPurgeAccounts,
     updateDailyBalance,
     recalculateAccountBalance
 };

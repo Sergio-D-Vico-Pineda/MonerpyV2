@@ -8,6 +8,7 @@ import { formatDateForDisplay, formatCurrency } from "@lib/date-utils.ts";
 import Bin from "@comps/svgs/mono/Bin.astro";
 import CreditCard from "@comps/svgs/mono/CreditCard.astro";
 import { accountTypes } from "@arrays.d.ts";
+import DeletedInfo from "@/components/DeletedInfo.astro";
 
 const user = Astro.locals.user;
 
@@ -31,6 +32,13 @@ const allAccounts = accountsResult.data?.ok ? accountsResult.data.accounts : [];
 const deletedAccounts = allAccounts
     ? allAccounts.filter((account: any) => account.deletedAt !== null)
     : [];
+
+const deletedMsg = [
+    "Deleted accounts are hidden from the main interface but their data is preserved",
+    "All transactions and balance history remain intact",
+    "You can restore deleted accounts at any time",
+    "Restored accounts will reappear in your account lists",
+];
 ---
 
 <Layout title="Deleted Accounts" description="Manage deleted accounts">
@@ -56,17 +64,34 @@ const deletedAccounts = allAccounts
                         <span>Accounts</span>
                     </a>
                 </div>
-                <div class="flex items-center gap-x-4">
-                    <button
-                        type="button"
-                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-[6.5px] px-4 rounded-lg transition-colors text-sm"
-                        title="Create a new account"
-                    >
-                        A button
-                    </button>
+                <div id="bulkHeaderBar" class="hidden items-center gap-x-4">
+                    <div class="text-sm text-gray-300">
+                        <span id="selectedCount">0</span> selected (max 10)
+                    </div>
+                    <div class="flex items-center gap-x-2">
+                        <button
+                            id="bulkRestoreBtn"
+                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Restore Selected</button
+                        >
+                        <button
+                            id="bulkPurgeBtn"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Purge Selected</button
+                        >
+                        <button
+                            id="clearSelectionBtn"
+                            class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                            >Clear</button
+                        >
+                        <button
+                            id="selectAllBtn"
+                            class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled>Select All</button
+                        >
+                    </div>
                 </div>
             </div>
-
             {
                 deletedAccounts.length === 0 ? (
                     <div class="text-center py-10 text-gray-400">
@@ -79,31 +104,47 @@ const deletedAccounts = allAccounts
                         <p>All your accounts are active!</p>
                     </div>
                 ) : (
-                    <div class="flex flex-col gap-y-4">
+                    <div id="accountsList" class="flex flex-col gap-y-4">
                         {deletedAccounts.map((account: any) => (
-                            <div class="bg-gray-700 rounded-lg p-4 border-l-4 border-red-500">
+                            <div
+                                class="account-row bg-gray-700 rounded-lg p-4 border-l-4 border-red-500 group"
+                                data-account-id={account.id}
+                                data-account-name={account.name}
+                            >
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-x-4">
-                                        <div
-                                            class="w-4 h-4 rounded-full opacity-50"
-                                            style={`background-color: ${account.color}`}
-                                        />
+                                        <div class="w-4 h-4 rounded-sm opacity-50 selection-checkbox-wrapper relative">
+                                            <input
+                                                type="checkbox"
+                                                class="hidden selection-checkbox"
+                                                value={account.id}
+                                                data-name={account.name}
+                                            />
+                                            <div
+                                                class="w-4 h-4 rounded-full color-indicator"
+                                                style={`background-color: ${account.color}`}
+                                            />
+                                        </div>
                                         <div>
-                                            <h3 class="font-semibold text-white">
-                                                {account.name}
-                                                <span class="text-red-400 text-sm ml-2">
+                                            <h3 class="font-semibold text-white flex items-baseline gap-x-2">
+                                                <span class="account-name">
+                                                    {account.name}
+                                                </span>
+                                                <span class="text-sm text-gray-400">
+                                                    {accountTypes.find(
+                                                        (t) =>
+                                                            t.value ===
+                                                            account.accountType,
+                                                    )?.label ||
+                                                        account.accountType}
+                                                </span>
+                                                <span class="text-red-400 text-xs">
                                                     (Deleted)
                                                 </span>
                                             </h3>
-                                            <p class="text-sm text-gray-400">
-                                                {accountTypes.find(
-                                                    (t) =>
-                                                        t.value ===
-                                                        account.accountType,
-                                                )?.label || account.accountType}
-                                            </p>
+
                                             <p class="text-xs text-gray-500 mt-1">
-                                                Deleted on:
+                                                Deleted on:{" "}
                                                 {formatDateForDisplay(
                                                     account.deletedAt,
                                                     {
@@ -114,7 +155,6 @@ const deletedAccounts = allAccounts
                                             </p>
                                         </div>
                                     </div>
-
                                     <div class="flex items-center gap-x-4">
                                         <div class="text-right">
                                             <p
@@ -128,8 +168,7 @@ const deletedAccounts = allAccounts
                                                 Last balance
                                             </p>
                                         </div>
-
-                                        <div class="flex items-center gap-x-2">
+                                        <div class="flex items-center gap-x-2 per-item-actions">
                                             <form class="restore-account-form inline">
                                                 <input
                                                     type="hidden"
@@ -167,148 +206,371 @@ const deletedAccounts = allAccounts
                                 </div>
                             </div>
                         ))}
-
-                        <div class="mt-8 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg">
-                            <div class="flex items-start gap-x-3">
-                                <div class="text-yellow-400 text-xl">⚠️</div>
-                                <div>
-                                    <h3 class="text-yellow-400 font-semibold mb-2">
-                                        About Deleted Accounts
-                                    </h3>
-                                    <ul class="text-yellow-200 text-sm flex flex-col gap-y-1">
-                                        <li>
-                                            • Deleted accounts are hidden from
-                                            the main interface but their data is
-                                            preserved
-                                        </li>
-                                        <li>
-                                            • All transactions and balance
-                                            history remain intact
-                                        </li>
-                                        <li>
-                                            • You can restore deleted accounts
-                                            at any time
-                                        </li>
-                                        <li>
-                                            • Restored accounts will reappear in
-                                            your account lists
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 )
             }
         </div>
+        <DeletedInfo
+            classes="mx-auto max-w-7xl"
+            title="About Deleted Accounts"
+            listItems={deletedMsg}
+        />
     </main>
 
     <ConfirmationModal variant="info" />
     <LogoutScript />
 
     <script>
-        // Handle restore account forms
-        document.addEventListener("DOMContentLoaded", function () {
-            const restoreForms = document.querySelectorAll(
-                ".restore-account-form",
-            );
+        // Mirror categories multi-select behavior
+        const selection = new Set<number>();
+        let selectionMode = false;
+        const MAX_BULK = 10;
 
-            restoreForms.forEach((form) => {
-                form.addEventListener("submit", async function (e) {
-                    e.preventDefault();
+        function updateBulkBar() {
+            const bulkHeaderBar = document.getElementById("bulkHeaderBar");
+            if (!bulkHeaderBar) return;
+            const countEl = document.getElementById("selectedCount");
+            if (countEl) countEl.textContent = String(selection.size);
+            if (selection.size > 0) {
+                bulkHeaderBar.classList.remove("hidden");
+                bulkHeaderBar.classList.add("flex");
+            } else {
+                bulkHeaderBar.classList.add("hidden");
+                bulkHeaderBar.classList.remove("flex");
+                exitSelectionMode();
+            }
+            (
+                document.getElementById("bulkRestoreBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            (
+                document.getElementById("bulkPurgeBtn") as HTMLButtonElement
+            )?.toggleAttribute("disabled", selection.size === 0);
+            const selectAllBtn = document.getElementById(
+                "selectAllBtn",
+            ) as HTMLButtonElement | null;
+            if (selectAllBtn) {
+                const total = document.querySelectorAll(".account-row").length;
+                const disableSelectAll =
+                    selection.size === 0 ||
+                    selection.size >= Math.min(total, MAX_BULK);
+                selectAllBtn.toggleAttribute("disabled", disableSelectAll);
+            }
+        }
 
-                    const button = form.querySelector("button");
-                    const accountName =
-                        button?.getAttribute("data-account-name");
+        function enterSelectionMode() {
+            if (selectionMode) return;
+            selectionMode = true;
+            document.querySelectorAll(".selection-checkbox").forEach((el) => {
+                (el as HTMLInputElement).classList.remove("hidden");
+            });
+            document
+                .querySelectorAll(".color-indicator")
+                .forEach((el) => el.classList.add("hidden"));
+            document
+                .querySelectorAll(".per-item-actions")
+                .forEach((el) => (el as HTMLElement).classList.add("hidden"));
+            document
+                .getElementById("accountsList")
+                ?.classList.add("select-none");
+        }
 
-                    // Show confirmation modal
-                    const confirmationModal = document.getElementById(
-                        "confirmationModal",
-                    ) as any;
-                    if (!confirmationModal) {
-                        console.error("Confirmation modal not found");
+        function clearSelection() {
+            selection.clear();
+            document.querySelectorAll(".selection-checkbox").forEach((el) => {
+                (el as HTMLInputElement).checked = false;
+            });
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+            updateBulkBar();
+        }
+
+        function exitSelectionMode() {
+            if (!selectionMode) return;
+            selectionMode = false;
+            document
+                .querySelectorAll(".selection-checkbox")
+                .forEach((el) => el.classList.add("hidden"));
+            document
+                .querySelectorAll(".color-indicator")
+                .forEach((el) => el.classList.remove("hidden"));
+            document
+                .querySelectorAll(".per-item-actions")
+                .forEach((el) =>
+                    (el as HTMLElement).classList.remove("hidden"),
+                );
+            document
+                .getElementById("accountsList")
+                ?.classList.remove("select-none");
+            try {
+                window.getSelection()?.removeAllRanges();
+            } catch {}
+        }
+
+        // ESC support
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && selectionMode) {
+                clearSelection();
+                exitSelectionMode();
+            }
+        });
+
+        // Shift+click row to toggle
+        document.addEventListener("click", (e) => {
+            const target = e.target as HTMLElement;
+            const row = target.closest(".account-row") as HTMLElement | null;
+            if (!row) return;
+            const id = parseInt(row.getAttribute("data-account-id") || "0", 10);
+            const checkbox = row.querySelector(
+                ".selection-checkbox",
+            ) as HTMLInputElement | null;
+            if (e.shiftKey && id && checkbox) {
+                e.preventDefault();
+                enterSelectionMode();
+                if (selection.has(id)) {
+                    selection.delete(id);
+                    checkbox.checked = false;
+                } else {
+                    if (selection.size < MAX_BULK) {
+                        selection.add(id);
+                        checkbox.checked = true;
+                    }
+                }
+                updateBulkBar();
+            }
+        });
+
+        // Direct checkbox click support
+        document.addEventListener("change", (e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("selection-checkbox")) {
+                const cb = target as HTMLInputElement;
+                const id = parseInt(cb.value || "0", 10);
+                if (!id) return;
+                if (!selectionMode) enterSelectionMode();
+                if (cb.checked) {
+                    if (selection.size >= MAX_BULK && !selection.has(id)) {
+                        cb.checked = false;
                         return;
                     }
+                    selection.add(id);
+                } else {
+                    selection.delete(id);
+                }
+                updateBulkBar();
+            }
+        });
 
-                    confirmationModal.show({
-                        title: "Restore Account",
-                        message: `Are you sure you want to restore "${accountName}"?`,
-                        confirmLabel: "Restore",
-                        cancelLabel: "Cancel",
-                        onConfirm: async () => {
-                            const csrfInput = document.querySelector(
-                                'input[name="_csrf_token"]',
-                            ) as HTMLInputElement;
+        document
+            .getElementById("clearSelectionBtn")
+            ?.addEventListener("click", () => {
+                clearSelection();
+            });
+        document
+            .getElementById("selectAllBtn")
+            ?.addEventListener("click", () => {
+                const items = Array.from(
+                    document.querySelectorAll(".account-row"),
+                ) as HTMLElement[];
+                let changed = false;
+                for (const el of items) {
+                    if (selection.size >= MAX_BULK) break;
+                    const id = parseInt(
+                        el.getAttribute("data-account-id") || "0",
+                        10,
+                    );
+                    if (id && !selection.has(id)) {
+                        selection.add(id);
+                        const cb = el.querySelector(
+                            ".selection-checkbox",
+                        ) as HTMLInputElement | null;
+                        if (cb) cb.checked = true;
+                        changed = true;
+                    }
+                }
+                if (changed) updateBulkBar();
+            });
 
-                            const formData = new FormData(
-                                form as HTMLFormElement,
-                            );
-
-                            if (csrfInput && csrfInput.value) {
-                                formData.set("_csrf_token", csrfInput.value);
-                            }
-
-                            const { ToastService } = await import(
-                                "@lib/toast.ts"
-                            );
-
-                            try {
-                                const { actions } = await import(
-                                    "astro:actions"
+        // Bulk restore
+        document
+            .getElementById("bulkRestoreBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.account-row[data-account-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-account-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                (confirmationModal as any)?.show({
+                    title: "Restore Accounts",
+                    message: `Restore these accounts?\n\n${names.join("\n")}`,
+                    confirmLabel: "Restore",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkRestoreAccounts(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Restored ${result.data.restored} accounts.`,
                                 );
-                                const result =
-                                    await actions.restoreAccount(formData);
-
-                                if (result.data?.ok) {
-                                    ToastService.success(
-                                        "Account restored successfully!",
+                                if (result.data.skipped?.length)
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
                                     );
-                                    // Reload the page to show updated data
-                                    window.location.reload();
-                                } else {
-                                    ToastService.error(
-                                        result.data?.error ||
-                                            "Failed to restore account",
-                                    );
-                                    console.error(
-                                        "Account restore failed:",
-                                        result.error || result.data?.error,
-                                    );
-                                }
-                            } catch (error) {
+                                window.location.reload();
+                            } else {
                                 ToastService.error(
-                                    "An error occurred. Please try again.",
-                                );
-                                console.error(
-                                    "Error restoring account:",
-                                    error,
+                                    result.data?.error || "Bulk restore failed",
                                 );
                             }
-                        },
-                    });
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
                 });
             });
 
-            // Handle purge account forms
-            const purgeForms = document.querySelectorAll(".purge-account-form");
+        // Bulk purge
+        document
+            .getElementById("bulkPurgeBtn")
+            ?.addEventListener("click", async () => {
+                if (selection.size === 0) return;
+                const names: string[] = [];
+                selection.forEach((id) => {
+                    const el = document.querySelector(
+                        `.account-row[data-account-id="${id}"]`,
+                    );
+                    if (el) {
+                        const n = el.getAttribute("data-account-name");
+                        if (n) names.push(n);
+                    }
+                });
+                const confirmationModal2 = document.getElementById(
+                    "confirmationModal",
+                ) as any;
+                (confirmationModal2 as any)?.show({
+                    title: "Permanently Delete Accounts",
+                    message: `Permanently delete these accounts? This cannot be undone.\n\n${names.join("\n")}`,
+                    confirmLabel: "Purge",
+                    cancelLabel: "Cancel",
+                    onConfirm: async () => {
+                        const csrfInput = document.querySelector(
+                            'input[name="_csrf_token"]',
+                        ) as HTMLInputElement;
+                        const formData = new FormData();
+                        formData.set("ids", Array.from(selection).join(","));
+                        if (csrfInput?.value)
+                            formData.set("_csrf_token", csrfInput.value);
+                        const { ToastService } = await import("@lib/toast.ts");
+                        try {
+                            const { actions } = await import("astro:actions");
+                            const result =
+                                await actions.bulkPurgeAccounts(formData);
+                            if (result.data?.ok) {
+                                ToastService.success(
+                                    `Purged ${result.data.purged} accounts.`,
+                                );
+                                if (result.data.skipped?.length)
+                                    ToastService.info(
+                                        `${result.data.skipped.length} skipped.`,
+                                    );
+                                window.location.reload();
+                            } else {
+                                ToastService.error(
+                                    result.data?.error || "Bulk purge failed",
+                                );
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    },
+                });
+            });
 
-            purgeForms.forEach((form) => {
-                form.addEventListener("submit", async function (e) {
+        // Single-item restore/purge forms (unchanged logic)
+        document.addEventListener("DOMContentLoaded", () => {
+            document
+                .querySelectorAll(".restore-account-form")
+                .forEach((form) => {
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const button = form.querySelector("button");
+                        const accountName =
+                            button?.getAttribute("data-account-name");
+                        const confirmationModal = document.getElementById(
+                            "confirmationModal",
+                        ) as any;
+                        confirmationModal.show({
+                            title: "Restore Account",
+                            message: `Are you sure you want to restore "${accountName}"?`,
+                            confirmLabel: "Restore",
+                            cancelLabel: "Cancel",
+                            onConfirm: async () => {
+                                const csrfInput = document.querySelector(
+                                    'input[name="_csrf_token"]',
+                                ) as HTMLInputElement;
+                                const formData = new FormData(
+                                    form as HTMLFormElement,
+                                );
+                                if (csrfInput?.value)
+                                    formData.set(
+                                        "_csrf_token",
+                                        csrfInput.value,
+                                    );
+                                const { ToastService } = await import(
+                                    "@lib/toast.ts"
+                                );
+                                try {
+                                    const { actions } = await import(
+                                        "astro:actions"
+                                    );
+                                    const result =
+                                        await actions.restoreAccount(formData);
+                                    if (result.data?.ok) {
+                                        ToastService.success(
+                                            "Account restored successfully!",
+                                        );
+                                        window.location.reload();
+                                    } else {
+                                        ToastService.error(
+                                            result.data?.error ||
+                                                "Failed to restore account",
+                                        );
+                                    }
+                                } catch (err) {
+                                    ToastService.error("An error occurred.");
+                                }
+                            },
+                        });
+                    });
+                });
+            document.querySelectorAll(".purge-account-form").forEach((form) => {
+                form.addEventListener("submit", async (e) => {
                     e.preventDefault();
-
                     const button = form.querySelector("button");
                     const accountName =
                         button?.getAttribute("data-account-name");
-
-                    // Show confirmation modal
                     const confirmationModal = document.getElementById(
                         "confirmationModal",
                     ) as any;
-                    if (!confirmationModal) {
-                        console.error("Confirmation modal not found");
-                        return;
-                    }
-
                     confirmationModal.show({
                         title: "Permanently Delete Account",
                         message: `Are you sure you want to permanently delete "${accountName}"? This action cannot be undone and will also delete all associated transactions and balance history.`,
@@ -318,47 +580,33 @@ const deletedAccounts = allAccounts
                             const csrfInput = document.querySelector(
                                 'input[name="_csrf_token"]',
                             ) as HTMLInputElement;
-
                             const formData = new FormData(
                                 form as HTMLFormElement,
                             );
-
-                            if (csrfInput && csrfInput.value) {
+                            if (csrfInput?.value)
                                 formData.set("_csrf_token", csrfInput.value);
-                            }
-
                             const { ToastService } = await import(
                                 "@lib/toast.ts"
                             );
-
                             try {
                                 const { actions } = await import(
                                     "astro:actions"
                                 );
                                 const result =
                                     await actions.purgeAccount(formData);
-
                                 if (result.data?.ok) {
                                     ToastService.success(
                                         "Account permanently deleted!",
                                     );
-                                    // Reload the page to show updated data
                                     window.location.reload();
                                 } else {
                                     ToastService.error(
                                         result.data?.error ||
                                             "Failed to permanently delete account",
                                     );
-                                    console.error(
-                                        "Account purge failed:",
-                                        result.error || result.data?.error,
-                                    );
                                 }
-                            } catch (error) {
-                                ToastService.error(
-                                    "An error occurred. Please try again.",
-                                );
-                                console.error("Error purging account:", error);
+                            } catch (err) {
+                                ToastService.error("An error occurred.");
                             }
                         },
                     });
