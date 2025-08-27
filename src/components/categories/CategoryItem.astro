@@ -60,6 +60,7 @@ function isDescendantOf(
 <div
     class={`flex items-center justify-between ${isChild ? "pl-6 px-4 py-3 border-b border-gray-500 last:border-b-0" : "p-4"}`}
     data-category-id={category.id}
+    data-subcount={subCount}
 >
     <!-- Display Mode -->
     <div class="category-display flex items-center gap-x-3 flex-1 py-[5px]">
@@ -551,6 +552,19 @@ function isDescendantOf(
 
                 // Delete category
                 async function deleteCategory(categoryName: string) {
+                    // Client-side guard: block deletion if category has (non-deleted) subcategories
+                    const subCount = parseInt(
+                        categoryItem.getAttribute("data-subcount") || "0",
+                    );
+                    if (subCount > 0) {
+                        ToastService.showToast({
+                            message:
+                                "This category has subcategories. Remove or reassign them first.",
+                            type: "error",
+                        });
+                        return; // Do not open confirmation modal
+                    }
+
                     try {
                         const modal =
                             document.getElementById("deleteConfirmModal");

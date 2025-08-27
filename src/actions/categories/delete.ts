@@ -12,7 +12,7 @@ const deleteCategory = defineAction({
         try {
             const user = context.locals.user;
             if (!user) {
-                return { ok: false, error: "Authentication required" };
+                return { ok: false, error: "Authentication required." };
             }
 
             // Get user with family info
@@ -22,7 +22,7 @@ const deleteCategory = defineAction({
             });
 
             if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family" };
+                return { ok: false, error: "User must belong to a family." };
             }
 
             // Check if category exists and belongs to the family
@@ -45,7 +45,7 @@ const deleteCategory = defineAction({
             });
 
             if (!category) {
-                return { ok: false, error: "Category not found" };
+                return { ok: false, error: "Category not found." };
             }
 
             // Check if category has children
@@ -55,7 +55,7 @@ const deleteCategory = defineAction({
 
             // Check if category is being used by transactions
             if (category.transactions.length > 0) {
-                return { ok: false, error: "Cannot delete category that is being used by transactions" };
+                return { ok: false, error: "Cannot delete category that is being used by transactions." };
             }
 
             // Soft delete category
@@ -71,7 +71,7 @@ const deleteCategory = defineAction({
 
         } catch (error) {
             console.error('Error deleting category:', error);
-            return { ok: false, error: "Failed to delete category" };
+            return { ok: false, error: "Failed to delete category." };
         }
     }
 });
@@ -85,7 +85,7 @@ const restoreCategory = defineAction({
         try {
             const user = context.locals.user;
             if (!user) {
-                return { ok: false, error: "Authentication required" };
+                return { ok: false, error: "Authentication required." };
             }
 
             // Get user with family info
@@ -95,7 +95,7 @@ const restoreCategory = defineAction({
             });
 
             if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family" };
+                return { ok: false, error: "User must belong to a family." };
             }
 
             // Check if category exists and belongs to the family
@@ -108,7 +108,7 @@ const restoreCategory = defineAction({
             });
 
             if (!category) {
-                return { ok: false, error: "Deleted category not found" };
+                return { ok: false, error: "Deleted category not found." };
             }
 
             // Check if a category with the same name already exists
@@ -122,7 +122,23 @@ const restoreCategory = defineAction({
             });
 
             if (nameConflict) {
-                return { ok: false, error: "A category with this name already exists" };
+                return { ok: false, error: "A category with this name already exists." };
+            }
+
+            // Determine if original parent is still valid (exists & not deleted)
+            let newParentId = category.parentId as number | null | undefined;
+            if (newParentId) {
+                const parent = await prisma.category.findFirst({
+                    where: {
+                        id: newParentId,
+                        familyId: userWithFamily.familyId,
+                        deletedAt: null
+                    },
+                    select: { id: true }
+                });
+                if (!parent) {
+                    newParentId = null;
+                }
             }
 
             // Restore category
@@ -130,7 +146,8 @@ const restoreCategory = defineAction({
                 where: { id: input.id },
                 data: {
                     deletedAt: null,
-                    updatedAt: getCurrentDateTime()
+                    updatedAt: getCurrentDateTime(),
+                    parentId: newParentId ?? null
                 }
             });
 
@@ -138,7 +155,7 @@ const restoreCategory = defineAction({
 
         } catch (error) {
             console.error('Error restoring category:', error);
-            return { ok: false, error: "Failed to restore category" };
+            return { ok: false, error: "Failed to restore category." };
         }
     }
 });
@@ -152,7 +169,7 @@ const purgeCategory = defineAction({
         try {
             const user = context.locals.user;
             if (!user) {
-                return { ok: false, error: "Authentication required" };
+                return { ok: false, error: "Authentication required." };
             }
 
             // Get user with family info
@@ -162,7 +179,7 @@ const purgeCategory = defineAction({
             });
 
             if (!userWithFamily?.familyId) {
-                return { ok: false, error: "User must belong to a family" };
+                return { ok: false, error: "User must belong to a family." };
             }
 
             // Check if category exists and belongs to the family
@@ -175,7 +192,7 @@ const purgeCategory = defineAction({
             });
 
             if (!category) {
-                return { ok: false, error: "Deleted category not found" };
+                return { ok: false, error: "Deleted category not found." };
             }
 
             // Start transaction to ensure data consistency
@@ -208,7 +225,7 @@ const purgeCategory = defineAction({
 
         } catch (error) {
             console.error('Error purging category:', error);
-            return { ok: false, error: "Failed to permanently delete category" };
+            return { ok: false, error: "Failed to permanently delete category." };
         }
     }
 });
