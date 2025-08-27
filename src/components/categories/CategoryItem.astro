@@ -144,9 +144,9 @@ function isDescendantOf(
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex items-center gap-x-2">
+    <div>
         <!-- Display Mode Buttons -->
-        <div class="category-actions">
+        <div class="category-actions flex items-center gap-x-2">
             <button
                 type="button"
                 class="edit-category-btn group text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-900/20 focus:outline-none"
@@ -165,7 +165,7 @@ function isDescendantOf(
         </div>
 
         <!-- Edit Mode Buttons -->
-        <div class="category-edit-actions hidden">
+        <div class="category-edit-actions items-center gap-x-2 hidden">
             <button
                 type="button"
                 class="save-category-btn group text-green-400 hover:text-green-300 transition-colors p-1 rounded hover:bg-green-900/20 focus:outline-none"
@@ -340,7 +340,10 @@ function isDescendantOf(
                     if (displayMode) displayMode.classList.add("hidden");
                     if (editMode) editMode.classList.remove("hidden");
                     if (displayActions) displayActions.classList.add("hidden");
-                    if (editActions) editActions.classList.remove("hidden");
+                    if (editActions) {
+                        editActions.classList.remove("hidden");
+                        editActions.classList.add("flex");
+                    }
 
                     // Add highlight
                     categoryItem.classList.add(
