@@ -6,6 +6,9 @@
     "name": "Scarpy19",
     "url": "https://github.com/Scarpy19"
   },
+  "engines": {
+    "node": "22"
+  },
   "packageManager": "pnpm@10.14.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
