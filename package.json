@@ -12,10 +12,10 @@
   "packageManager": "pnpm@10.15.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "initial": "pnpm install && prisma generate",
+    "initial": "pnpm install && prisma generate --no-hints",
     "dev": "astro dev",
     "deve": "astro dev --host",
-    "build": "prisma generate && astro check && astro build",
+    "build": "prisma generate --no-hints && astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -32,6 +32,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/client",
       "esbuild"
     ],
     "ignoredBuiltDependencies": [
